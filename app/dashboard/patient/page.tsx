@@ -8,6 +8,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Calendar, HeartPulse, ShieldCheck, ArrowRight, Activity, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import CancelAppointment from "./CancelAppointment";
 
 export default async function PatientDashboard() {
   const session = await auth.api.getSession({
@@ -93,9 +94,7 @@ export default async function PatientDashboard() {
                           </div>
                         </div>
                       </div>
-                      <button className="text-[#64748B] dark:text-[#94A3B8] hover:text-[#EF4444] transition-colors p-4">
-                        <ArrowRight size={24} className="rotate-45" />
-                      </button>
+                      <CancelAppointment appointmentId={appt.id} />
                     </div>
                   ))}
                 </div>

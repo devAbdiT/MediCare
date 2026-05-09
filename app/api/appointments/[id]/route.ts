@@ -1,0 +1,80 @@
+// app/api/appointments/[id]/route.ts
+import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
+  if (!session) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const { status, dateTime } = await req.json();
+
+  try {
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: params.id },
+      include: { patient: true }
+    });
+
+    if (!appointment) {
+      return new NextResponse("Appointment not found", { status: 404 });
+    }
+
+    // Authorization check
+    // Patients can only cancel their own appointments
+    if (session.user.role === "PATIENT") {
+      if (appointment.patient.userId !== session.user.id) {
+        return new NextResponse("Forbidden", { status: 403 });
+      }
+      // Patients can only cancel, not reschedule (as per FR-10)
+      if (status !== "CANCELLED") {
+        return new NextResponse("Patients can only cancel appointments", { status: 403 });
+      }
+    }
+
+    // Admins and Receptionists can do anything
+    
+    const updated = await prisma.appointment.update({
+      where: { id: params.id },
+      data: {
+        status: status || undefined,
+        dateTime: dateTime ? new Date(dateTime) : undefined,
+      },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Appointment Update Error:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
+  if (!session || (session.user.role !== "ADMIN" && session.user.role !== "RECEPTIONIST")) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  try {
+    await prisma.appointment.delete({
+      where: { id: params.id },
+    });
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}

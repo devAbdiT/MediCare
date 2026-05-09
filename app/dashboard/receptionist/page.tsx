@@ -9,6 +9,7 @@ import { Calendar, UserPlus, ChevronRight, Search, Activity } from "lucide-react
 import Link from "next/link";
 import React from "react";
 import { cn } from "@/lib/utils";
+import AppointmentActions from "./AppointmentActions";
 
 export default async function ReceptionistDashboard() {
   const session = await auth.api.getSession({
@@ -105,9 +106,7 @@ export default async function ReceptionistDashboard() {
                                  CHECKED IN
                               </span>
                            </div>
-                           <button className="p-5 bg-[#F8FAFC] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-2xl hover:bg-[#1E293B] dark:hover:bg-[#334155] hover:text-white transition-all shadow-sm">
-                              <ChevronRight size={24} />
-                           </button>
+                           <AppointmentActions appointmentId={appt.id} />
                         </div>
                      </div>
                    ))}
