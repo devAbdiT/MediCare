@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -30,11 +31,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster richColors position="top-right" />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

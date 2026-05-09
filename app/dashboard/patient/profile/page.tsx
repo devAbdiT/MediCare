@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import { User, Phone, Mail, Calendar, Droplets, ShieldCheck } from "lucide-react";
 import ProfileForm from "./ProfileForm";
+import React from "react";
 
 export default async function PatientProfilePage() {
   const session = await auth.api.getSession({
@@ -28,49 +29,80 @@ export default async function PatientProfilePage() {
 
   return (
     <DashboardLayout role="patient">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="space-y-10 pb-10">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Your Profile</h1>
-          <p className="text-slate-500 mt-2 font-medium">Manage your personal information and security settings</p>
+          <h1 className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tight">Identity & Security</h1>
+          <p className="text-[#64748B] dark:text-[#94A3B8] mt-2 text-lg font-medium">Manage your clinical profile and contact details</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Info Side */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm text-center">
-              <div className="w-24 h-24 rounded-[2rem] bg-blue-600 text-white flex items-center justify-center mx-auto text-3xl font-black shadow-xl shadow-blue-100 mb-6">
-                {patient.user.name[0]}
-              </div>
-              <h2 className="text-2xl font-black text-slate-900">{patient.user.name}</h2>
-              <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mt-1">Patient ID: {patient.id.slice(-6).toUpperCase()}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Left Column: Stats & ID */}
+          <div className="space-y-8">
+            <div className="bg-white dark:bg-[#1E293B] p-10 rounded-[3rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm text-center group transition-all duration-500">
+               <div className="w-32 h-32 rounded-[2.5rem] bg-[#F8FAFC] dark:bg-[#0F172A] flex items-center justify-center mx-auto mb-6 border border-[#E2E8F0] dark:border-[#334155] group-hover:scale-105 transition-transform duration-500">
+                  <User size={64} className="text-[#3B82F6] dark:text-[#60A5FA]" />
+               </div>
+               <h2 className="text-2xl font-black text-[#1E293B] dark:text-[#F1F5F9]">{patient.user.name}</h2>
+               <p className="text-[#64748B] dark:text-[#94A3B8] font-bold text-sm uppercase tracking-widest mt-1">Verified Patient</p>
+               
+               <div className="mt-8 pt-8 border-t border-[#F8FAFC] dark:border-[#0F172A] grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Blood Type</p>
+                    <p className="text-lg font-black text-[#EF4444] dark:text-[#F87171] flex items-center justify-center gap-1">
+                      <Droplets size={16} />
+                      {patient.bloodType}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Member Since</p>
+                    <p className="text-lg font-black text-[#1E293B] dark:text-[#F1F5F9]">{format(patient.user.createdAt, "yyyy")}</p>
+                  </div>
+               </div>
             </div>
 
-            <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white space-y-6">
-              <h3 className="font-bold flex items-center gap-2">
-                <ShieldCheck className="text-blue-400" size={20} />
-                Medical Data
-              </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                  <span className="text-white/60 text-sm font-medium">Blood Type</span>
-                  <span className="font-black text-emerald-400">{patient.bloodType || "N/A"}</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                  <span className="text-white/60 text-sm font-medium">Date of Birth</span>
-                  <span className="font-bold">{format(new Date(patient.dateOfBirth), "MMM dd, yyyy")}</span>
-                </div>
-              </div>
+            <div className="bg-[#3B82F6] p-8 rounded-[2.5rem] text-white flex items-center gap-4 shadow-xl shadow-blue-500/10">
+               <ShieldCheck size={32} />
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Status</p>
+                  <p className="font-black">Active Clinical Record</p>
+               </div>
             </div>
           </div>
 
-          {/* Form Side */}
-          <div className="lg:col-span-2">
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm">
-              <ProfileForm initialPhone={patient.user.phone || ""} />
+          {/* Right Column: Details & Edit */}
+          <div className="lg:col-span-2 space-y-8">
+            <div className="bg-white dark:bg-[#1E293B] p-10 rounded-[3rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">
+               <h3 className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9] mb-8 flex items-center gap-3">
+                  Clinical Information
+               </h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <DetailItem icon={<Mail />} label="Primary Email" value={patient.user.email} />
+                  <DetailItem icon={<Phone />} label="Phone Number" value={patient.phone} />
+                  <DetailItem icon={<Calendar />} label="Date of Birth" value={format(patient.dateOfBirth, "MMMM dd, yyyy")} />
+               </div>
+            </div>
+
+            <div className="bg-white dark:bg-[#1E293B] p-10 rounded-[3rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">
+               <h3 className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9] mb-8">Update Access Settings</h3>
+               <ProfileForm patient={patient as any} />
             </div>
           </div>
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+function DetailItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#334155] transition-colors duration-500">
+       <div className="text-[#3B82F6] dark:text-[#60A5FA] mt-1">
+          {React.cloneElement(icon as React.ReactElement, { size: 20 })}
+       </div>
+       <div>
+          <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">{label}</p>
+          <p className="text-sm font-bold text-[#1E293B] dark:text-[#F1F5F9]">{value}</p>
+       </div>
+    </div>
   );
 }

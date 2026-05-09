@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import { Calendar, UserPlus, ChevronRight, Search, Activity } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 import { cn } from "@/lib/utils";
 
 export default async function ReceptionistDashboard() {
@@ -42,15 +43,15 @@ export default async function ReceptionistDashboard() {
       <div className="space-y-10 pb-10">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div className="flex items-center gap-4">
-             <div className="w-1.5 h-10 bg-indigo-600 rounded-full" />
+             <div className="w-1.5 h-10 bg-[#3B82F6] dark:bg-[#60A5FA] rounded-full" />
              <div>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tighter">Front Desk Control</h1>
-                <p className="text-slate-500 font-medium">Operational Hub for Patient Flow</p>
+                <h1 className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tighter">Front Desk Control</h1>
+                <p className="text-[#64748B] dark:text-[#94A3B8] font-medium">Operational Hub for Patient Flow</p>
              </div>
           </div>
           <div className="flex gap-4 w-full lg:w-auto">
              <Link href="/dashboard/receptionist/register" className="flex-1 lg:flex-none">
-                <button className="w-full bg-[#0A0D14] text-white px-10 py-5 rounded-[1.5rem] font-black shadow-2xl shadow-slate-200 hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest">
+                <button className="w-full bg-[#1E293B] dark:bg-[#0F172A] text-white px-10 py-5 rounded-[1.5rem] font-black shadow-2xl shadow-blue-500/10 hover:bg-[#3B82F6] dark:hover:bg-[#60A5FA] transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest">
                   <UserPlus size={20} />
                   Register Patient
                 </button>
@@ -64,47 +65,47 @@ export default async function ReceptionistDashboard() {
            <ReceptionStat label="Global Database" value={patientCount.toString()} icon={<UserPlus />} />
         </div>
 
-        <div className="bg-white rounded-[3rem] border border-slate-200/60 shadow-sm overflow-hidden">
-           <div className="p-10 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <div className="bg-white dark:bg-[#1E293B] rounded-[3rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm overflow-hidden transition-colors duration-500">
+           <div className="p-10 border-b border-[#E2E8F0] dark:border-[#334155] flex items-center justify-between bg-[#F8FAFC] dark:bg-[#0F172A]">
+              <h2 className="text-2xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tight flex items-center gap-3">
                  Live Patient Manifest
               </h2>
-              <div className="flex items-center gap-2 px-5 py-2.5 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                 <span className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" />
-                 <span className="text-xs font-black text-slate-900 uppercase tracking-widest">{format(new Date(), "dd MMM yyyy")}</span>
+              <div className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">
+                 <span className="w-2 h-2 bg-[#3B82F6] dark:bg-[#60A5FA] rounded-full animate-pulse" />
+                 <span className="text-xs font-black text-[#1E293B] dark:text-[#F1F5F9] uppercase tracking-widest">{format(new Date(), "dd MMM yyyy")}</span>
               </div>
            </div>
 
            <div className="p-10">
               {appointments.length === 0 ? (
-                <div className="text-center py-20 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-100">
-                  <p className="text-slate-400 font-bold italic">No arrivals scheduled for today.</p>
+                <div className="text-center py-20 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-[2.5rem] border-2 border-dashed border-[#E2E8F0] dark:border-[#334155]">
+                  <p className="text-[#64748B] dark:text-[#94A3B8] font-bold italic">No arrivals scheduled for today.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                    {appointments.map((appt) => (
-                     <div key={appt.id} className="group p-6 rounded-[2.5rem] bg-white border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/5 transition-all duration-500">
+                     <div key={appt.id} className="group p-6 rounded-[2.5rem] bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#334155] flex flex-col md:flex-row items-center justify-between gap-8 hover:border-[#3B82F6] dark:hover:border-[#60A5FA] transition-all duration-500">
                         <div className="flex items-center gap-8 w-full md:w-auto">
-                           <div className="bg-indigo-600 text-white p-6 rounded-[1.5rem] text-center min-w-[100px] shadow-xl shadow-indigo-100 group-hover:bg-[#0A0D14] transition-colors duration-500">
+                           <div className="bg-[#1E293B] dark:bg-[#0F172A] text-white p-6 rounded-[1.5rem] text-center min-w-[100px] shadow-xl group-hover:bg-[#3B82F6] dark:group-hover:bg-[#60A5FA] transition-colors duration-500">
                               <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Entry</p>
                               <p className="text-2xl font-black">{format(appt.dateTime, "HH:mm")}</p>
                            </div>
                            <div>
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Patient Name</p>
-                              <h4 className="text-2xl font-black text-slate-900">{appt.patient.user.name}</h4>
-                              <p className="text-xs font-bold text-indigo-500 mt-1 uppercase tracking-widest">→ Dr. {appt.doctor.user.name}</p>
+                              <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Patient Name</p>
+                              <h4 className="text-2xl font-black text-[#1E293B] dark:text-[#F1F5F9]">{appt.patient.user.name}</h4>
+                              <p className="text-xs font-bold text-[#3B82F6] dark:text-[#60A5FA] mt-1 uppercase tracking-widest">→ Dr. {appt.doctor.user.name}</p>
                            </div>
                         </div>
 
-                        <div className="flex items-center gap-6 w-full md:w-auto justify-end border-t md:border-t-0 pt-6 md:pt-0 border-slate-50">
+                        <div className="flex items-center gap-6 w-full md:w-auto justify-end border-t md:border-t-0 pt-6 md:pt-0 border-[#E2E8F0] dark:border-[#334155]">
                            <div className="text-right">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Clinic Status</p>
-                              <span className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-600">
-                                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                              <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Clinic Status</p>
+                              <span className="inline-flex items-center gap-1.5 text-xs font-black text-[#10B981] dark:text-[#34D399]">
+                                 <div className="w-1.5 h-1.5 bg-[#10B981] dark:bg-[#34D399] rounded-full" />
                                  CHECKED IN
                               </span>
                            </div>
-                           <button className="p-5 bg-slate-50 text-slate-400 rounded-2xl hover:bg-[#0A0D14] hover:text-white transition-all shadow-sm">
+                           <button className="p-5 bg-[#F8FAFC] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-2xl hover:bg-[#1E293B] dark:hover:bg-[#334155] hover:text-white transition-all shadow-sm">
                               <ChevronRight size={24} />
                            </button>
                         </div>
@@ -121,12 +122,12 @@ export default async function ReceptionistDashboard() {
 
 function ReceptionStat({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 flex items-center justify-between group hover:border-indigo-500 transition-all shadow-sm">
+    <div className="bg-white dark:bg-[#1E293B] p-8 rounded-[2.5rem] border border-[#E2E8F0] dark:border-[#334155] flex items-center justify-between group hover:border-[#3B82F6] dark:hover:border-[#60A5FA] transition-all shadow-sm transition-colors duration-500">
        <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-          <p className="text-4xl font-black text-slate-900 tracking-tighter">{value}</p>
+          <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">{label}</p>
+          <p className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tighter">{value}</p>
        </div>
-       <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+       <div className="w-14 h-14 rounded-2xl bg-[#F8FAFC] dark:bg-[#0F172A] flex items-center justify-center text-[#64748B] dark:text-[#94A3B8] group-hover:bg-[#3B82F6]/10 dark:group-hover:bg-[#60A5FA]/10 group-hover:text-[#3B82F6] dark:group-hover:text-[#60A5FA] transition-all">
           {React.cloneElement(icon as React.ReactElement, { size: 24 })}
        </div>
     </div>

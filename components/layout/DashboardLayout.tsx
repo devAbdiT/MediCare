@@ -14,10 +14,13 @@ import {
   ClipboardList,
   Search,
   Settings,
-  Bell
+  Bell,
+  Sun,
+  Moon
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -28,6 +31,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
+  const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -62,23 +66,23 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
   const currentMenu = menuItems[role];
 
   return (
-    <div className="min-h-screen bg-[#F4F7FE] flex font-sans selection:bg-indigo-100 selection:text-indigo-900">
-      {/* Sidebar - Modern Deep Dark Theme */}
-      <aside className="w-[280px] bg-[#0A0D14] text-white flex flex-col sticky top-0 h-screen shadow-[20px_0_40px_rgba(0,0,0,0.05)] z-50">
+    <div className="h-screen bg-[#F8FAFC] dark:bg-[#0F172A] flex p-4 gap-4 font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30 selection:text-blue-900 transition-colors duration-500 overflow-hidden">
+      {/* Sidebar - Floating & Rounded */}
+      <aside className="w-[280px] bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#334155] flex flex-col rounded-[2.5rem] shadow-sm transition-all duration-500 shrink-0">
         <div className="p-10">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(79,70,229,0.4)] group hover:rotate-12 transition-transform duration-500">
+            <div className="w-12 h-12 bg-[#3B82F6] dark:bg-[#60A5FA] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group hover:rotate-12 transition-transform duration-500">
               <Stethoscope size={24} />
             </div>
             <div>
-              <span className="text-xl font-black tracking-tighter block leading-none">MediCare</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-1 block">Cloud OS</span>
+              <span className="text-xl font-black tracking-tighter block leading-none text-[#1E293B] dark:text-[#F1F5F9]">MediCare</span>
+              <span className="text-[10px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.3em] mt-1 block">Cloud OS</span>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 px-6 space-y-2 mt-4">
-          <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-4 mb-4">Main Menu</p>
+        <nav className="flex-1 px-6 space-y-2 mt-4 overflow-y-auto custom-scrollbar">
+          <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest px-4 mb-4">Main Menu</p>
           {currentMenu.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -88,15 +92,15 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                 className={cn(
                   "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 relative group",
                   isActive 
-                    ? "bg-indigo-600/10 text-white" 
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#3B82F6]/10 text-[#3B82F6] dark:bg-[#60A5FA]/10 dark:text-[#60A5FA]" 
+                    : "text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#0F172A] hover:text-[#3B82F6] dark:hover:text-[#60A5FA]"
                 )}
               >
                 {isActive && (
-                  <div className="absolute left-0 w-1.5 h-6 bg-indigo-500 rounded-r-full shadow-[0_0_15px_rgba(99,102,241,0.8)]" />
+                  <div className="absolute left-0 w-1.5 h-6 bg-[#3B82F6] dark:bg-[#60A5FA] rounded-r-full shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
                 )}
-                <item.icon size={20} className={cn("transition-all duration-300", isActive ? "text-indigo-400 scale-110" : "group-hover:scale-110")} />
-                <span className={cn("text-sm font-bold tracking-tight", isActive ? "text-white" : "group-hover:translate-x-1 transition-transform")}>
+                <item.icon size={20} className={cn("transition-all duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
+                <span className={cn("text-sm font-bold tracking-tight", isActive ? "" : "group-hover:translate-x-1 transition-transform")}>
                   {item.name}
                 </span>
               </Link>
@@ -105,51 +109,57 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
         </nav>
 
         {/* User Card */}
-        <div className="p-8 mx-4 mb-4 bg-white/5 rounded-[2.5rem] border border-white/5 backdrop-blur-sm">
+        <div className="p-8 mx-4 mb-6 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-[2rem] border border-[#E2E8F0] dark:border-[#334155]">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-lg shadow-xl">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center text-white font-black text-sm shadow-xl">
               {session?.user?.name?.[0] || "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-black truncate text-white">{session?.user?.name}</p>
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-0.5">{role}</p>
+              <p className="text-xs font-black truncate text-[#1E293B] dark:text-[#F1F5F9]">{session?.user?.name}</p>
+              <p className="text-[9px] font-black text-[#3B82F6] dark:text-[#60A5FA] uppercase tracking-widest mt-0.5">{role}</p>
             </div>
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center justify-center gap-3 px-5 py-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all duration-300 text-xs font-black uppercase tracking-widest"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[#EF4444]/10 hover:bg-[#EF4444] text-[#EF4444] hover:text-white rounded-xl transition-all duration-300 text-[10px] font-black uppercase tracking-widest"
           >
-            <LogOut size={16} />
+            <LogOut size={14} />
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Top Header */}
-        <header className="h-24 bg-white/50 backdrop-blur-md border-b border-slate-200/50 px-10 flex items-center justify-between sticky top-0 z-40">
-           <div className="flex items-center gap-4 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm w-96">
-              <Search size={18} className="text-slate-400" />
+      {/* Main Content Area - Rounded & Floating */}
+      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#1E293B] rounded-[2.5rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm overflow-hidden transition-colors duration-500">
+        {/* Top Header - Integrated & Rounded */}
+        <header className="h-24 bg-white/50 dark:bg-[#1E293B]/50 backdrop-blur-md px-10 flex items-center justify-between z-40 transition-colors duration-500">
+           <div className="flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#0F172A] px-5 py-2.5 rounded-2xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm w-96 transition-colors duration-500">
+              <Search size={18} className="text-[#64748B] dark:text-[#94A3B8]" />
               <input 
                 type="text" 
                 placeholder="Search patient ID, records or labs..." 
-                className="bg-transparent border-none outline-none text-sm font-medium text-slate-600 w-full placeholder:text-slate-300"
+                className="bg-transparent border-none outline-none text-sm font-medium text-[#1E293B] dark:text-[#F1F5F9] w-full placeholder:text-[#64748B] dark:placeholder:text-[#94A3B8]"
               />
            </div>
            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer relative">
+              <button 
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="w-12 h-12 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#334155] flex items-center justify-center text-[#64748B] dark:text-[#94A3B8] hover:text-[#3B82F6] dark:hover:text-[#60A5FA] transition-all cursor-pointer shadow-sm active:scale-95"
+              >
+                 {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#334155] flex items-center justify-center text-[#64748B] dark:text-[#94A3B8] hover:text-[#3B82F6] dark:hover:text-[#60A5FA] transition-colors cursor-pointer relative">
                  <Bell size={20} />
-                 <span className="absolute top-3 right-3 w-2 h-2 bg-indigo-500 rounded-full border-2 border-white" />
+                 <span className="absolute top-3 right-3 w-2 h-2 bg-[#3B82F6] dark:bg-[#60A5FA] rounded-full border-2 border-white dark:border-[#1E293B]" />
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer">
+              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#334155] flex items-center justify-center text-[#64748B] dark:text-[#94A3B8] hover:text-[#3B82F6] dark:hover:text-[#60A5FA] transition-colors cursor-pointer">
                  <Settings size={20} />
               </div>
            </div>
         </header>
 
         {/* Content View */}
-        <main className="flex-1 p-10 overflow-y-auto custom-scrollbar">
+        <main className="flex-1 p-10 overflow-y-auto custom-scrollbar border-t border-[#F8FAFC] dark:border-[#0F172A] transition-colors duration-500">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

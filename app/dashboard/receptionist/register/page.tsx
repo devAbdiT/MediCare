@@ -45,44 +45,44 @@ export default function RegisterPatient() {
 
   return (
     <DashboardLayout role="receptionist">
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div className="max-w-3xl mx-auto space-y-8 pb-10">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
-            <UserPlus className="text-blue-600" size={40} />
+          <h1 className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tight flex items-center gap-4">
+            <UserPlus className="text-[#3B82F6] dark:text-[#60A5FA]" size={40} />
             Patient Registration
           </h1>
-          <p className="text-slate-500 mt-2 text-lg">Enter the details below to create a new patient profile.</p>
+          <p className="text-[#64748B] dark:text-[#94A3B8] mt-2 text-lg">Enter the details below to create a new patient profile.</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <Card className="rounded-3xl border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-8">
-              <CardTitle className="text-xl font-bold text-slate-800">Personal Information</CardTitle>
-              <CardDescription>All fields are required for medical compliance.</CardDescription>
+          <Card className="rounded-[3rem] border-[#E2E8F0] dark:border-[#334155] shadow-xl shadow-blue-500/5 overflow-hidden bg-white dark:bg-[#1E293B] transition-colors duration-500">
+            <CardHeader className="bg-[#F8FAFC] dark:bg-[#0F172A] border-b border-[#E2E8F0] dark:border-[#334155] p-10 transition-colors duration-500">
+              <CardTitle className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9]">Personal Information</CardTitle>
+              <CardDescription className="text-[#64748B] dark:text-[#94A3B8] font-medium">All fields are required for medical compliance.</CardDescription>
             </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Full Name</Label>
-                  <Input name="name" placeholder="John Doe" required className="rounded-xl h-12" />
+            <CardContent className="p-10 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Full Name</Label>
+                  <Input name="name" placeholder="John Doe" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Email Address</Label>
-                  <Input name="email" type="email" placeholder="john@example.com" required className="rounded-xl h-12" />
+                <div className="space-y-3">
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Email Address</Label>
+                  <Input name="email" type="email" placeholder="john@example.com" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Phone Number</Label>
-                  <Input name="phone" placeholder="+251..." required className="rounded-xl h-12" />
+                <div className="space-y-3">
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Phone Number</Label>
+                  <Input name="phone" placeholder="+251..." required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Date of Birth</Label>
-                  <Input name="dateOfBirth" type="date" required className="rounded-xl h-12" />
+                <div className="space-y-3">
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Date of Birth</Label>
+                  <Input name="dateOfBirth" type="date" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Blood Type</Label>
+                <div className="space-y-3">
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Blood Type</Label>
                   <select 
                     name="bloodType" 
-                    className="w-full rounded-xl h-12 border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full rounded-2xl h-14 border border-[#E2E8F0] dark:border-[#334155] bg-[#F8FAFC] dark:bg-[#0F172A] px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500"
                     required
                   >
                     <option value="">Select Type</option>
@@ -96,25 +96,25 @@ export default function RegisterPatient() {
                     <option value="O-">O-</option>
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Set Initial Password</Label>
-                  <Input name="password" type="password" placeholder="••••••••" required className="rounded-xl h-12" />
+                <div className="space-y-3">
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Initial Password</Label>
+                  <Input name="password" type="password" placeholder="••••••••" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-100 flex justify-end gap-4">
+              <div className="pt-8 border-t border-[#F8FAFC] dark:border-[#0F172A] flex justify-end gap-4 transition-colors duration-500">
                 <Button 
                   type="button" 
                   variant="outline" 
                   onClick={() => router.back()}
-                  className="rounded-xl h-12 px-8 font-bold"
+                  className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest border-[#E2E8F0] dark:border-[#334155] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#0F172A]"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="rounded-xl h-12 px-10 font-black bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-all flex items-center gap-2"
+                  className="rounded-2xl h-14 px-12 font-black bg-[#3B82F6] dark:bg-[#60A5FA] hover:bg-[#2563EB] dark:hover:bg-[#3B82F6] text-white shadow-xl shadow-blue-500/20 transition-all flex items-center gap-2 uppercase tracking-widest"
                 >
                   {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={18} />}
                   Register Patient
