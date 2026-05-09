@@ -96,7 +96,7 @@ export default function UserList({ users, adminName }: UserListProps) {
       <div className="print-only mb-10 pb-6 border-b-2 border-slate-900">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-black text-slate-900">Bosa Kito Health Center</h1>
+            <h1 className="text-3xl font-black text-slate-900">Jimma Medical Center</h1>
             <p className="text-sm font-bold text-slate-600 uppercase tracking-widest mt-1">Clinical Manifest Report</p>
           </div>
           <div className="text-right">
@@ -228,13 +228,6 @@ export default function UserList({ users, adminName }: UserListProps) {
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right flex items-center justify-end gap-4">
-                      <Link 
-                        href={`/dashboard/admin/users/${user.id}`}
-                        className="text-[#1E4A8A] dark:text-[#4A8AC8] text-[10px] font-black uppercase tracking-widest hover:underline"
-                      >
-                        View
-                      </Link>
-
                       <Dialog>
                         <DialogTrigger asChild>
                           <button 

@@ -47,7 +47,6 @@ export default async function AdminAppointmentsPage() {
                   <th className="px-8 py-6">Patient</th>
                   <th className="px-8 py-6">Assigned Doctor</th>
                   <th className="px-8 py-6">Status</th>
-                  <th className="px-8 py-6">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F0F4F8] dark:divide-[#0A122A]">
@@ -91,11 +90,6 @@ export default async function AdminAppointmentsPage() {
                       <Badge variant={appt.status === "SCHEDULED" ? "default" : "outline"} className="rounded-lg px-3 py-1 font-bold">
                         {appt.status}
                       </Badge>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      <Link href={`/dashboard/admin/users/${appt.patient.user.id}`} className="text-sm font-black text-[#1E4A8A] dark:text-[#4A8AC8] hover:text-[#0F3A6A] dark:hover:text-[#1E4A8A] underline underline-offset-4">
-                        View Details
-                      </Link>
                     </td>
                   </tr>
                 ))}

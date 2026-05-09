@@ -82,8 +82,8 @@ export default async function UserProfilePage({ params }: { params: { id: string
                 <Building2 size={40} />
               </div>
               <div className="space-y-1">
-                <h2 className="text-4xl font-black text-[#1A2A4A] tracking-tighter">Bosa Kito Health Center</h2>
-                <p className="text-sm font-medium text-[#5A6E8A]">Bosa Kito Clinical Management System (PDMS)</p>
+                <h2 className="text-4xl font-black text-[#1A2A4A] tracking-tighter">Jimma Medical Center</h2>
+                <p className="text-sm font-medium text-[#5A6E8A]">Jimma Medical Center Clinical Management System (PDMS)</p>
                 <p className="text-xs font-bold text-[#8A9CBA] uppercase tracking-widest">Jimma, Oromia, Ethiopia</p>
               </div>
             </div>
@@ -140,7 +140,7 @@ export default async function UserProfilePage({ params }: { params: { id: string
             {/* 4. Address */}
             <div>
               <h4 className="text-[10px] font-black text-[#1E4A8A] uppercase tracking-[0.2em] mb-6 pb-2 border-b border-slate-100">Registered Address</h4>
-              <p className="text-lg font-bold text-[#1A2A4A]">Oromia, Bosa Kito, Jimma District, Ethiopia</p>
+              <p className="text-lg font-bold text-[#1A2A4A]">Oromia, Jimma Medical Center, Jimma District, Ethiopia</p>
             </div>
 
             {/* 5. Reports & History (FR-29) */}
