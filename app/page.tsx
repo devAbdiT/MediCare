@@ -76,3 +76,43 @@ function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; 
     </div>
   );
 }
+    </div>
+  );
+}
+
+function StatItem({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <p className="text-3xl font-black text-slate-900 tracking-tighter leading-none">{value}</p>
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{label}</p>
+    </div>
+  );
+}
+
+function FeatureCard({ icon, title, desc, gradient }: { icon: React.ReactNode; title: string; desc: string; gradient: string }) {
+  return (
+    <div className="group bg-white p-12 rounded-[3.5rem] border border-slate-100 hover:border-blue-200 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden">
+      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 transition-opacity rounded-bl-[4rem]`} />
+      <div className={`w-16 h-16 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center text-white mb-8 shadow-xl group-hover:scale-110 transition-transform duration-500`}>
+        {React.cloneElement(icon as React.ReactElement, { size: 32 })}
+      </div>
+      <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">{title}</h3>
+      <p className="text-slate-500 font-medium leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function FooterCol({ title, links }: { title: string; links: string[] }) {
+  return (
+    <div className="space-y-6">
+      <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{title}</h4>
+      <ul className="space-y-4">
+        {links.map(link => (
+          <li key={link}>
+            <a href="#" className="text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors">{link}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
