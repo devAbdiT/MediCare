@@ -8,6 +8,7 @@ import { Users, Calendar, Activity, Zap, ArrowUpRight } from "lucide-react";
 import { subDays, startOfDay, format } from "date-fns";
 import AnalyticsCharts from "./AnalyticsCharts";
 import AdminQuickActions from "./AdminQuickActions";
+import AdminControls from "./AdminControls";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
@@ -62,6 +63,37 @@ export default async function AdminDashboard() {
     })
   );
 
+  // Fetch recent system activity
+  const [recentUsers, recentAppts] = await Promise.all([
+    prisma.user.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),
+    prisma.appointment.findMany({ 
+      orderBy: { createdAt: "desc" }, 
+      take: 4,
+      include: { patient: { include: { user: true } } }
+    })
+  ]);
+
+  const recentLogs = [
+    ...recentUsers.map(u => ({
+      type: "USER",
+      text: `New ${u.role.toLowerCase()} account created: ${u.name}`,
+      date: u.createdAt
+    })),
+    ...recentAppts.map(a => ({
+      type: "APPT",
+      text: `Appointment booked for ${a.patient?.user?.name || "Unknown"}`,
+      date: a.createdAt
+    }))
+  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
+
+  const getRelativeTime = (date: Date) => {
+    const diff = Math.floor((new Date().getTime() - date.getTime()) / 60000); // in minutes
+    if (diff < 1) return "Just now";
+    if (diff < 60) return `${diff}m ago`;
+    if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
+    return `${Math.floor(diff / 1440)}d ago`;
+  };
+
   return (
     <DashboardLayout role="admin">
       <div className="space-y-10 pb-10">
@@ -77,14 +109,7 @@ export default async function AdminDashboard() {
               <h1 className="text-5xl font-black tracking-tighter">System Console</h1>
               <p className="text-[#8A9CBA] text-lg font-medium max-w-lg">Monitoring global medical activity and infrastructure integrity across all nodes.</p>
             </div>
-            <div className="flex gap-4">
-              <button className="bg-[#1E4A8A] hover:bg-[#0F3A6A] dark:bg-[#4A8AC8] dark:hover:bg-[#5A9AD8] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-[#1E4A8A]/20">
-                Generate Audit
-              </button>
-              <button className="bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest border border-white/10 transition-all">
-                API Docs
-              </button>
-            </div>
+            <AdminControls />
           </div>
         </div>
 
@@ -111,10 +136,12 @@ export default async function AdminDashboard() {
               </button>
             </div>
             <div className="space-y-4">
-              <LogItem type="USER" text="New Receptionist account created: receptionist_delta" time="2m ago" />
-              <LogItem type="SEC" text="Database sync completed with node EU-WEST" time="15m ago" />
-              <LogItem type="PAT" text="Global patient index updated (+42 records)" time="1h ago" />
-              <LogItem type="SYS" text="Automated security patch v2.41 applied" time="3h ago" />
+              {recentLogs.map((log, idx) => (
+                <LogItem key={idx} type={log.type} text={log.text} time={getRelativeTime(log.date)} />
+              ))}
+              {recentLogs.length === 0 && (
+                <p className="text-sm text-[#8A9CBA]">No recent activity.</p>
+              )}
             </div>
           </div>
 

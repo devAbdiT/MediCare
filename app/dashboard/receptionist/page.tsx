@@ -10,6 +10,7 @@ import Link from "next/link";
 import React from "react";
 import { cn } from "@/lib/utils";
 import AppointmentActions from "./AppointmentActions";
+import { ReceptionistDashboardSearch } from "./ReceptionistDashboardSearch";
 
 export default async function ReceptionistDashboard() {
   const session = await auth.api.getSession({
@@ -51,14 +52,22 @@ export default async function ReceptionistDashboard() {
              </div>
           </div>
           <div className="flex gap-4 w-full lg:w-auto">
+             <Link href="/dashboard/receptionist/book-appointment" className="flex-1 lg:flex-none">
+                <button className="w-full bg-[#3B82F6] dark:bg-[#60A5FA] text-white px-10 py-5 rounded-[1.5rem] font-black shadow-2xl shadow-blue-500/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest">
+                  <Calendar size={20} />
+                  Book Appointment
+                </button>
+             </Link>
              <Link href="/dashboard/receptionist/register" className="flex-1 lg:flex-none">
-                <button className="w-full bg-[#1E293B] dark:bg-[#0F172A] text-white px-10 py-5 rounded-[1.5rem] font-black shadow-2xl shadow-blue-500/10 hover:bg-[#3B82F6] dark:hover:bg-[#60A5FA] transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest">
+                <button className="w-full bg-[#1E293B] dark:bg-[#0F172A] text-white px-10 py-5 rounded-[1.5rem] font-black shadow-2xl shadow-slate-900/10 hover:bg-slate-800 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest">
                   <UserPlus size={20} />
                   Register Patient
                 </button>
              </Link>
           </div>
         </div>
+
+        <ReceptionistDashboardSearch />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            <ReceptionStat label="Daily Manifest" value={appointments.length.toString()} icon={<Activity />} />

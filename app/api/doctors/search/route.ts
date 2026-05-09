@@ -1,4 +1,3 @@
-// app/api/patients/search/route.ts
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
@@ -9,19 +8,18 @@ export async function GET(req: Request) {
     headers: await headers()
   });
 
-  if (!session || (session.user.role !== "ADMIN" && session.user.role !== "RECEPTIONIST")) {
+  if (!session) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("q") || "";
 
-  const patients = await prisma.patient.findMany({
+  const doctors = await prisma.doctor.findMany({
     where: {
       OR: [
         { user: { name: { contains: query, mode: "insensitive" } } },
-        { user: { email: { contains: query, mode: "insensitive" } } },
-        { user: { phone: { contains: query, mode: "insensitive" } } },
+        { specialization: { contains: query, mode: "insensitive" } },
       ]
     },
     include: {
@@ -29,20 +27,10 @@ export async function GET(req: Request) {
         select: {
           name: true,
           email: true,
-          phone: true,
         }
       }
     }
   });
 
-  const formattedPatients = patients.map(p => ({
-    id: p.id,
-    name: p.user.name,
-    email: p.user.email,
-    phone: p.user.phone,
-    bloodType: p.bloodType,
-    cardNumber: p.cardNumber
-  }));
-
-  return NextResponse.json(formattedPatients);
+  return NextResponse.json(doctors);
 }

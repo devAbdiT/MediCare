@@ -1,4 +1,4 @@
-// app/dashboard/receptionist/book/page.tsx
+// app/dashboard/receptionist/book-appointment/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -15,18 +15,15 @@ import {
   CheckCircle2, 
   Loader2,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from "lucide-react";
+import { PatientSearch, PatientSearchResult } from "@/components/PatientSearch";
 
 interface Doctor {
   id: string;
   specialization: string;
   user: { name: string };
-}
-
-interface Patient {
-  id: string;
-  user: { name: string; email: string };
 }
 
 export default function ReceptionistBookingPage() {
@@ -35,13 +32,12 @@ export default function ReceptionistBookingPage() {
   const preSelectedPatientId = searchParams.get("patientId");
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   
-  const [selectedPatient, setSelectedPatient] = useState<string>(preSelectedPatientId || "");
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(preSelectedPatientId || "");
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [reason, setReason] = useState("");
   
   const [loading, setLoading] = useState(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -52,17 +48,7 @@ export default function ReceptionistBookingPage() {
     fetch("/api/doctors")
       .then((res) => res.json())
       .then(setDoctors);
-
-    // Fetch Patients for selection
-    fetch("/api/patients")
-      .then((res) => res.json())
-      .then(setPatients);
   }, []);
-
-  const filteredPatients = patients.filter(p => 
-    p.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const checkAvailability = async () => {
     if (!selectedDoctor || !date || !time) return;
@@ -88,7 +74,7 @@ export default function ReceptionistBookingPage() {
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!available || !selectedPatient) return;
+    if (!available || !selectedPatientId) return;
 
     setLoading(true);
     const dateTime = new Date(`${date}T${time}`);
@@ -98,15 +84,16 @@ export default function ReceptionistBookingPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          patientId: selectedPatient,
+          patientId: selectedPatientId,
           doctorId: selectedDoctor,
           dateTime: dateTime.toISOString(),
+          reason,
         }),
       });
 
       if (res.ok) {
         toast.success("Appointment booked successfully!");
-        router.push("/dashboard/receptionist");
+        router.push("/dashboard/receptionist/schedule");
       } else {
         const error = await res.json();
         toast.error(error.message || "Failed to book appointment");
@@ -120,7 +107,7 @@ export default function ReceptionistBookingPage() {
 
   return (
     <DashboardLayout role="receptionist">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 pb-12">
         <div>
           <h1 className="text-4xl font-black text-slate-900 tracking-tight text-center">New Appointment</h1>
           <p className="text-slate-500 mt-2 text-center text-lg font-medium italic">Bridge patients with world-class care.</p>
@@ -128,55 +115,48 @@ export default function ReceptionistBookingPage() {
 
         <form onSubmit={handleBooking} className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Step 1: Patient Selection */}
-          <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-hidden flex flex-col">
-            <CardHeader className="bg-slate-900 text-white p-8">
-              <CardTitle className="flex items-center gap-3">
-                <User size={24} className="text-blue-400" />
-                Select Patient
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 flex-1 space-y-6">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search patient name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 outline-none transition-all font-medium text-slate-900"
+          <div className="space-y-8">
+            <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-visible flex flex-col">
+              <CardHeader className="bg-teal-900 text-white p-8 rounded-t-[2.5rem]">
+                <CardTitle className="flex items-center gap-3">
+                  <User size={24} className="text-teal-400" />
+                  Select Patient
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 flex-1 space-y-6">
+                <PatientSearch 
+                  onSelect={(p) => {
+                    setSelectedPatientId(p.id);
+                  }}
+                  selectedPatientId={selectedPatientId}
                 />
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {filteredPatients.map((p) => (
-                  <label key={p.id} className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer ${selectedPatient === p.id ? "bg-blue-50 border-blue-600" : "bg-white border-slate-50 hover:border-blue-100"}`}>
-                    <input 
-                      type="radio" 
-                      name="patient" 
-                      value={p.id} 
-                      checked={selectedPatient === p.id}
-                      onChange={() => setSelectedPatient(p.id)}
-                      className="hidden" 
-                    />
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${selectedPatient === p.id ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400"}`}>
-                      {p.user.name[0]}
-                    </div>
-                    <div>
-                      <p className="font-bold text-slate-900">{p.user.name}</p>
-                      <p className="text-xs text-slate-400 font-medium">{p.user.email}</p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-hidden flex flex-col">
+              <CardHeader className="p-8 pb-0">
+                <CardTitle className="text-xl font-black text-teal-900 flex items-center gap-3">
+                  <FileText className="text-teal-600" size={24} />
+                  Reason for Visit
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Describe the symptoms or reason for the appointment... (Optional)"
+                  className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-medium text-slate-900 min-h-[120px] resize-none"
+                />
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Step 2 & 3: Doctor and Time */}
           <div className="space-y-8">
             <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-hidden">
               <CardHeader className="p-8 pb-0">
-                <CardTitle className="text-xl font-black text-slate-800 flex items-center gap-3">
-                  <Stethoscope className="text-blue-600" size={24} />
+                <CardTitle className="text-xl font-black text-teal-900 flex items-center gap-3">
+                  <Stethoscope className="text-teal-600" size={24} />
                   Choose Doctor
                 </CardTitle>
               </CardHeader>
@@ -187,7 +167,7 @@ export default function ReceptionistBookingPage() {
                     setSelectedDoctor(e.target.value);
                     setAvailable(null);
                   }}
-                  className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 outline-none transition-all font-bold text-slate-900 appearance-none"
+                  className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-bold text-slate-900 appearance-none"
                   required
                 >
                   <option value="">Select a Doctor</option>
@@ -202,8 +182,8 @@ export default function ReceptionistBookingPage() {
 
             <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-hidden">
               <CardHeader className="p-8 pb-0">
-                <CardTitle className="text-xl font-black text-slate-800 flex items-center gap-3">
-                  <Calendar className="text-blue-600" size={24} />
+                <CardTitle className="text-xl font-black text-teal-900 flex items-center gap-3">
+                  <Calendar className="text-teal-600" size={24} />
                   Date & Time
                 </CardTitle>
               </CardHeader>
@@ -219,22 +199,31 @@ export default function ReceptionistBookingPage() {
                         setDate(e.target.value);
                         setAvailable(null);
                       }}
-                      className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 outline-none transition-all font-bold text-slate-900"
+                      className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-bold text-slate-900"
                       required
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Time Slot</label>
-                    <input
-                      type="time"
+                    <select
                       value={time}
                       onChange={(e) => {
                         setTime(e.target.value);
                         setAvailable(null);
                       }}
-                      className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 outline-none transition-all font-bold text-slate-900"
+                      className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-bold text-slate-900 appearance-none"
                       required
-                    />
+                    >
+                      <option value="">Select time</option>
+                      {/* Fixed working hours slots */}
+                      {Array.from({ length: 9 }, (_, i) => i + 9).map(hour => {
+                        const formattedHour = hour < 10 ? `0${hour}` : hour;
+                        const label = hour > 12 ? `${hour - 12}:00 PM` : hour === 12 ? `12:00 PM` : `${hour}:00 AM`;
+                        return (
+                          <option key={hour} value={`${formattedHour}:00:00`}>{label}</option>
+                        );
+                      })}
+                    </select>
                   </div>
                 </div>
 
@@ -242,7 +231,7 @@ export default function ReceptionistBookingPage() {
                   type="button"
                   onClick={checkAvailability}
                   disabled={!selectedDoctor || !date || !time || checkingAvailability}
-                  className="w-full py-4 bg-blue-50 text-blue-600 rounded-2xl font-black hover:bg-blue-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-4 bg-teal-50 text-teal-700 rounded-2xl font-black hover:bg-teal-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {checkingAvailability ? <Loader2 className="animate-spin" /> : <Clock size={20} />}
                   Check Slot Availability
@@ -265,8 +254,8 @@ export default function ReceptionistBookingPage() {
 
             <button
               type="submit"
-              disabled={!available || loading || !selectedPatient}
-              className="w-full py-6 bg-slate-900 text-white rounded-[2.5rem] font-black text-xl shadow-2xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:bg-slate-300"
+              disabled={!available || loading || !selectedPatientId}
+              className="w-full py-6 bg-teal-700 text-white rounded-[2.5rem] font-black text-xl shadow-2xl shadow-teal-900/20 hover:bg-teal-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none"
             >
               {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 />}
               Confirm Booking

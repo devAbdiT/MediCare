@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import { Calendar, Clock, Stethoscope, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export default async function AdminAppointmentsPage() {
   const session = await auth.api.getSession({
@@ -21,7 +22,7 @@ export default async function AdminAppointmentsPage() {
     orderBy: { dateTime: "desc" },
     include: {
       patient: {
-        include: { user: { select: { name: true } } }
+        include: { user: { select: { id: true, name: true } } }
       },
       doctor: {
         include: { user: { select: { name: true } } }
@@ -92,9 +93,9 @@ export default async function AdminAppointmentsPage() {
                       </Badge>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <button className="text-sm font-black text-[#1E4A8A] dark:text-[#4A8AC8] hover:text-[#0F3A6A] dark:hover:text-[#1E4A8A] underline underline-offset-4">
+                      <Link href={`/dashboard/admin/users/${appt.patient.user.id}`} className="text-sm font-black text-[#1E4A8A] dark:text-[#4A8AC8] hover:text-[#0F3A6A] dark:hover:text-[#1E4A8A] underline underline-offset-4">
                         View Details
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}
