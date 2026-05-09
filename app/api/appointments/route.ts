@@ -15,7 +15,7 @@ export async function GET() {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { role, id: userId } = session.user;
+  const { role, id: userId } = session.user as any;
 
   let query: any = {
     include: {
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
     // 2. Resolve IDs
     let finalPatientId = patientId;
-    if (session.user.role === "PATIENT") {
+    if ((session.user as any).role === "PATIENT") {
       const patient = await prisma.patient.findUnique({ where: { userId: session.user.id } });
       finalPatientId = patient?.id;
     }
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
         doctorId,
         dateTime: requestedTime,
         reason,
-        receptionistId: session.user.role === "RECEPTIONIST" ? 
+        receptionistId: (session.user as any).role === "RECEPTIONIST" ? 
           (await prisma.receptionist.findUnique({ where: { userId: session.user.id } }))?.id : 
           null,
       }

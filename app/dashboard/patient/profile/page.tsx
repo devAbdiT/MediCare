@@ -13,7 +13,7 @@ export default async function PatientProfilePage() {
     headers: await headers()
   });
 
-  if (!session || session.user.role !== "PATIENT") {
+  if (!session || (session.user as any).role !== "PATIENT") {
     redirect("/login");
   }
 
