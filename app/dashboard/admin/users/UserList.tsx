@@ -182,7 +182,9 @@ export default function UserList({ users, adminName }: UserListProps) {
                         </div>
                         <div>
                           <p className="font-bold text-[#1A2A4A] dark:text-[#E8EEF8]">{user.name}</p>
-                          <p className="text-[10px] text-[#5A6E8A] dark:text-[#8A9CBA] font-black uppercase tracking-widest">ID-{user.id.slice(-6)}</p>
+                          <p className="text-[10px] text-[#5A6E8A] dark:text-[#8A9CBA] font-black uppercase tracking-widest">
+                            {user.role === "PATIENT" ? (user.patient?.cardNumber || `BK-P-${user.id.slice(-4).toUpperCase()}`) : `ID-${user.id.slice(-6)}`}
+                          </p>
                         </div>
                       </div>
                     </td>

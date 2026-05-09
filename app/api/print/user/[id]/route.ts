@@ -54,6 +54,7 @@ export async function GET(
       createdAt: user.createdAt,
       dateOfBirth: user.patient?.dateOfBirth,
       bloodType: user.patient?.bloodType,
+      cardNumber: user.patient?.cardNumber,
       specialization: user.doctor?.specialization,
       appointments: user.patient?.medicalRecords.map((record: any) => ({
         id: record.id,

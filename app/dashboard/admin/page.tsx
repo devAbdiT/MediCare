@@ -99,17 +99,6 @@ export default async function AdminDashboard() {
         {/* Analytics Charts Section */}
         <AnalyticsCharts data={analyticsData} />
 
-Uncaught Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.  
-
-Check the render method of `AdminPatientsPage`.
-    at AdminPatientsPage (app\dashboard\admin\patients\page.tsx:48:13)
-  46 |           </div>
-  47 |           <div className="flex items-center gap-6">
-> 48 |             <PrintButton />
-     |             ^
-  49 |             <AddUserButton role="PATIENT" label="Add Patient" colorClass="bg-[#2D8A6E]" />
-  50 |             <div className="bg-white dark:bg-[#111C3A] px-8 py-4 rounded-2xl border bor...
-  51 |               <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] u...
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Logs */}
           <div className="lg:col-span-2 bg-white dark:bg-[#111C3A] p-10 rounded-[3rem] border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm transition-colors duration-500">

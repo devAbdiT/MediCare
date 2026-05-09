@@ -18,7 +18,16 @@ async function main() {
 
   const hashedPassword = await hash("password123", 10);
 
-  const seedData = [
+  const seedData: {
+    name: string;
+    email: string;
+    role: string;
+    phone: string;
+    specialization?: string;
+    bloodType?: string;
+    dateOfBirth?: Date;
+    cardNumber?: string;
+  }[] = [
     {
       name: "System Admin",
       email: "admin@hospital.com",
@@ -45,6 +54,7 @@ async function main() {
       phone: "+251944333333",
       bloodType: "O+",
       dateOfBirth: new Date("1990-01-01"),
+      cardNumber: "BK-P-2026-0001",
     },
   ];
 
@@ -57,8 +67,6 @@ async function main() {
         email: data.email,
         phone: data.phone,
         role: data.role as any,
-        // Better Auth also stores password in User table in some configs, 
-        // but primarily it looks at the Account table.
         password: hashedPassword, 
         
         // Create role-specific record
@@ -71,7 +79,8 @@ async function main() {
           patient: { 
             create: { 
               bloodType: data.bloodType || "A+", 
-              dateOfBirth: data.dateOfBirth || new Date("1985-05-05") 
+              dateOfBirth: data.dateOfBirth || new Date("1985-05-05"),
+              cardNumber: data.cardNumber,
             } 
           } 
         }),

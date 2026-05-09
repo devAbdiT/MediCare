@@ -55,12 +55,19 @@ export async function POST(req: Request) {
           }
         });
       } else if (role === "PATIENT") {
+        // Auto-generate a unique card number: BK-P-YYYY-NNNN
+        const year = new Date().getFullYear();
+        const patientCount = await tx.patient.count();
+        const sequence = String(patientCount + 1).padStart(4, "0");
+        const cardNumber = `BK-P-${year}-${sequence}`;
+
         await tx.patient.create({
           data: {
             userId: user.id,
             dateOfBirth: new Date(dateOfBirth || "2000-01-01"),
             gender: gender || "OTHER",
             bloodType: bloodType || "UNKNOWN",
+            cardNumber,
           }
         });
       }

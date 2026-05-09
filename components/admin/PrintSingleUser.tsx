@@ -11,6 +11,7 @@ interface UserData {
   role: string;
   dateOfBirth?: string;
   bloodType?: string;
+  cardNumber?: string;
   specialization?: string;
   createdAt: string;
 }
@@ -48,7 +49,7 @@ export function PrintSingleUser({ user, appointments }: PrintSingleUserProps) {
           <p><strong>Network Email:</strong> {user.email}</p>
           <p><strong>Contact Phone:</strong> {user.phone || "Not specified"}</p>
           <p><strong>Registry Date:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
-          <p><strong>Global ID:</strong> {user.id}</p>
+          <p><strong>{user.role === "PATIENT" ? "Medical Card Number" : "Global System ID"}:</strong> {user.role === "PATIENT" ? (user.cardNumber || `BK-P-${user.id.slice(-4).toUpperCase()}`) : user.id}</p>
           
           {user.role === "PATIENT" && (
             <>

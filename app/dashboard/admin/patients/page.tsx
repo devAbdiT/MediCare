@@ -28,7 +28,7 @@ export default async function AdminPatientsPage() {
       phone: true,
       createdAt: true,
       patient: {
-        select: { bloodType: true, dateOfBirth: true }
+        select: { bloodType: true, dateOfBirth: true, cardNumber: true }
       }
     }
   });

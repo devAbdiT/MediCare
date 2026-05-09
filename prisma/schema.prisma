@@ -95,6 +95,7 @@ model Patient {
   userId      String   @unique
   dateOfBirth DateTime
   bloodType   String?
+  cardNumber  String?  @unique
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments   Appointment[]

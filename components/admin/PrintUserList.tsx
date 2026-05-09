@@ -11,6 +11,7 @@ interface User {
   role: string;
   specialization?: string;
   bloodType?: string;
+  cardNumber?: string;
 }
 
 interface PrintUserListProps {
@@ -41,6 +42,7 @@ export function PrintUserList({ users, title }: PrintUserListProps) {
         <thead>
           <tr className="bg-gray-100">
             <th className="border border-black p-3 text-[10px] font-black uppercase tracking-widest">#</th>
+            <th className="border border-black p-3 text-[10px] font-black uppercase tracking-widest">Identity / Card No</th>
             <th className="border border-black p-3 text-[10px] font-black uppercase tracking-widest">Name</th>
             <th className="border border-black p-3 text-[10px] font-black uppercase tracking-widest">Email Address</th>
             <th className="border border-black p-3 text-[10px] font-black uppercase tracking-widest">Contact Phone</th>
@@ -52,6 +54,9 @@ export function PrintUserList({ users, title }: PrintUserListProps) {
           {users.map((user, index) => (
             <tr key={user.id}>
               <td className="border border-black p-3 text-xs font-bold">{index + 1}</td>
+              <td className="border border-black p-3 text-xs font-bold uppercase tracking-widest">
+                {user.role === "PATIENT" ? (user.cardNumber || `BK-P-${user.id.slice(-4).toUpperCase()}`) : `ID-${user.id.slice(-6)}`}
+              </td>
               <td className="border border-black p-3 text-sm font-bold">{user.name}</td>
               <td className="border border-black p-3 text-sm">{user.email}</td>
               <td className="border border-black p-3 text-sm">{user.phone || "---"}</td>
