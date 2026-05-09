@@ -50,65 +50,65 @@
 
 @layer base {
   :root {
-    --background: #F8FAFC;
-    --foreground: #1E293B;
+    --background: #F0F4F8;
+    --foreground: #1A2A4A;
 
     --card: #FFFFFF;
-    --card-foreground: #1E293B;
+    --card-foreground: #1A2A4A;
 
     --popover: #FFFFFF;
-    --popover-foreground: #1E293B;
+    --popover-foreground: #1A2A4A;
 
-    --primary: #3B82F6;
+    --primary: #1E4A8A;
     --primary-foreground: #FFFFFF;
 
-    --secondary: #F1F5F9;
-    --secondary-foreground: #1E293B;
+    --secondary: #D0DCE8;
+    --secondary-foreground: #1A2A4A;
 
-    --muted: #F1F5F9;
-    --muted-foreground: #64748B;
+    --muted: #D0DCE8;
+    --muted-foreground: #5A6E8A;
 
-    --accent: #F1F5F9;
-    --accent-foreground: #1E293B;
+    --accent: #D0DCE8;
+    --accent-foreground: #1A2A4A;
 
-    --destructive: #EF4444;
+    --destructive: #D94A5A;
     --destructive-foreground: #FFFFFF;
 
-    --border: #E2E8F0;
-    --input: #E2E8F0;
-    --ring: #3B82F6;
+    --border: #D0DCE8;
+    --input: #D0DCE8;
+    --ring: #1E4A8A;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: #0F172A;
-    --foreground: #F1F5F9;
+    --background: #0A122A;
+    --foreground: #E8EEF8;
 
-    --card: #1E293B;
-    --card-foreground: #F1F5F9;
+    --card: #111C3A;
+    --card-foreground: #E8EEF8;
 
-    --popover: #1E293B;
-    --popover-foreground: #F1F5F9;
+    --popover: #111C3A;
+    --popover-foreground: #E8EEF8;
 
-    --primary: #60A5FA;
-    --primary-foreground: #0F172A;
+    --primary: #4A8AC8;
+    --primary-foreground: #0A122A;
 
-    --secondary: #334155;
-    --secondary-foreground: #F1F5F9;
+    --secondary: #1A2A4A;
+    --secondary-foreground: #E8EEF8;
 
-    --muted: #334155;
-    --muted-foreground: #94A3B8;
+    --muted: #1A2A4A;
+    --muted-foreground: #8A9CBA;
 
-    --accent: #334155;
-    --accent-foreground: #F1F5F9;
+    --accent: #1A2A4A;
+    --accent-foreground: #E8EEF8;
 
-    --destructive: #F87171;
-    --destructive-foreground: #F1F5F9;
+    --destructive: #E86A7A;
+    --destructive-foreground: #E8EEF8;
 
-    --border: #334155;
-    --input: #334155;
-    --ring: #60A5FA;
+    --border: #1A2A4A;
+    --input: #1A2A4A;
+    --ring: #4A8AC8;
   }
 }
 
@@ -122,14 +122,18 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
+  background: #D0DCE8;
   border-radius: 20px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1A2A4A;
+}
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #CBD5E1;
+  background: #5A6E8A;
   background-clip: content-box;
 }
 

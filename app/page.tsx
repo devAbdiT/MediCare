@@ -1,185 +1,168 @@
 // app/page.tsx
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Stethoscope, ArrowRight, ShieldCheck, HeartPulse, ClipboardCheck, Sparkles, Activity } from "lucide-react";
+import { 
+  Stethoscope, 
+  ArrowRight, 
+  ShieldCheck, 
+  HeartPulse,
+  Activity,
+} from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function Home() {
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] overflow-hidden relative selection:bg-blue-100 selection:text-blue-900">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-100/50 to-emerald-50/30 rounded-full blur-[150px] -mr-96 -mt-96 animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-gradient-to-tr from-blue-50/50 to-indigo-50/30 rounded-full blur-[120px] -ml-48 -mb-48" />
+  const { theme } = useTheme();
 
-      {/* Premium Glass Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-8 py-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between bg-white/70 backdrop-blur-2xl border border-white/20 px-8 py-4 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <div className="flex items-center gap-3 text-blue-600 font-black text-2xl tracking-tighter">
-            <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-              <Stethoscope size={24} />
+  return (
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0A122A] overflow-hidden relative selection:bg-[#1E4A8A]/10 dark:selection:bg-[#4A8AC8]/20 selection:text-[#1E4A8A] transition-colors duration-700">
+      {/* Cinematic Background */}
+      <div className="absolute top-0 right-0 w-[1200px] h-[1200px] bg-gradient-to-br from-[#1E4A8A]/20 to-[#2D8A6E]/10 dark:from-[#4A8AC8]/10 dark:to-[#4AA88A]/5 rounded-full blur-[160px] -mr-[400px] -mt-[400px] animate-pulse pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[1000px] h-[1000px] bg-gradient-to-tr from-[#3A7BC8]/20 to-[#1E4A8A]/10 dark:from-[#2A6ABA]/10 dark:to-[#4A8AC8]/5 rounded-full blur-[140px] -ml-[300px] -mb-[300px] pointer-events-none" />
+
+      {/* Modern Floating Navigation */}
+      <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-[calc(100%-4rem)] max-w-7xl">
+        <div className="bg-white/70 dark:bg-[#111C3A]/70 backdrop-blur-2xl border border-white/20 dark:border-white/5 px-8 py-5 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] flex items-center justify-between transition-all duration-500">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-[#1E4A8A] rounded-2xl flex items-center justify-center text-white shadow-xl shadow-[#1E4A8A]/20 group hover:rotate-12 transition-transform duration-500">
+              <Stethoscope size={26} />
             </div>
-            <span className="hidden sm:block">MediCare</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-black tracking-tighter text-[#1A2A4A] dark:text-[#E8EEF8] leading-none">MediCare</span>
+              <span className="text-[10px] font-black text-[#1E4A8A] uppercase tracking-[0.3em] mt-1">Cloud OS</span>
+            </div>
           </div>
-          <div className="flex items-center gap-8">
-            <Link href="/login" className="hidden lg:block font-black text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-widest text-[10px]">
-              System Status
-            </Link>
-            <Link href="/login" className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-2xl shadow-slate-200 hover:bg-blue-600 hover:scale-105 active:scale-95 transition-all text-xs uppercase tracking-widest">
-              Login to Portal
+          
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="px-10 py-4 bg-[#1A2A4A] dark:bg-[#0A122A] text-white rounded-2xl font-black shadow-2xl hover:bg-[#1E4A8A] dark:hover:bg-[#4A8AC8] hover:scale-105 active:scale-95 transition-all text-[11px] uppercase tracking-widest">
+              Access Portal
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-8 pt-40 pb-32 relative z-10">
+      {/* Hero Workspace */}
+      <main className="max-w-7xl mx-auto px-8 pt-64 pb-32 relative z-10 flex flex-col items-center justify-center min-h-[90vh]">
         <div className="flex flex-col lg:flex-row items-center gap-24">
-          {/* Left Content */}
-          <div className="flex-1 text-center lg:text-left space-y-10">
-            <div className="inline-flex items-center gap-2 px-5 py-2 bg-blue-50 rounded-full border border-blue-100/50">
-              <Activity className="text-blue-600 animate-pulse" size={16} />
-              <span className="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em]">Live Clinical OS v2.0</span>
+          {/* Left: Narrative Content */}
+          <div className="flex-1 space-y-12 text-center lg:text-left">
+            <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-[#F0F4F8] dark:bg-[#1A2A4A]/40 rounded-full border border-[#D0DCE8] dark:border-[#1A2A4A] mx-auto lg:mx-0 w-fit">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1E4A8A] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1E4A8A]"></span>
+              </span>
+              <span className="text-[10px] font-black text-[#1E4A8A] dark:text-[#4A8AC8] uppercase tracking-[0.3em]">System v2.4.1 Active</span>
             </div>
             
-            <h1 className="text-7xl lg:text-9xl font-black text-slate-900 leading-[0.85] tracking-tighter">
-              Healthy <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-500">Excellence.</span>
+            <h1 className="text-[5rem] lg:text-[10rem] font-black text-[#1A2A4A] dark:text-[#E8EEF8] leading-[0.8] tracking-tighter transition-colors">
+              Medical <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1E4A8A] via-[#3A7BC8] to-[#2D8A6E] dark:from-[#4A8AC8] dark:to-[#4AA88A] animate-gradient-x">Intelligence.</span>
             </h1>
             
-            <p className="max-w-xl text-slate-500 text-xl font-medium leading-relaxed">
-              Experience the future of healthcare management with our elite operating system for patients and medical professionals.
+            <p className="max-w-xl text-[#5A6E8A] dark:text-[#8A9CBA] text-xl font-medium leading-relaxed mx-auto lg:mx-0">
+              Precision-engineered clinical management system. Experience healthcare infrastructure reimagined for efficiency and security.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start pt-4">
-              <Link href="/login" className="px-12 py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-xl flex items-center justify-center gap-3 shadow-[0_20px_40px_-10px_rgba(37,99,235,0.3)] hover:bg-blue-700 hover:-translate-y-1 transition-all group">
-                Enter Platform
-                <ArrowRight size={28} className="group-hover:translate-x-2 transition-transform" />
+              <Link href="/login" className="px-12 py-8 bg-[#1E4A8A] dark:bg-[#1E4A8A] text-white rounded-[2.5rem] font-black text-xl flex items-center justify-center gap-4 shadow-[0_25px_50px_-12px_rgba(30,74,138,0.5)] hover:bg-[#0F3A6A] hover:-translate-y-1 transition-all group">
+                Enter Command Center
+                <ArrowRight size={32} className="group-hover:translate-x-2 transition-transform" />
               </Link>
-              <button className="px-12 py-7 bg-white border-2 border-slate-100 text-slate-900 rounded-[2.5rem] font-black text-xl hover:border-blue-600 hover:bg-blue-50/30 transition-all">
-                System Tour
-              </button>
             </div>
 
-            <div className="flex items-center gap-12 pt-8 border-t border-slate-100">
-              <StatItem value="100%" label="Uptime" />
-              <StatItem value="Secure" label="Encrypted" />
-              <StatItem value="Role" label="Integrated" />
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-12 pt-12 border-t border-[#D0DCE8] dark:border-[#1A2A4A]">
+              <StatItem value="100%" label="Uptime SLA" />
+              <StatItem value="256-bit" label="Encryption" />
+              <StatItem value="Multi-Node" label="Architecture" />
             </div>
           </div>
 
-          {/* Right Visual */}
-          <div className="flex-1 relative group">
-            <div className="relative z-10 transition-transform duration-700 group-hover:scale-[1.02] animate-float">
+          {/* Right: Architectural Visual */}
+          <div className="flex-1 relative group w-full max-w-lg lg:max-w-none">
+            <div className="relative z-10 transition-transform duration-1000 group-hover:scale-[1.05] animate-float">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1E4A8A]/30 to-[#2D8A6E]/30 blur-[100px] opacity-0 group-hover:opacity-50 transition-opacity" />
               <img 
                 src="/premium_3d_doctor_mascot_1778335022307.png" 
-                alt="Elite Doctor Mascot"
-                className="w-full h-auto drop-shadow-[0_50px_50px_rgba(0,0,0,0.12)] rounded-[4rem] border-4 border-white"
+                alt="MediCare AI Specialist"
+                className="w-full h-auto drop-shadow-[0_80px_80px_rgba(0,0,0,0.15)] rounded-[5rem] relative z-20"
               />
             </div>
 
-            <div className="absolute -right-12 top-1/4 z-20 bg-white/90 backdrop-blur-2xl p-6 rounded-[2.5rem] border border-white/50 shadow-2xl animate-bounce hidden xl:block">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-100">
-                  <HeartPulse size={28} />
+            {/* Float Cards */}
+            <div className="absolute -right-8 top-1/4 z-30 bg-white/90 dark:bg-[#111C3A]/90 backdrop-blur-2xl p-8 rounded-[3rem] border border-white dark:border-white/5 shadow-2xl animate-bounce hidden xl:block">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 bg-[#2D8A6E]/10 text-[#2D8A6E] rounded-3xl flex items-center justify-center shadow-inner">
+                  <HeartPulse size={32} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pulse Check</p>
-                  <p className="text-lg font-black text-slate-900">Normal Range</p>
+                  <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.2em] mb-1">Live Telemetry</p>
+                  <p className="text-xl font-black text-[#1A2A4A] dark:text-[#E8EEF8]">Vitals Syncing</p>
                 </div>
               </div>
             </div>
 
-            <div className="absolute -left-12 bottom-1/4 z-20 bg-slate-900 text-white p-8 rounded-[3rem] shadow-2xl animate-float hidden xl:block">
-               <div className="flex items-center gap-4 mb-4">
-                  <ShieldCheck className="text-blue-400" size={32} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Verified Secure</span>
+            <div className="absolute -left-12 bottom-1/4 z-30 bg-[#1A2A4A] dark:bg-[#0A122A] text-white p-10 rounded-[3.5rem] shadow-2xl animate-float-slow hidden xl:block border border-white/5">
+               <div className="flex items-center gap-5 mb-6">
+                  <ShieldCheck className="text-[#1E4A8A]" size={40} />
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 block">Identity Engine</span>
+                    <span className="text-xl font-black tracking-tight">Verified Access</span>
+                  </div>
                </div>
-               <p className="text-xl font-black tracking-tight">Data Vault Active</p>
+               <div className="flex gap-2">
+                  {[1,2,3,4,5].map(i => <div key={i} className="w-2 h-2 bg-[#1E4A8A] rounded-full animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />)}
+               </div>
             </div>
           </div>
-        </div>
-
-        {/* Feature Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-40">
-          <FeatureCard 
-            icon={<Activity />} 
-            title="Real-time Vitals" 
-            desc="Instant synchronization across all medical devices and profiles."
-            gradient="from-blue-600 to-blue-400"
-          />
-          <FeatureCard 
-            icon={<ClipboardCheck />} 
-            title="Atomic Records" 
-            desc="Every prescription and diagnosis is handled with total precision."
-            gradient="from-emerald-600 to-teal-400"
-          />
-          <FeatureCard 
-            icon={<Sparkles />} 
-            title="AI Insights" 
-            desc="Smart alerts for medication conflicts and appointment optimization."
-            gradient="from-indigo-600 to-blue-400"
-          />
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-20 relative z-10">
-        <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-start gap-12">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 text-blue-600 font-black text-2xl tracking-tighter">
-              <Stethoscope size={32} />
-              <span>MediCare</span>
+      {/* Minimal Footer */}
+      <footer className="bg-white/50 dark:bg-[#111C3A]/50 backdrop-blur-md py-12 relative z-10 transition-colors duration-500 border-t border-[#D0DCE8] dark:border-[#1A2A4A]">
+        <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#1E4A8A] rounded-xl flex items-center justify-center text-white">
+              <Stethoscope size={20} />
             </div>
-            <p className="max-w-xs text-slate-400 font-medium leading-relaxed">
-              The world's most advanced patient management system for modern clinics.
-            </p>
+            <span className="text-lg font-black tracking-tighter text-[#1A2A4A] dark:text-[#E8EEF8]">MediCare</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-16">
-            <FooterCol title="Platform" links={["Features", "Security", "Uptime"]} />
-            <FooterCol title="Medical" links={["Doctors", "Records", "Pharmacy"]} />
-            <FooterCol title="Company" links={["About", "Privacy", "Terms"]} />
+          <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.4em]">© 2026 MediCare Elite Cloud System.</p>
+          <div className="flex items-center gap-2">
+             <div className="w-2 h-2 bg-[#2D8A6E] rounded-full animate-pulse" />
+             <span className="text-[10px] font-black text-[#1A2A4A] dark:text-[#E8EEF8] uppercase tracking-widest">Global Status: Online</span>
           </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-8 mt-20 pt-8 border-t border-slate-50 text-center">
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">© 2026 MediCare Elite Cloud. Engineered for Excellence.</p>
         </div>
       </footer>
+
+      <style jsx global>{`
+        @keyframes gradient-x {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 15s ease infinite;
+        }
+        @keyframes float-slow {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(1deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-float-slow {
+          animation: float-slow 6s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
 
 function StatItem({ value, label }: { value: string; label: string }) {
   return (
-    <div>
-      <p className="text-3xl font-black text-slate-900 tracking-tighter leading-none">{value}</p>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{label}</p>
-    </div>
-  );
-}
-
-function FeatureCard({ icon, title, desc, gradient }: { icon: React.ReactNode; title: string; desc: string; gradient: string }) {
-  return (
-    <div className="group bg-white p-12 rounded-[3.5rem] border border-slate-100 hover:border-blue-200 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden">
-      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 transition-opacity rounded-bl-[4rem]`} />
-      <div className={`w-16 h-16 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center text-white mb-8 shadow-xl group-hover:scale-110 transition-transform duration-500`}>
-        {React.cloneElement(icon as React.ReactElement, { size: 32 })}
-      </div>
-      <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">{title}</h3>
-      <p className="text-slate-500 font-medium leading-relaxed">{desc}</p>
-    </div>
-  );
-}
-
-function FooterCol({ title, links }: { title: string; links: string[] }) {
-  return (
-    <div className="space-y-6">
-      <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{title}</h4>
-      <ul className="space-y-4">
-        {links.map(link => (
-          <li key={link}>
-            <a href="#" className="text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors">{link}</a>
-          </li>
-        ))}
-      </ul>
+    <div className="group cursor-default text-center lg:text-left">
+      <p className="text-4xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tighter leading-none group-hover:text-[#1E4A8A] transition-colors">{value}</p>
+      <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.2em] mt-3">{label}</p>
     </div>
   );
 }

@@ -47,42 +47,42 @@ export default function RegisterPatient() {
     <DashboardLayout role="receptionist">
       <div className="max-w-3xl mx-auto space-y-8 pb-10">
         <div>
-          <h1 className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tight flex items-center gap-4">
-            <UserPlus className="text-[#3B82F6] dark:text-[#60A5FA]" size={40} />
+          <h1 className="text-4xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tight flex items-center gap-4">
+            <UserPlus className="text-[#1E4A8A] dark:text-[#4A8AC8]" size={40} />
             Patient Registration
           </h1>
-          <p className="text-[#64748B] dark:text-[#94A3B8] mt-2 text-lg">Enter the details below to create a new patient profile.</p>
+          <p className="text-[#5A6E8A] dark:text-[#8A9CBA] mt-2 text-lg">Enter the details below to create a new patient profile.</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <Card className="rounded-[3rem] border-[#E2E8F0] dark:border-[#334155] shadow-xl shadow-blue-500/5 overflow-hidden bg-white dark:bg-[#1E293B] transition-colors duration-500">
-            <CardHeader className="bg-[#F8FAFC] dark:bg-[#0F172A] border-b border-[#E2E8F0] dark:border-[#334155] p-10 transition-colors duration-500">
-              <CardTitle className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9]">Personal Information</CardTitle>
-              <CardDescription className="text-[#64748B] dark:text-[#94A3B8] font-medium">All fields are required for medical compliance.</CardDescription>
+          <Card className="rounded-[3rem] border-[#D0DCE8] dark:border-[#1A2A4A] shadow-xl shadow-blue-500/5 overflow-hidden bg-white dark:bg-[#111C3A] transition-colors duration-500">
+            <CardHeader className="bg-[#F0F4F8] dark:bg-[#0A122A] border-b border-[#D0DCE8] dark:border-[#1A2A4A] p-10 transition-colors duration-500">
+              <CardTitle className="text-xl font-black text-[#1A2A4A] dark:text-[#E8EEF8]">Personal Information</CardTitle>
+              <CardDescription className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium">All fields are required for medical compliance.</CardDescription>
             </CardHeader>
             <CardContent className="p-10 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Full Name</Label>
-                  <Input name="name" placeholder="John Doe" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Full Name</Label>
+                  <Input name="name" placeholder="John Doe" required className="rounded-2xl h-14 bg-[#F0F4F8] dark:bg-[#0A122A] border-[#D0DCE8] dark:border-[#1A2A4A] focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500" />
                 </div>
                 <div className="space-y-3">
-                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Email Address</Label>
-                  <Input name="email" type="email" placeholder="john@example.com" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Email Address</Label>
+                  <Input name="email" type="email" placeholder="john@example.com" required className="rounded-2xl h-14 bg-[#F0F4F8] dark:bg-[#0A122A] border-[#D0DCE8] dark:border-[#1A2A4A] focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500" />
                 </div>
                 <div className="space-y-3">
-                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Phone Number</Label>
-                  <Input name="phone" placeholder="+251..." required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Phone Number</Label>
+                  <Input name="phone" placeholder="+251..." required className="rounded-2xl h-14 bg-[#F0F4F8] dark:bg-[#0A122A] border-[#D0DCE8] dark:border-[#1A2A4A] focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500" />
                 </div>
                 <div className="space-y-3">
-                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Date of Birth</Label>
-                  <Input name="dateOfBirth" type="date" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Date of Birth</Label>
+                  <Input name="dateOfBirth" type="date" required className="rounded-2xl h-14 bg-[#F0F4F8] dark:bg-[#0A122A] border-[#D0DCE8] dark:border-[#1A2A4A] focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500" />
                 </div>
                 <div className="space-y-3">
-                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Blood Type</Label>
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Blood Type</Label>
                   <select 
                     name="bloodType" 
-                    className="w-full rounded-2xl h-14 border border-[#E2E8F0] dark:border-[#334155] bg-[#F8FAFC] dark:bg-[#0F172A] px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500"
+                    className="w-full rounded-2xl h-14 border border-[#D0DCE8] dark:border-[#1A2A4A] bg-[#F0F4F8] dark:bg-[#0A122A] px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500"
                     required
                   >
                     <option value="">Select Type</option>
@@ -97,28 +97,27 @@ export default function RegisterPatient() {
                   </select>
                 </div>
                 <div className="space-y-3">
-                  <Label className="font-black text-xs uppercase tracking-widest text-[#1E293B] dark:text-[#F1F5F9]">Initial Password</Label>
-                  <Input name="password" type="password" placeholder="••••••••" required className="rounded-2xl h-14 bg-[#F8FAFC] dark:bg-[#0F172A] border-[#E2E8F0] dark:border-[#334155] focus:ring-[#3B82F6] text-[#1E293B] dark:text-[#F1F5F9] transition-colors duration-500" />
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Initial Password</Label>
+                  <Input name="password" type="password" placeholder="••••••••" required className="rounded-2xl h-14 bg-[#F0F4F8] dark:bg-[#0A122A] border-[#D0DCE8] dark:border-[#1A2A4A] focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500" />
                 </div>
               </div>
 
-              <div className="pt-8 border-t border-[#F8FAFC] dark:border-[#0F172A] flex justify-end gap-4 transition-colors duration-500">
-                <Button 
+              <div className="pt-8 border-t border-[#F0F4F8] dark:border-[#0A122A] flex justify-end gap-4 transition-colors duration-500">
+                <button 
                   type="button" 
-                  variant="outline" 
                   onClick={() => router.back()}
-                  className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest border-[#E2E8F0] dark:border-[#334155] text-[#64748B] dark:text-[#94A3B8] hover:bg-[#F8FAFC] dark:hover:bg-[#0F172A]"
+                  className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest border border-[#D0DCE8] dark:border-[#1A2A4A] text-[#5A6E8A] dark:text-[#8A9CBA] hover:bg-[#F0F4F8] dark:hover:bg-[#0A122A] transition-all"
                 >
                   Cancel
-                </Button>
-                <Button 
+                </button>
+                <button 
                   type="submit" 
                   disabled={loading}
-                  className="rounded-2xl h-14 px-12 font-black bg-[#3B82F6] dark:bg-[#60A5FA] hover:bg-[#2563EB] dark:hover:bg-[#3B82F6] text-white shadow-xl shadow-blue-500/20 transition-all flex items-center gap-2 uppercase tracking-widest"
+                  className="rounded-2xl h-14 px-12 font-black bg-[#1E4A8A] dark:bg-[#4A8AC8] hover:bg-[#0F3A6A] dark:hover:bg-[#1E4A8A] text-white shadow-xl shadow-[#1E4A8A]/20 transition-all flex items-center gap-2 uppercase tracking-widest"
                 >
                   {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={18} />}
                   Register Patient
-                </Button>
+                </button>
               </div>
             </CardContent>
           </Card>
