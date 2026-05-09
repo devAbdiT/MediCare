@@ -158,9 +158,9 @@ export default function UserList({ users, adminName }: UserListProps) {
             <thead>
               <tr className="bg-[#F0F4F8] dark:bg-[#0A122A] border-b border-[#D0DCE8] dark:border-[#1A2A4A] text-[#5A6E8A] dark:text-[#8A9CBA] text-[10px] font-black uppercase tracking-widest transition-colors duration-500">
                 <th className="px-8 py-6">Identity</th>
-                <th className="px-8 py-6">Role / Specialization</th>
-                <th className="px-8 py-6">Address / Location</th>
-                <th className="px-8 py-6">Telemetry/Contact</th>
+                <th className="px-8 py-6">Role</th>
+                <th className="px-8 py-6">Card No</th>
+                <th className="px-8 py-6">Contact</th>
                 <th className="px-8 py-6">Registry Date</th>
                 <th className="px-8 py-6 text-right no-print">Action</th>
               </tr>
@@ -182,9 +182,7 @@ export default function UserList({ users, adminName }: UserListProps) {
                         </div>
                         <div>
                           <p className="font-bold text-[#1A2A4A] dark:text-[#E8EEF8]">{user.name}</p>
-                          <p className="text-[10px] text-[#5A6E8A] dark:text-[#8A9CBA] font-black uppercase tracking-widest">
-                            {user.role === "PATIENT" ? (user.patient?.cardNumber || `BK-P-${user.id.slice(-4).toUpperCase()}`) : `ID-${user.id.slice(-6)}`}
-                          </p>
+                          <p className="text-[10px] text-[#5A6E8A] dark:text-[#8A9CBA] font-bold">{user.email}</p>
                         </div>
                       </div>
                     </td>
@@ -203,7 +201,13 @@ export default function UserList({ users, adminName }: UserListProps) {
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                       <p className="text-xs font-bold text-[#5A6E8A] dark:text-[#8A9CBA]">Jimma, Bosa Kito</p>
+                      {user.role === "PATIENT" ? (
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-[#2D8A6E] dark:text-[#4AA88A] text-[10px] font-black uppercase tracking-widest border border-emerald-200 dark:border-emerald-800">
+                          {user.patient?.cardNumber || "—"}
+                        </span>
+                      ) : (
+                        <span className="text-[#8A9CBA] text-xs font-bold">—</span>
+                      )}
                     </td>
                     <td className="px-8 py-6">
                       <div className="space-y-1">
