@@ -5,57 +5,94 @@ import { hash } from "bcrypt-ts";
 const prisma = new PrismaClient();
 
 async function main() {
+  console.log("Cleaning up database...");
+  await prisma.appointment.deleteMany({});
+  await prisma.medicalRecord.deleteMany({});
+  await prisma.patient.deleteMany({});
+  await prisma.doctor.deleteMany({});
+  await prisma.receptionist.deleteMany({});
+  await prisma.admin.deleteMany({});
+  await prisma.session.deleteMany({});
+  await prisma.account.deleteMany({});
+  await prisma.user.deleteMany({});
+
   const hashedPassword = await hash("password123", 10);
 
-  // Create Admin
-  await prisma.user.upsert({
-    where: { email: "admin@hospital.com" },
-    update: {},
-    create: {
+  const seedData = [
+    {
       name: "System Admin",
       email: "admin@hospital.com",
-      phone: "+251911000000",
       role: "ADMIN",
-      password: hashedPassword,
-      admin: { create: {} },
+      phone: "+251911000000",
     },
-  });
-
-  // Create Doctor
-  await prisma.user.upsert({
-    where: { email: "dr.alex@hospital.com" },
-    update: {},
-    create: {
+    {
       name: "Dr. Alex Johnson",
       email: "dr.alex@hospital.com",
-      phone: "+251933222222",
       role: "DOCTOR",
-      password: hashedPassword,
-      doctor: {
-        create: { specialization: "Cardiology" },
-      },
+      phone: "+251933222222",
+      specialization: "Cardiology",
     },
-  });
-
-  // Create Receptionist
-  await prisma.user.upsert({
-    where: { email: "reception@hospital.com" },
-    update: {},
-    create: {
+    {
       name: "Sara Reception",
       email: "reception@hospital.com",
-      phone: "+251922111111",
       role: "RECEPTIONIST",
-      password: hashedPassword,
-      receptionist: { create: {} },
+      phone: "+251922111111",
     },
-  });
+    {
+      name: "John Patient",
+      email: "patient@hospital.com",
+      role: "PATIENT",
+      phone: "+251944333333",
+      bloodType: "O+",
+      dateOfBirth: new Date("1990-01-01"),
+    },
+  ];
 
-  console.log("✅ Seed data created successfully!");
-  console.log("\nDefault Credentials:");
-  console.log("Admin        → admin@hospital.com / password123");
-  console.log("Doctor       → dr.alex@hospital.com / password123");
-  console.log("Receptionist → reception@hospital.com / password123");
+  console.log("Seeding users...");
+
+  for (const data of seedData) {
+    const user = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: data.role as any,
+        // Better Auth also stores password in User table in some configs, 
+        // but primarily it looks at the Account table.
+        password: hashedPassword, 
+        
+        // Create role-specific record
+        ...(data.role === "ADMIN" && { admin: { create: {} } }),
+        ...(data.role === "DOCTOR" && { 
+          doctor: { create: { specialization: data.specialization || "General Medicine" } } 
+        }),
+        ...(data.role === "RECEPTIONIST" && { receptionist: { create: {} } }),
+        ...(data.role === "PATIENT" && { 
+          patient: { 
+            create: { 
+              bloodType: data.bloodType || "A+", 
+              dateOfBirth: data.dateOfBirth || new Date("1985-05-05") 
+            } 
+          } 
+        }),
+
+        // IMPORTANT: Create the Better Auth Account record
+        accounts: {
+          create: {
+            accountId: data.email,
+            providerId: "credential",
+            password: hashedPassword,
+          }
+        }
+      },
+    });
+
+    console.log(`✅ Created ${data.role}: ${user.email}`);
+  }
+
+  console.log("\n🎉 Database seeded successfully!");
+  console.log("Credentials for all users:");
+  console.log("Password: password123");
 }
 
 main()

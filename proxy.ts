@@ -2,17 +2,22 @@
 import { auth } from "@/lib/auth";
 import { NextResponse, type NextRequest } from "next/server";
 
-export default async function middleware(request: NextRequest) {
+/**
+ * Next.js 16 Proxy Layer
+ * Handles optimistic routing and role-based redirection.
+ */
+export async function proxy(request: NextRequest) {
   const { nextUrl } = request;
   const pathname = nextUrl.pathname;
 
-  // For Better Auth, we check the session using the API
+  // Check for session (Better Auth)
   const session = await auth.api.getSession({
     headers: request.headers,
   });
 
   const user = session?.user;
 
+  // 1. Public / Login handling
   if (
     pathname === "/" ||
     pathname === "/login" ||
@@ -25,14 +30,17 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // 2. Protect all other routes
   if (!user) {
     return NextResponse.redirect(new URL("/login", nextUrl));
   }
 
+  // 3. Role-based Dashboard Protection
   if (pathname.startsWith("/dashboard")) {
     const requestedRole = pathname.split("/")[2];
     const userRole = (user.role as string).toLowerCase();
 
+    // If trying to access a dashboard that doesn't match the role
     if (requestedRole && requestedRole !== userRole) {
       return NextResponse.redirect(new URL(`/dashboard/${userRole}`, nextUrl));
     }
@@ -41,6 +49,7 @@ export default async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Next.js 16 requires a config for the proxy matcher
 export const config = {
   matcher: ["/dashboard/:path*", "/login", "/api/:path*"],
 };
