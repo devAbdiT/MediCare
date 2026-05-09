@@ -22,19 +22,19 @@ enum AppointmentStatus {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  password      String?
-  phone         String?
-  role          Role     @default(PATIENT)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String?
+  phone     String?
+  role      Role     @default(PATIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  patient       Patient?
-  doctor        Doctor?
-  receptionist  Receptionist?
-  admin         Admin?
+  patient      Patient?
+  doctor       Doctor?
+  receptionist Receptionist?
+  admin        Admin?
 
   @@map("users")
 }
@@ -45,72 +45,74 @@ model Patient {
   dateOfBirth DateTime
   bloodType   String?
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  appointments Appointment[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments   Appointment[]
   medicalRecords MedicalRecord[]
 
   @@map("patients")
 }
 
 model Doctor {
-  id            String   @id @default(cuid())
-  userId        String   @unique
+  id             String @id @default(cuid())
+  userId         String @unique
   specialization String
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  appointments  Appointment[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments   Appointment[]
   medicalRecords MedicalRecord[]
 
   @@map("doctors")
-}
-
-model Receptionist {
-  id     String @id @default(cuid())
-  userId String @unique
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("receptionists")
 }
 
 model Admin {
   id     String @id @default(cuid())
   userId String @unique
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admins")
 }
 
+model Receptionist {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments Appointment[] // ← Add this line
+
+  @@map("receptionists")
+}
+
 model Appointment {
-  id             String           @id @default(cuid())
+  id             String  @id @default(cuid())
   patientId      String
   doctorId       String
   receptionistId String?
-  dateTime       DateTime
-  status         AppointmentStatus @default(SCHEDULED)
-  reason         String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
 
-  patient        Patient          @relation(fields: [patientId], references: [id])
-  doctor         Doctor           @relation(fields: [doctorId], references: [id])
-  receptionist   Receptionist?    @relation(fields: [receptionistId], references: [id])
+  dateTime  DateTime
+  status    AppointmentStatus @default(SCHEDULED)
+  reason    String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  patient      Patient       @relation(fields: [patientId], references: [id])
+  doctor       Doctor        @relation(fields: [doctorId], references: [id])
+  receptionist Receptionist? @relation(fields: [receptionistId], references: [id])
 
   @@map("appointments")
 }
 
 model MedicalRecord {
-  id          String   @id @default(cuid())
-  patientId   String
-  doctorId    String
-  diagnosis   String
+  id           String   @id @default(cuid())
+  patientId    String
+  doctorId     String
+  diagnosis    String
   prescription String
-  notes       String?
-  date        DateTime @default(now())
+  notes        String?
+  date         DateTime @default(now())
 
-  patient     Patient  @relation(fields: [patientId], references: [id])
-  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
 
   @@map("medical_records")
 }
