@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import prisma from "@/lib/prisma";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
@@ -13,24 +14,40 @@ export default async function AdminDashboard() {
     redirect("/login");
   }
 
+  // Get real counts
+  const [patientCount, appointmentTodayCount, doctorCount, userCount] = await Promise.all([
+    prisma.patient.count(),
+    prisma.appointment.count({
+      where: {
+        dateTime: {
+          gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          lt: new Date(new Date().setHours(23, 59, 59, 999)),
+        }
+      }
+    }),
+    prisma.doctor.count(),
+    prisma.user.count()
+  ]);
+
   return (
     <DashboardLayout role="admin">
       <div className="space-y-8">
         <div className="flex justify-between items-end">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">Admin Console</h1>
             <p className="text-slate-500 mt-2 text-lg font-medium">System Health & Overview</p>
           </div>
-          <div className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg shadow-blue-200">
-            System Live
+          <div className="bg-emerald-500 text-white px-6 py-2 rounded-2xl text-sm font-black shadow-lg shadow-emerald-100 flex items-center gap-2">
+            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+            SYSTEM OPERATIONAL
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Patients" value="248" trend="+12% this month" />
-          <StatCard title="Today's Appointments" value="18" trend="4 pending" />
-          <StatCard title="Active Doctors" value="12" trend="All on duty" />
-          <StatCard title="System Users" value="320" trend="Across all roles" />
+          <StatCard title="Total Patients" value={patientCount.toString()} trend="Registered in system" />
+          <StatCard title="Today's Visits" value={appointmentTodayCount.toString()} trend="Scheduled appointments" />
+          <StatCard title="Medical Staff" value={doctorCount.toString()} trend="Active doctors" />
+          <StatCard title="System Users" value={userCount.toString()} trend="Across all roles" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

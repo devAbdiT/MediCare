@@ -93,9 +93,11 @@ export default async function DoctorDashboard() {
                       <Badge variant={appt.status === "SCHEDULED" ? "default" : "outline"} className="rounded-lg px-3 py-1 font-bold">
                         {appt.status}
                       </Badge>
-                      <button className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all">
-                        <ExternalLink size={18} />
-                      </button>
+                      <Link href={`/dashboard/doctor/appointments/${appt.id}`}>
+                        <button className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all">
+                          <ExternalLink size={18} />
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 ))}

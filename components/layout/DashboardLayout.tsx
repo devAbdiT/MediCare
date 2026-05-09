@@ -43,11 +43,12 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
     ],
     receptionist: [
       { name: "Schedule", icon: Calendar, href: "/dashboard/receptionist" },
+      { name: "Book Appointment", icon: Calendar, href: "/dashboard/receptionist/book" },
       { name: "Register Patient", icon: UserCircle, href: "/dashboard/receptionist/register" },
       { name: "Search", icon: Search, href: "/dashboard/receptionist/search" },
     ],
     patient: [
-      { name: "My Health", icon: ClipboardList, href: "/dashboard/patient" },
+      { name: "My Health", icon: ClipboardList, href: "/dashboard/patient/records" },
       { name: "Book Visit", icon: Calendar, href: "/dashboard/patient/book" },
       { name: "Profile", icon: UserCircle, href: "/dashboard/patient/profile" },
     ],
