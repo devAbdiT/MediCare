@@ -41,7 +41,9 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
   const menuItems = {
     admin: [
       { name: "Overview", icon: LayoutDashboard, href: "/dashboard/admin" },
-      { name: "All Users", icon: Users, href: "/dashboard/admin/users" },
+      { name: "Patients", icon: Users, href: "/dashboard/admin/patients" },
+      { name: "Doctors", icon: Stethoscope, href: "/dashboard/admin/doctors" },
+      { name: "Receptionists", icon: Users, href: "/dashboard/admin/receptionists" },
       { name: "Appointments", icon: Calendar, href: "/dashboard/admin/appointments" },
       { name: "Settings", icon: Settings, href: "/dashboard/admin/settings" },
     ],

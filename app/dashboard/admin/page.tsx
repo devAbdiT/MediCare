@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import prisma from "@/lib/prisma";
 import { Users, Calendar, Activity, Zap, ArrowUpRight } from "lucide-react";
+import { subDays, startOfDay, format } from "date-fns";
+import AnalyticsCharts from "./AnalyticsCharts";
+import AdminQuickActions from "./AdminQuickActions";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
@@ -15,12 +18,13 @@ export default async function AdminDashboard() {
     redirect("/login");
   }
 
+  // Fetch Stats
   const [patientCount, appointmentTodayCount, doctorCount, userCount] = await Promise.all([
     prisma.patient.count(),
     prisma.appointment.count({
       where: {
         dateTime: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          gte: startOfDay(new Date()),
           lt: new Date(new Date().setHours(23, 59, 59, 999)),
         }
       }
@@ -28,6 +32,35 @@ export default async function AdminDashboard() {
     prisma.doctor.count(),
     prisma.user.count()
   ]);
+
+  // Fetch Analytics Data (Last 7 Days)
+  const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
+  
+  const analyticsData = await Promise.all(
+    last7Days.map(async (day) => {
+      const start = startOfDay(day);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+
+      const [appointments, registrations] = await Promise.all([
+        prisma.appointment.count({
+          where: { dateTime: { gte: start, lt: end } }
+        }),
+        prisma.user.count({
+          where: { 
+            role: "PATIENT",
+            createdAt: { gte: start, lt: end }
+          }
+        })
+      ]);
+
+      return {
+        date: format(day, "MMM dd"),
+        appointments,
+        registrations
+      };
+    })
+  );
 
   return (
     <DashboardLayout role="admin">
@@ -63,6 +96,20 @@ export default async function AdminDashboard() {
           <AdminStat icon={<Zap />} label="Server Uptime" value="99.9%" trend="Stable" />
         </div>
 
+        {/* Analytics Charts Section */}
+        <AnalyticsCharts data={analyticsData} />
+
+Uncaught Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.  
+
+Check the render method of `AdminPatientsPage`.
+    at AdminPatientsPage (app\dashboard\admin\patients\page.tsx:48:13)
+  46 |           </div>
+  47 |           <div className="flex items-center gap-6">
+> 48 |             <PrintButton />
+     |             ^
+  49 |             <AddUserButton role="PATIENT" label="Add Patient" colorClass="bg-[#2D8A6E]" />
+  50 |             <div className="bg-white dark:bg-[#111C3A] px-8 py-4 rounded-2xl border bor...
+  51 |               <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] u...
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Logs */}
           <div className="lg:col-span-2 bg-white dark:bg-[#111C3A] p-10 rounded-[3rem] border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm transition-colors duration-500">

@@ -22,6 +22,7 @@ Designed for hospital management to oversee global operations.
 *   **Global Appointments**: Access to the clinic-wide master schedule.
 *   **Activity Logs**: Real-time trail of system events (registrations, database syncs).
 *   **Infrastructure Metrics**: Stats for server uptime, daily quotas, and user growth.
+*   **Visual Analytics**: Dynamic charts for tracking appointment velocity and patient registration trends over time.
 
 ---
 
@@ -75,8 +76,9 @@ State-of-the-art interface design optimized for healthcare environments.
 ---
 
 ## 🛠️ Technical Stack
-*   **Frontend**: Next.js 15+ (App Router), Tailwind CSS.
-*   **Backend**: Node.js, Prisma ORM.
-*   **Database**: PostgreSQL / SQLite (Current).
-*   **Auth**: Better-Auth.
-*   **Icons**: Lucide React.
+*   **Framework**: Next.js 15+ (Unified Full-Stack Architecture)
+*   **Data Layer**: Prisma ORM (Server-side integration)
+*   **Database**: PostgreSQL / SQLite
+*   **Auth**: Better-Auth (Integrated Middleware & Route Handlers)
+*   **Styling**: Tailwind CSS & Vanilla CSS
+*   **Icons**: Lucide React
