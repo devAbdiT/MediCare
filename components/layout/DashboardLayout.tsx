@@ -154,9 +154,9 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                  <Bell size={20} />
                  <span className="absolute top-3 right-3 w-2 h-2 bg-[#1E4A8A] dark:bg-[#4A8AC8] rounded-full border-2 border-white dark:border-[#111C3A]" />
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] flex items-center justify-center text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8] transition-colors cursor-pointer">
+              <Link href={`/dashboard/${role}/settings`} className="w-12 h-12 rounded-2xl bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] flex items-center justify-center text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8] transition-colors cursor-pointer">
                  <Settings size={20} />
-              </div>
+              </Link>
            </div>
         </header>
 

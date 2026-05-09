@@ -32,7 +32,7 @@ export default async function DoctorDashboard() {
   const appointments = await prisma.appointment.findMany({
     where: {
       doctorId: doctor?.id,
-      dateTime: { gte: today, lt: tomorrow },
+      dateTime: { gte: today }, // Show all upcoming appointments
       status: { not: "CANCELLED" }
     },
     include: {
@@ -53,7 +53,7 @@ export default async function DoctorDashboard() {
               <div className="w-2 h-8 bg-[#3B82F6] dark:bg-[#60A5FA] rounded-full" />
               <h1 className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tighter">Clinical Workspace</h1>
             </div>
-            <p className="text-[#64748B] dark:text-[#94A3B8] text-lg font-medium">Monitoring {appointments.length} active consultations today.</p>
+            <p className="text-[#64748B] dark:text-[#94A3B8] text-lg font-medium">Monitoring {appointments.length} active consultations.</p>
           </div>
           <div className="flex items-center gap-3 bg-white dark:bg-[#1E293B] p-2 rounded-2xl border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">
             <div className="px-5 py-3 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-xl flex items-center gap-3">
@@ -83,13 +83,13 @@ export default async function DoctorDashboard() {
              <div className="space-y-4">
                 {appointments.length === 0 ? (
                   <div className="text-center py-20 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-[2rem] border-2 border-dashed border-[#E2E8F0] dark:border-[#334155]">
-                    <p className="text-[#64748B] dark:text-[#94A3B8] font-bold italic">No patients queued for today.</p>
+                    <p className="text-[#64748B] dark:text-[#94A3B8] font-bold italic">No upcoming patients queued.</p>
                   </div>
                 ) : (
                   appointments.map((appt) => (
                     <div key={appt.id} className="group flex items-center gap-8 p-6 rounded-[2.5rem] bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#334155] hover:border-[#3B82F6] dark:hover:border-[#60A5FA] hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500">
                        <div className="text-center min-w-[80px]">
-                          <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest">{format(appt.dateTime, "aaa")}</p>
+                          <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest">{format(appt.dateTime, "MMM dd")}</p>
                           <p className="text-2xl font-black text-[#1E293B] dark:text-[#F1F5F9] leading-none my-1">{format(appt.dateTime, "HH:mm")}</p>
                        </div>
                        <div className="w-1.5 h-12 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-full group-hover:bg-[#3B82F6] dark:group-hover:bg-[#60A5FA] transition-colors" />
@@ -133,9 +133,11 @@ export default async function DoctorDashboard() {
                       </div>
                    </div>
                 </div>
-                <button className="w-full mt-10 py-4 bg-[#3B82F6] hover:bg-[#2563EB] rounded-2xl font-black text-xs uppercase tracking-widest transition-all">
-                   Patient History Search
-                </button>
+                <Link href="/dashboard/doctor/patients">
+                  <button className="w-full mt-10 py-4 bg-[#3B82F6] hover:bg-[#2563EB] rounded-2xl font-black text-xs uppercase tracking-widest transition-all">
+                     Patient History Search
+                  </button>
+                </Link>
              </div>
 
              <div className="bg-white dark:bg-[#1E293B] p-8 rounded-[2.5rem] border border-[#E2E8F0] dark:border-[#334155] text-center transition-colors duration-500">
