@@ -9,6 +9,9 @@ import {
   ShieldCheck, 
   HeartPulse,
   Activity,
+  Sun,
+  Moon,
+  UserPlus
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -35,6 +38,21 @@ export default function Home() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-12 h-12 rounded-2xl bg-white/50 dark:bg-[#0A122A]/50 border border-white/20 dark:border-white/5 flex items-center justify-center text-[#1A2A4A] dark:text-[#E8EEF8] hover:bg-white dark:hover:bg-[#0A122A] transition-all shadow-lg"
+            >
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            
+            {/* Register Button */}
+            <Link href="/register" className="px-8 py-4 bg-white dark:bg-[#1A2A4A] text-[#1E4A8A] dark:text-white border-2 border-[#1E4A8A] dark:border-[#4A8AC8] rounded-2xl font-black shadow-xl hover:bg-[#1E4A8A] hover:text-white dark:hover:bg-[#4A8AC8] hover:scale-105 active:scale-95 transition-all text-[11px] uppercase tracking-widest flex items-center gap-2">
+              <UserPlus size={16} />
+              Register as Patient
+            </Link>
+            
+            {/* Login Button */}
             <Link href="/login" className="px-10 py-4 bg-[#1A2A4A] dark:bg-[#0A122A] text-white rounded-2xl font-black shadow-2xl hover:bg-[#1E4A8A] dark:hover:bg-[#4A8AC8] hover:scale-105 active:scale-95 transition-all text-[11px] uppercase tracking-widest">
               Access Portal
             </Link>

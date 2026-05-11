@@ -13,13 +13,17 @@ import {
   ArrowRight,
   Zap,
   Activity,
-  HeartPulse
+  HeartPulse,
+  Sun,
+  Moon
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +55,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0A122A] flex p-4 lg:p-8 gap-8 font-sans selection:bg-[#1E4A8A]/10 dark:selection:bg-[#4A8AC8]/20 selection:text-[#1E4A8A] transition-colors duration-700 overflow-hidden">
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0A122A] flex p-4 lg:p-8 gap-8 font-sans selection:bg-[#1E4A8A]/10 dark:selection:bg-[#4A8AC8]/20 selection:text-[#1E4A8A] transition-colors duration-700 overflow-hidden relative">
+      {/* Theme Toggle */}
+      <button
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className="fixed top-8 right-8 w-12 h-12 rounded-2xl bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] flex items-center justify-center text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8] transition-all shadow-sm z-50"
+      >
+        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
       {/* Left Side - Hero Visual Overlay */}
       <div className="hidden lg:flex lg:w-[45%] bg-[#1E4A8A] dark:bg-[#111C3A] relative overflow-hidden flex-col justify-between p-16 rounded-[3.5rem] shadow-2xl transition-all duration-700">
         {/* Animated Background Orbs */}

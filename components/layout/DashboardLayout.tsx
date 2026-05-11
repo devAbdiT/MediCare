@@ -44,6 +44,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
       { name: "Patients", icon: Users, href: "/dashboard/admin/patients" },
       { name: "Doctors", icon: Stethoscope, href: "/dashboard/admin/doctors" },
       { name: "Receptionists", icon: Users, href: "/dashboard/admin/receptionists" },
+      { name: "Departments", icon: ClipboardList, href: "/dashboard/admin/departments" },
       { name: "Appointments", icon: Calendar, href: "/dashboard/admin/appointments" },
       { name: "Settings", icon: Settings, href: "/dashboard/admin/settings" },
     ],
