@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, phone, dateOfBirth, bloodType, password } = body;
+    const { name, email, phone, dateOfBirth, gender, bloodType, password } = body;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -71,6 +71,7 @@ export async function POST(req: Request) {
           phone,
           password: hashedPassword,
           role: "PATIENT",
+          gender,
           patient: {
             create: {
               dateOfBirth: new Date(dateOfBirth),

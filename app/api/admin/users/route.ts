@@ -33,6 +33,7 @@ export async function POST(req: Request) {
           role,
           phone,
           password: hashedPassword,
+          gender,
         },
       });
 
@@ -65,7 +66,6 @@ export async function POST(req: Request) {
           data: {
             userId: user.id,
             dateOfBirth: new Date(dateOfBirth || "2000-01-01"),
-            gender: gender || "OTHER",
             bloodType: bloodType || "UNKNOWN",
             cardNumber,
           }

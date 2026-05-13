@@ -1,251 +1,519 @@
-import { PrismaClient, Role, AppointmentStatus } from "@prisma/client";
-import { hash } from "bcrypt-ts";
+// prisma/seed.ts
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcrypt-ts';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting database seed...");
+  console.log('🌱 Starting database seeding...\n');
 
-  // 1. Clear existing data in correct dependency order
-  console.log("🧹 Clearing existing data...");
-  await prisma.department.deleteMany();
+  // Clear existing data (optional - comment out if you want to keep existing data)
+  console.log('🗑️  Cleaning existing data...');
   await prisma.medicalRecord.deleteMany();
   await prisma.appointment.deleteMany();
   await prisma.patient.deleteMany();
   await prisma.doctor.deleteMany();
   await prisma.receptionist.deleteMany();
   await prisma.admin.deleteMany();
+  await prisma.department.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.session.deleteMany();
   await prisma.user.deleteMany();
+  console.log('✅ Existing data cleaned\n');
 
-  // Common password hash for everyone except admin
-  const defaultPasswordHash = await hash("password123", 10);
-  const adminPasswordHash = await hash("Admin123!", 10);
+  // Hash password for all users
+  const hashedPassword = await hash('password123', 10);
 
-  // 2. Create Admin
-  console.log("👑 Creating Admin user...");
+  // 1. Create Departments
+  console.log('🏥 Creating departments...');
+  const departments = await Promise.all([
+    prisma.department.create({
+      data: {
+        name: 'Cardiology',
+        description: 'Heart and cardiovascular system care',
+      },
+    }),
+    prisma.department.create({
+      data: {
+        name: 'Pediatrics',
+        description: 'Medical care for infants, children, and adolescents',
+      },
+    }),
+    prisma.department.create({
+      data: {
+        name: 'Orthopedics',
+        description: 'Musculoskeletal system treatment',
+      },
+    }),
+    prisma.department.create({
+      data: {
+        name: 'Neurology',
+        description: 'Nervous system disorders treatment',
+      },
+    }),
+    prisma.department.create({
+      data: {
+        name: 'Dermatology',
+        description: 'Skin, hair, and nail conditions',
+      },
+    }),
+    prisma.department.create({
+      data: {
+        name: 'General Medicine',
+        description: 'General health and wellness care',
+      },
+    }),
+  ]);
+  console.log(`✅ Created ${departments.length} departments\n`);
+
+  // 2. Create Admin User
+  console.log('👤 Creating admin user...');
   const adminUser = await prisma.user.create({
     data: {
-      name: "System Admin",
-      email: "admin@hospital.com",
-      phone: "+251911111100",
-      role: Role.ADMIN,
-      admin: {
-        create: {}
-      }
-    }
-  });
-  
-  await prisma.account.create({
-    data: {
-      userId: adminUser.id,
-      accountId: adminUser.id,
-      providerId: "credential",
-      password: adminPasswordHash
-    }
-  });
-
-  // 3. Create Receptionists
-  console.log("📞 Creating Receptionists...");
-  const receptionistsData = [
-    { name: "Sarah Wilson", email: "sarah@hospital.com", phone: "+251911111111" },
-    { name: "Mike Tefera", email: "mike@hospital.com", phone: "+251911111112" },
-    { name: "Helen Girma", email: "helen@hospital.com", phone: "+251911111113" },
-  ];
-
-  const receptionists = [];
-  for (const rep of receptionistsData) {
-    const user = await prisma.user.create({
-      data: {
-        name: rep.name,
-        email: rep.email,
-        phone: rep.phone,
-        role: Role.RECEPTIONIST,
-        receptionist: {
-          create: {}
-        }
-      },
-      include: { receptionist: true }
-    });
-    
-    await prisma.account.create({
-      data: {
-        userId: user.id,
-        accountId: user.id,
-        providerId: "credential",
-        password: defaultPasswordHash
-      }
-    });
-    
-    receptionists.push(user);
-  }
-
-  // 4. Create Departments & Doctors
-  console.log("🩺 Creating Departments & Doctors...");
-  const departments = [
-    "Cardiology", "Pediatrics", "Orthopedics", "Neurology", "Dermatology", 
-    "Radiology", "Emergency Medicine", "General Surgery", "Obstetrics & Gynecology", 
-    "Ophthalmology", "Urology", "Psychiatry"
-  ];
-
-  const doctors = [];
-  for (const dept of departments) {
-    // Create the department
-    const departmentRecord = await prisma.department.create({
-      data: {
-        name: dept,
-        description: `${dept} Department`
-      }
-    });
-
-    for (let i = 1; i <= 2; i++) {
-      const formattedDept = dept.toLowerCase().replace(/[^a-z0-9]/g, "");
-      const user = await prisma.user.create({
-        data: {
-          name: `Dr. ${dept} Specialist ${i}`,
-          email: `doctor${i}.${formattedDept}@hospital.com`,
-          phone: `+2519200000${doctors.length < 10 ? '0' + doctors.length : doctors.length}`,
-          role: Role.DOCTOR,
-          doctor: {
-            create: {
-              specialization: dept,
-              departmentId: departmentRecord.id
-            }
-          }
+      name: 'Admin User',
+      email: 'admin@hospital.com',
+      phone: '+251911000001',
+      role: 'ADMIN',
+      emailVerified: true,
+      accounts: {
+        create: {
+          accountId: 'admin-account',
+          providerId: 'credential',
+          password: hashedPassword,
         },
-        include: { doctor: true }
-      });
-      
-      await prisma.account.create({
-        data: {
-          userId: user.id,
-          accountId: user.id,
-          providerId: "credential",
-          password: defaultPasswordHash
-        }
-      });
-      
-      doctors.push(user);
-    }
-  }
+      },
+      admin: {
+        create: {},
+      },
+    },
+  });
+  console.log(`✅ Admin created: ${adminUser.email} / password123\n`);
 
-  // 5. Create Patients
-  console.log("🩻 Creating Patients...");
-  const patientsData = [
-    { name: "Abebe Kebede", email: "abebe@email.com", phone: "0912345678", dob: "1985-03-15", blood: "A+" },
-    { name: "Tigist Haile", email: "tigist@email.com", phone: "0912345679", dob: "1990-07-22", blood: "O+" },
-    { name: "Lemma Bekele", email: "lemma@email.com", phone: "0912345680", dob: "1978-11-05", blood: "B+" },
-    { name: "Sara Mohammed", email: "sara@email.com", phone: "0912345681", dob: "1995-01-30", blood: "AB-" },
-    { name: "Girma Assefa", email: "girma@email.com", phone: "0912345682", dob: "1982-06-18", blood: "A-" },
-    { name: "Meron Daniel", email: "meron@email.com", phone: "0912345683", dob: "2000-09-12", blood: "O-" },
-    { name: "Tesfaye Alemu", email: "tesfaye@email.com", phone: "0912345684", dob: "1975-04-25", blood: "B-" },
-    { name: "Hiwot Negash", email: "hiwot@email.com", phone: "0912345685", dob: "1988-12-03", blood: "AB+" },
-    { name: "Yonas Desta", email: "yonas@email.com", phone: "0912345686", dob: "1992-08-14", blood: "A+" },
-    { name: "Frehiwot Tsegaye", email: "frehiwot@email.com", phone: "0912345687", dob: "1980-10-09", blood: "O+" },
-  ];
-
-  const patients = [];
-  let cardCounter = 1000;
-  for (const pat of patientsData) {
-    const user = await prisma.user.create({
+  // 3. Create Receptionist Users
+  console.log('👤 Creating receptionist users...');
+  const receptionists = await Promise.all([
+    prisma.user.create({
       data: {
-        name: pat.name,
-        email: pat.email,
-        phone: pat.phone,
-        role: Role.PATIENT,
+        name: 'Sarah Johnson',
+        email: 'receptionist1@hospital.com',
+        phone: '+251911000002',
+        role: 'RECEPTIONIST',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'receptionist1-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        receptionist: {
+          create: {},
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Emily Davis',
+        email: 'receptionist2@hospital.com',
+        phone: '+251911000003',
+        role: 'RECEPTIONIST',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'receptionist2-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        receptionist: {
+          create: {},
+        },
+      },
+    }),
+  ]);
+  console.log(`✅ Created ${receptionists.length} receptionists\n`);
+
+  // 4. Create Doctor Users
+  console.log('👨‍⚕️ Creating doctor users...');
+  const doctors = await Promise.all([
+    prisma.user.create({
+      data: {
+        name: 'Dr. Michael Chen',
+        email: 'doctor1@hospital.com',
+        phone: '+251911000010',
+        role: 'DOCTOR',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'doctor1-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        doctor: {
+          create: {
+            specialization: 'Cardiologist',
+            departmentId: departments[0].id, // Cardiology
+          },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Dr. Sarah Williams',
+        email: 'doctor2@hospital.com',
+        phone: '+251911000011',
+        role: 'DOCTOR',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'doctor2-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        doctor: {
+          create: {
+            specialization: 'Pediatrician',
+            departmentId: departments[1].id, // Pediatrics
+          },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Dr. James Anderson',
+        email: 'doctor3@hospital.com',
+        phone: '+251911000012',
+        role: 'DOCTOR',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'doctor3-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        doctor: {
+          create: {
+            specialization: 'Orthopedic Surgeon',
+            departmentId: departments[2].id, // Orthopedics
+          },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Dr. Lisa Martinez',
+        email: 'doctor4@hospital.com',
+        phone: '+251911000013',
+        role: 'DOCTOR',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'doctor4-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        doctor: {
+          create: {
+            specialization: 'Neurologist',
+            departmentId: departments[3].id, // Neurology
+          },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Dr. Robert Taylor',
+        email: 'doctor5@hospital.com',
+        phone: '+251911000014',
+        role: 'DOCTOR',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'doctor5-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        doctor: {
+          create: {
+            specialization: 'Dermatologist',
+            departmentId: departments[4].id, // Dermatology
+          },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Dr. Amanda White',
+        email: 'doctor6@hospital.com',
+        phone: '+251911000015',
+        role: 'DOCTOR',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'doctor6-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        doctor: {
+          create: {
+            specialization: 'General Practitioner',
+            departmentId: departments[5].id, // General Medicine
+          },
+        },
+      },
+    }),
+  ]);
+  console.log(`✅ Created ${doctors.length} doctors\n`);
+
+  // 5. Create Patient Users
+  console.log('🏥 Creating patient users...');
+  const patients = await Promise.all([
+    prisma.user.create({
+      data: {
+        name: 'John Smith',
+        email: 'patient1@example.com',
+        phone: '+251911000100',
+        role: 'PATIENT',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'patient1-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
         patient: {
           create: {
-            dateOfBirth: new Date(pat.dob),
-            bloodType: pat.blood,
-            cardNumber: `PT-${cardCounter++}`
-          }
-        }
+            dateOfBirth: new Date('1990-05-15'),
+            bloodType: 'O+',
+            cardNumber: 'BK-P-2026-0001',
+          },
+        },
       },
-      include: { patient: true }
-    });
-    
-    await prisma.account.create({
+    }),
+    prisma.user.create({
       data: {
-        userId: user.id,
-        accountId: user.id,
-        providerId: "credential",
-        password: defaultPasswordHash
-      }
-    });
-    
-    patients.push(user);
-  }
-
-  // 6. Create Appointments & Medical Records
-  console.log("📅 Creating Appointments & Medical Records...");
-  
-  const now = new Date();
-  const appointmentConfigs = [
-    // Past completed appointments
-    { dayOffset: -10, status: AppointmentStatus.COMPLETED, diag: "Seasonal Flu", presc: "Paracetamol 500mg twice daily for 5 days" },
-    { dayOffset: -8, status: AppointmentStatus.COMPLETED, diag: "Hypertension", presc: "Lisinopril 10mg daily" },
-    { dayOffset: -5, status: AppointmentStatus.COMPLETED, diag: "Asthma", presc: "Albuterol inhaler as needed" },
-    { dayOffset: -3, status: AppointmentStatus.COMPLETED, diag: "Mild sprain", presc: "Rest, ice, and Ibuprofen 400mg" },
-    { dayOffset: -2, status: AppointmentStatus.COMPLETED, diag: "Allergic Rhinitis", presc: "Cetirizine 10mg daily" },
-    
-    // Past cancelled appointments
-    { dayOffset: -4, status: AppointmentStatus.CANCELLED },
-    { dayOffset: -1, status: AppointmentStatus.CANCELLED },
-
-    // Upcoming scheduled appointments
-    { dayOffset: 1, status: AppointmentStatus.SCHEDULED },
-    { dayOffset: 2, status: AppointmentStatus.SCHEDULED },
-    { dayOffset: 2, status: AppointmentStatus.SCHEDULED },
-    { dayOffset: 3, status: AppointmentStatus.SCHEDULED },
-    { dayOffset: 4, status: AppointmentStatus.SCHEDULED },
-    { dayOffset: 5, status: AppointmentStatus.SCHEDULED },
-    { dayOffset: 6, status: AppointmentStatus.SCHEDULED },
-    { dayOffset: 7, status: AppointmentStatus.SCHEDULED },
-  ];
-
-  for (let i = 0; i < appointmentConfigs.length; i++) {
-    const config = appointmentConfigs[i];
-    
-    // Pick a random patient and doctor
-    const patient = patients[i % patients.length].patient!;
-    const doctor = doctors[i % doctors.length].doctor!;
-    const receptionist = receptionists[i % receptionists.length].receptionist!;
-
-    const aptDate = new Date(now);
-    aptDate.setDate(now.getDate() + config.dayOffset);
-    aptDate.setHours(9 + (i % 8), 0, 0, 0); // Stagger hours between 9am and 4pm
-
-    const appointment = await prisma.appointment.create({
+        name: 'Emma Brown',
+        email: 'patient2@example.com',
+        phone: '+251911000101',
+        role: 'PATIENT',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'patient2-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        patient: {
+          create: {
+            dateOfBirth: new Date('1985-08-22'),
+            bloodType: 'A+',
+            cardNumber: 'BK-P-2026-0002',
+          },
+        },
+      },
+    }),
+    prisma.user.create({
       data: {
-        patientId: patient.id,
-        doctorId: doctor.id,
-        receptionistId: receptionist.id,
-        dateTime: aptDate,
-        status: config.status,
-        reason: "General consultation checkup"
-      }
-    });
+        name: 'David Wilson',
+        email: 'patient3@example.com',
+        phone: '+251911000102',
+        role: 'PATIENT',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'patient3-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        patient: {
+          create: {
+            dateOfBirth: new Date('1995-03-10'),
+            bloodType: 'B+',
+            cardNumber: 'BK-P-2026-0003',
+          },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Sophia Garcia',
+        email: 'patient4@example.com',
+        phone: '+251911000103',
+        role: 'PATIENT',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'patient4-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        patient: {
+          create: {
+            dateOfBirth: new Date('2000-11-30'),
+            bloodType: 'AB+',
+            cardNumber: 'BK-P-2026-0004',
+          },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: 'Oliver Martinez',
+        email: 'patient5@example.com',
+        phone: '+251911000104',
+        role: 'PATIENT',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: 'patient5-account',
+            providerId: 'credential',
+            password: hashedPassword,
+          },
+        },
+        patient: {
+          create: {
+            dateOfBirth: new Date('1988-07-18'),
+            bloodType: 'O-',
+            cardNumber: 'BK-P-2026-0005',
+          },
+        },
+      },
+    }),
+  ]);
+  console.log(`✅ Created ${patients.length} patients\n`);
 
-    // Create medical record if completed
-    if (config.status === AppointmentStatus.COMPLETED && config.diag && config.presc) {
-      await prisma.medicalRecord.create({
-        data: {
-          patientId: patient.id,
-          doctorId: doctor.id,
-          diagnosis: config.diag,
-          prescription: config.presc,
-          notes: "Routine follow-up completed successfully.",
-          date: aptDate
-        }
-      });
-    }
-  }
+  // 6. Get patient and doctor IDs for appointments
+  const patientRecords = await prisma.patient.findMany({
+    include: { user: true },
+  });
+  const doctorRecords = await prisma.doctor.findMany({
+    include: { user: true },
+  });
+  const receptionistRecords = await prisma.receptionist.findMany();
 
-  console.log("✅ Seed completed successfully!");
+  // 7. Create Appointments
+  console.log('📅 Creating appointments...');
+  const appointments = await Promise.all([
+    prisma.appointment.create({
+      data: {
+        patientId: patientRecords[0].id,
+        doctorId: doctorRecords[0].id,
+        receptionistId: receptionistRecords[0].id,
+        dateTime: new Date('2026-05-20T10:00:00'),
+        status: 'SCHEDULED',
+        reason: 'Regular checkup for heart condition',
+      },
+    }),
+    prisma.appointment.create({
+      data: {
+        patientId: patientRecords[1].id,
+        doctorId: doctorRecords[1].id,
+        receptionistId: receptionistRecords[0].id,
+        dateTime: new Date('2026-05-21T14:00:00'),
+        status: 'SCHEDULED',
+        reason: 'Child vaccination',
+      },
+    }),
+    prisma.appointment.create({
+      data: {
+        patientId: patientRecords[2].id,
+        doctorId: doctorRecords[2].id,
+        receptionistId: receptionistRecords[1].id,
+        dateTime: new Date('2026-05-22T09:00:00'),
+        status: 'SCHEDULED',
+        reason: 'Knee pain consultation',
+      },
+    }),
+    prisma.appointment.create({
+      data: {
+        patientId: patientRecords[3].id,
+        doctorId: doctorRecords[3].id,
+        receptionistId: receptionistRecords[1].id,
+        dateTime: new Date('2026-05-15T11:00:00'),
+        status: 'COMPLETED',
+        reason: 'Headache and dizziness',
+      },
+    }),
+    prisma.appointment.create({
+      data: {
+        patientId: patientRecords[4].id,
+        doctorId: doctorRecords[4].id,
+        receptionistId: receptionistRecords[0].id,
+        dateTime: new Date('2026-05-16T15:30:00'),
+        status: 'COMPLETED',
+        reason: 'Skin rash examination',
+      },
+    }),
+  ]);
+  console.log(`✅ Created ${appointments.length} appointments\n`);
+
+  // 8. Create Medical Records (for completed appointments)
+  console.log('📋 Creating medical records...');
+  const medicalRecords = await Promise.all([
+    prisma.medicalRecord.create({
+      data: {
+        patientId: patientRecords[3].id,
+        doctorId: doctorRecords[3].id,
+        diagnosis: 'Tension headache',
+        prescription: 'Ibuprofen 400mg, twice daily for 5 days',
+        notes: 'Patient advised to reduce screen time and get adequate rest',
+        date: new Date('2026-05-15T11:30:00'),
+      },
+    }),
+    prisma.medicalRecord.create({
+      data: {
+        patientId: patientRecords[4].id,
+        doctorId: doctorRecords[4].id,
+        diagnosis: 'Contact dermatitis',
+        prescription: 'Hydrocortisone cream 1%, apply twice daily',
+        notes: 'Avoid contact with suspected allergen. Follow up in 2 weeks if no improvement',
+        date: new Date('2026-05-16T16:00:00'),
+      },
+    }),
+  ]);
+  console.log(`✅ Created ${medicalRecords.length} medical records\n`);
+
+  // Summary
+  console.log('✨ Seeding completed successfully!\n');
+  console.log('📊 Summary:');
+  console.log(`   - Departments: ${departments.length}`);
+  console.log(`   - Admins: 1`);
+  console.log(`   - Receptionists: ${receptionists.length}`);
+  console.log(`   - Doctors: ${doctors.length}`);
+  console.log(`   - Patients: ${patients.length}`);
+  console.log(`   - Appointments: ${appointments.length}`);
+  console.log(`   - Medical Records: ${medicalRecords.length}`);
+  console.log('\n🔑 Login Credentials (all users):');
+  console.log('   Password: password123\n');
+  console.log('   Admin: admin@hospital.com');
+  console.log('   Receptionist 1: receptionist1@hospital.com');
+  console.log('   Receptionist 2: receptionist2@hospital.com');
+  console.log('   Doctor 1: doctor1@hospital.com (Cardiologist)');
+  console.log('   Doctor 2: doctor2@hospital.com (Pediatrician)');
+  console.log('   Doctor 3: doctor3@hospital.com (Orthopedic Surgeon)');
+  console.log('   Doctor 4: doctor4@hospital.com (Neurologist)');
+  console.log('   Doctor 5: doctor5@hospital.com (Dermatologist)');
+  console.log('   Doctor 6: doctor6@hospital.com (General Practitioner)');
+  console.log('   Patient 1: patient1@example.com');
+  console.log('   Patient 2: patient2@example.com');
+  console.log('   Patient 3: patient3@example.com');
+  console.log('   Patient 4: patient4@example.com');
+  console.log('   Patient 5: patient5@example.com');
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed failed:", e);
+    console.error('❌ Error during seeding:', e);
     process.exit(1);
   })
   .finally(async () => {

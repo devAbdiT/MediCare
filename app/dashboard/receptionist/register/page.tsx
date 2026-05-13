@@ -79,6 +79,19 @@ export default function RegisterPatient() {
                   <Input name="dateOfBirth" type="date" required className="rounded-2xl h-14 bg-[#F0F4F8] dark:bg-[#0A122A] border-[#D0DCE8] dark:border-[#1A2A4A] focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500" />
                 </div>
                 <div className="space-y-3">
+                  <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Gender</Label>
+                  <select 
+                    name="gender" 
+                    className="w-full rounded-2xl h-14 border border-[#D0DCE8] dark:border-[#1A2A4A] bg-[#F0F4F8] dark:bg-[#0A122A] px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1E4A8A] text-[#1A2A4A] dark:text-[#E8EEF8] transition-colors duration-500"
+                    required
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
                   <Label className="font-black text-xs uppercase tracking-widest text-[#1A2A4A] dark:text-[#E8EEF8]">Blood Type</Label>
                   <select 
                     name="bloodType" 
