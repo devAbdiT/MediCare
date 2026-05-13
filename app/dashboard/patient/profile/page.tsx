@@ -77,14 +77,14 @@ export default async function PatientProfilePage() {
                </h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <DetailItem icon={<Mail />} label="Primary Email" value={patient.user.email} />
-                  <DetailItem icon={<Phone />} label="Phone Number" value={patient.phone} />
+                  <DetailItem icon={<Phone />} label="Phone Number" value={patient.user.phone || "-"} />
                   <DetailItem icon={<Calendar />} label="Date of Birth" value={format(patient.dateOfBirth, "MMMM dd, yyyy")} />
                </div>
             </div>
 
             <div className="bg-white dark:bg-[#1E293B] p-10 rounded-[3rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">
                <h3 className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9] mb-8">Update Access Settings</h3>
-               <ProfileForm patient={patient as any} />
+               <ProfileForm initialPhone={patient.user.phone || ""} />
             </div>
           </div>
         </div>
@@ -97,7 +97,7 @@ function DetailItem({ icon, label, value }: { icon: React.ReactNode; label: stri
   return (
     <div className="flex items-start gap-4 p-5 rounded-2xl bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#334155] transition-colors duration-500">
        <div className="text-[#3B82F6] dark:text-[#60A5FA] mt-1">
-          {React.cloneElement(icon as React.ReactElement, { size: 20 })}
+          {React.cloneElement(icon as React.ReactElement, { size: 20 } as any)}
        </div>
        <div>
           <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">{label}</p>

@@ -136,7 +136,7 @@ function ReceptionStat({ label, value, icon }: { label: string; value: string; i
           <p className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tighter">{value}</p>
        </div>
        <div className="w-14 h-14 rounded-2xl bg-[#F8FAFC] dark:bg-[#0F172A] flex items-center justify-center text-[#64748B] dark:text-[#94A3B8] group-hover:bg-[#3B82F6]/10 dark:group-hover:bg-[#60A5FA]/10 group-hover:text-[#3B82F6] dark:group-hover:text-[#60A5FA] transition-all">
-          {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+          {React.cloneElement(icon as React.ReactElement, { size: 24 } as any)}
        </div>
     </div>
   );

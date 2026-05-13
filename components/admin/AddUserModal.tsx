@@ -24,7 +24,7 @@ export default function AddUserModal({ role, isOpen, onClose }: AddUserModalProp
     phone: "",
     specialization: "",
     dateOfBirth: "",
-    gender: "MALE",
+    gender: "Male",
     bloodType: "O_POSITIVE",
   });
 
@@ -52,7 +52,7 @@ export default function AddUserModal({ role, isOpen, onClose }: AddUserModalProp
           phone: "",
           specialization: "",
           dateOfBirth: "",
-          gender: "MALE",
+          gender: "Male",
           bloodType: "O_POSITIVE",
         });
       } else {
@@ -181,6 +181,22 @@ export default function AddUserModal({ role, isOpen, onClose }: AddUserModalProp
                     onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                     className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] outline-none font-bold text-slate-900 dark:text-white transition-all"
                   />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Gender</label>
+                <div className="relative">
+                  <UserPlus size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <select
+                    required
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] outline-none font-bold text-slate-900 dark:text-white transition-all appearance-none"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
               <div className="space-y-2">

@@ -162,7 +162,7 @@ function StatBox({ label, value, icon, color }: { label: string; value: string; 
           <p className="text-4xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tighter">{value}</p>
        </div>
        <div className={cn("w-14 h-14 rounded-2xl bg-[#F8FAFC] dark:bg-[#0F172A] flex items-center justify-center group-hover:scale-110 transition-transform", color)}>
-          {React.cloneElement(icon as React.ReactElement, { size: 28 })}
+          {React.cloneElement(icon as React.ReactElement, { size: 28 } as any)}
        </div>
     </div>
   );

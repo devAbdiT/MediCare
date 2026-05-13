@@ -190,12 +190,12 @@ export default function UserList({ users, adminName }: UserListProps) {
                 }
               />
               <div className="flex justify-end gap-3 mt-6 no-print p-4">
-                <PrintButton
-                  targetId="print-content"
-                  label="Execute Print"
-                  variant="default"
-                  className="bg-[#1E4A8A] text-white px-8 py-3 rounded-xl font-black uppercase text-xs"
-                />
+                <div className="bg-[#1E4A8A] text-white px-8 py-3 rounded-xl font-black uppercase text-xs">
+                  <PrintButton
+                    targetId="print-content"
+                    label="Execute Print"
+                  />
+                </div>
               </div>
             </DialogContent>
           </Dialog>
@@ -334,12 +334,12 @@ export default function UserList({ users, adminName }: UserListProps) {
                           )}
 
                           <div className="flex justify-end gap-3 mt-6 no-print p-4">
-                            <PrintButton
-                              targetId="print-content"
-                              label="Confirm & Print"
-                              variant="default"
-                              className="bg-[#1E4A8A] text-white px-8 py-3 rounded-xl font-black uppercase text-xs"
-                            />
+                            <div className="bg-[#1E4A8A] text-white px-8 py-3 rounded-xl font-black uppercase text-xs">
+                              <PrintButton
+                                targetId="print-content"
+                                label="Confirm & Print"
+                              />
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>

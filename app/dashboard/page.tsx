@@ -12,6 +12,6 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const role = (session.user.role as string).toLowerCase();
+  const role = ((session.user as any).role as string).toLowerCase();
   redirect(`/dashboard/${role}`);
 }

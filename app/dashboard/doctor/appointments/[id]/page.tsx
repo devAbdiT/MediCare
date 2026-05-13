@@ -9,14 +9,14 @@ import { User, Clipboard, FileText, Pill, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import RecordForm from "./RecordForm";
 
-export default async function AppointmentDetailsPage({ params }: { params: { id: string } }) {
+export default async function AppointmentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
   const session = await auth.api.getSession({
     headers: await headers()
   });
 
-  if (!session || session.user.role !== "DOCTOR") {
+  if (!session || (session.user as any).role !== "DOCTOR") {
     redirect("/login");
   }
 

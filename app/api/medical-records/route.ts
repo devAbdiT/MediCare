@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     headers: await headers()
   });
 
-  if (!session || session.user.role !== "DOCTOR") {
+  if (!session || (session.user as any).role !== "DOCTOR") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 

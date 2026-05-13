@@ -11,7 +11,7 @@ export async function GET() {
     headers: await headers()
   });
 
-  if (!session || (session.user.role !== "ADMIN" && session.user.role !== "RECEPTIONIST")) {
+  if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "RECEPTIONIST")) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   });
 
   // Only Admin and Receptionist can register patients
-  if (!session || (session.user.role !== "ADMIN" && session.user.role !== "RECEPTIONIST")) {
+  if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "RECEPTIONIST")) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 

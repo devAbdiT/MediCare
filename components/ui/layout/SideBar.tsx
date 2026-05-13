@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Home, Calendar, Users, User, FileText } from "lucide-react";
-import { signOut } from "better-auth/react";
+import { signOut } from "@/lib/auth-client";
 
 const menuItems: any = {
   admin: [

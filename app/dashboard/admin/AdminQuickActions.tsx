@@ -63,7 +63,7 @@ function ActionButton({ icon, label, description, color, onClick }: any) {
     >
       <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 dark:bg-[#0A122A] rounded-bl-[5rem] -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700" />
       <div className={`w-14 h-14 ${color} text-white rounded-2xl flex items-center justify-center mb-6 relative z-10 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-        {React.cloneElement(icon, { size: 28 })}
+        {React.cloneElement(icon as React.ReactElement, { size: 28 } as any)}
       </div>
       <div className="relative z-10">
         <h4 className="text-xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] mb-1">{label}</h4>

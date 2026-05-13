@@ -4,7 +4,8 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { startOfDay, endOfDay } from "date-fns";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: doctorId } = await params;
   const session = await auth.api.getSession({
     headers: await headers()
   });
@@ -13,7 +14,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { id: doctorId } = await params;
   const { searchParams } = new URL(req.url);
   const dateParam = searchParams.get("date");
 

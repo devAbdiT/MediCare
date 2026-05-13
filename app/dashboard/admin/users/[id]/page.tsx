@@ -10,7 +10,7 @@ import { ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
 import { PrintButton } from "@/components/admin/PrintButton";
 
-export default async function UserProfilePage({ params }: { params: { id: string } }) {
+export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
   const session = await auth.api.getSession({
@@ -65,11 +65,12 @@ export default async function UserProfilePage({ params }: { params: { id: string
               <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium">Digital clinical manifest for {user.name}</p>
             </div>
           </div>
-          <PrintButton 
-            targetId="print-content"
-            label={user.role === "PATIENT" ? "Print Patient Report" : "Print User Report"}
-            className="flex items-center gap-3 px-8 py-4 bg-[#1E4A8A] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0F3A6A] transition-all shadow-xl shadow-blue-500/10"
-          />
+          <div className="flex items-center gap-3 px-8 py-4 bg-[#1E4A8A] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0F3A6A] transition-all shadow-xl shadow-blue-500/10">
+            <PrintButton 
+              targetId="print-content"
+              label={user.role === "PATIENT" ? "Print Patient Report" : "Print User Report"}
+            />
+          </div>
         </div>
 
         {/* THE REPORT TEMPLATE - FR-29, FR-30, FR-33, FR-34 */}
@@ -120,7 +121,7 @@ export default async function UserProfilePage({ params }: { params: { id: string
                   </>
                 )}
                 
-                <ReportField label="Gender" value={user.patient?.gender || "NOT SPECIFIED"} />
+                <ReportField label="Gender" value={user.gender || "NOT SPECIFIED"} />
                 <ReportField label="Phone" value={user.phone || "-"} />
                 <ReportField label="Email" value={user.email} />
               </div>

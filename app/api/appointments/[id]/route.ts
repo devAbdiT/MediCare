@@ -6,8 +6,9 @@ import { NextResponse } from "next/server";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth.api.getSession({
     headers: await headers()
   });
@@ -20,7 +21,7 @@ export async function PATCH(
 
   try {
     const appointment = await prisma.appointment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { patient: true }
     });
 
@@ -30,7 +31,7 @@ export async function PATCH(
 
     // Authorization check
     // Patients can only cancel their own appointments
-    if (session.user.role === "PATIENT") {
+    if ((session.user as any).role === "PATIENT") {
       if (appointment.patient.userId !== session.user.id) {
         return new NextResponse("Forbidden", { status: 403 });
       }
@@ -43,7 +44,7 @@ export async function PATCH(
     // Admins and Receptionists can do anything
     
     const updated = await prisma.appointment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: status || undefined,
         dateTime: dateTime ? new Date(dateTime) : undefined,
@@ -59,19 +60,20 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth.api.getSession({
     headers: await headers()
   });
 
-  if (!session || (session.user.role !== "ADMIN" && session.user.role !== "RECEPTIONIST")) {
+  if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "RECEPTIONIST")) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
   try {
     await prisma.appointment.delete({
-      where: { id: params.id },
+      where: { id },
     });
     return new NextResponse(null, { status: 204 });
   } catch (error) {

@@ -1,6 +1,6 @@
 // components/layout/DashboardLayout.tsx
 import { ReactNode } from "react";
-import Sidebar from "./Sidebar";
+import Sidebar from "./SideBar";
 import Header from "./Header";
 
 export default function DashboardLayout({

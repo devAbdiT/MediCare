@@ -16,7 +16,7 @@ import {
 import { useTheme } from "next-themes";
 
 export default function Home() {
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0A122A] overflow-hidden relative selection:bg-[#1E4A8A]/10 dark:selection:bg-[#4A8AC8]/20 selection:text-[#1E4A8A] transition-colors duration-700">

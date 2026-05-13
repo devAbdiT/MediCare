@@ -3,16 +3,15 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth.api.getSession({
     headers: await headers()
   });
 
-  if (!session || (session.user.role !== "ADMIN" && session.user.role !== "RECEPTIONIST" && session.user.role !== "DOCTOR")) {
+  if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "RECEPTIONIST" && (session.user as any).role !== "DOCTOR")) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-
-  const { id } = await params;
 
   const patient = await prisma.patient.findUnique({
     where: { id },

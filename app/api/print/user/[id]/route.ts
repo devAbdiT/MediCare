@@ -5,8 +5,9 @@ import { headers } from "next/headers";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await auth.api.getSession({
       headers: await headers()
@@ -15,8 +16,6 @@ export async function GET(
     if (!session || (session.user as any).role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { id } = await params;
 
     const user = await prisma.user.findUnique({
       where: { id },
