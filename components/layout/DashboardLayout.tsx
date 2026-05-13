@@ -80,6 +80,11 @@ export default function DashboardLayout({
         href: "/dashboard/receptionist/register",
       },
       { name: "Search", icon: Search, href: "/dashboard/receptionist/search" },
+      {
+        name: "Schedule",
+        icon: Calendar,
+        href: "/dashboard/receptionist/schedule",
+      },
     ],
     patient: [
       { name: "Overview", icon: LayoutDashboard, href: "/dashboard/patient" },

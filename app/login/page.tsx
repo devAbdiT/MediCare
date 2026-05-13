@@ -227,9 +227,9 @@ export default function LoginPage() {
             </h4>
             <div className="grid grid-cols-2 gap-6 text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">
               <DemoItem role="Admin" email="admin@hospital.com" />
-              <DemoItem role="Doctor" email="dr.alex@hospital.com" />
-              <DemoItem role="Staff" email="sarah@hospital.com" />
-              <DemoItem role="Patient" email="abebe@email.com" />
+              <DemoItem role="Doctor" email="doctor1@hospital.com" />
+              <DemoItem role="Staff" email="receptionist1@hospital.com" />
+              <DemoItem role="Patient" email="patient1@example.com" />
             </div>
             <p className="text-[9px] text-[#1E4A8A]/50 dark:text-[#4A8AC8]/30 mt-6 text-center font-black uppercase tracking-[0.3em]">
               Access Key for All Nodes: password123
