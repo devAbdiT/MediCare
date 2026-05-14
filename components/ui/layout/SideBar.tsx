@@ -34,6 +34,11 @@ const menuItems: any = {
     },
     { name: "Patients", href: "/dashboard/receptionist/patients", icon: Users },
     {
+      name: "Clinic Schedule",
+      href: "/dashboard/receptionist/schedule",
+      icon: Calendar,
+    },
+    {
       name: "Appointments",
       href: "/dashboard/receptionist/appointments",
       icon: Calendar,

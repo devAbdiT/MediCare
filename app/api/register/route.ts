@@ -6,10 +6,10 @@ import { hash } from "bcrypt-ts";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, password, dateOfBirth, bloodType } = body;
+    const { name, email, phone, password, dateOfBirth, bloodType, gender } = body;
 
     // Validate required fields
-    if (!name || !email || !password || !dateOfBirth || !bloodType) {
+    if (!name || !email || !password || !dateOfBirth || !bloodType || !gender) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
           phone,
           password: hashedPassword,
           role: "PATIENT",
+          gender,
           patient: {
             create: {
               dateOfBirth: new Date(dateOfBirth),

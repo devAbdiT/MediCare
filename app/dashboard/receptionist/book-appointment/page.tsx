@@ -20,13 +20,15 @@ import {
 } from "lucide-react";
 import { PatientSearch, PatientSearchResult } from "@/components/PatientSearch";
 
+import { Suspense } from "react";
+
 interface Doctor {
   id: string;
   specialization: string;
   user: { name: string };
 }
 
-export default function ReceptionistBookingPage() {
+function BookingForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preSelectedPatientId = searchParams.get("patientId");
@@ -265,5 +267,19 @@ export default function ReceptionistBookingPage() {
         </form>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function ReceptionistBookingPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout role="receptionist">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="animate-spin text-teal-600" size={48} />
+        </div>
+      </DashboardLayout>
+    }>
+      <BookingForm />
+    </Suspense>
   );
 }

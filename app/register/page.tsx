@@ -14,6 +14,7 @@ import {
   Loader2,
   ArrowLeft,
   User,
+  Users,
   Stethoscope
 } from "lucide-react";
 import { toast } from "sonner";
@@ -31,7 +32,8 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
     dateOfBirth: "",
-    bloodType: "O+"
+    bloodType: "O+",
+    gender: "MALE"
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -67,7 +69,8 @@ export default function RegisterPage() {
           phone: formData.phone,
           password: formData.password,
           dateOfBirth: formData.dateOfBirth,
-          bloodType: formData.bloodType
+          bloodType: formData.bloodType,
+          gender: formData.gender
         })
       });
 
@@ -220,6 +223,27 @@ export default function RegisterPage() {
                     <option value="B-">B-</option>
                     <option value="AB+">AB+</option>
                     <option value="AB-">AB-</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div className="space-y-2">
+                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
+                  Gender
+                </label>
+                <div className="relative">
+                  <Users size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all appearance-none"
+                  >
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
                   </select>
                 </div>
               </div>
