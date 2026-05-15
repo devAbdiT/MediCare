@@ -27,8 +27,6 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
       patient: {
         include: {
           user: { select: { name: true, phone: true, email: true } },
-          dateOfBirth: true,
-          bloodType: true,
           medicalRecords: {
             include: { doctor: { include: { user: { select: { name: true } } } } },
             orderBy: { date: "desc" }
