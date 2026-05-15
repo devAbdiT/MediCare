@@ -111,15 +111,15 @@ function BookingForm() {
     <DashboardLayout role="receptionist">
       <div className="max-w-4xl mx-auto space-y-8 pb-12">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight text-center">New Appointment</h1>
-          <p className="text-slate-500 mt-2 text-center text-lg font-medium italic">Bridge patients with world-class care.</p>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight text-center">New Appointment</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-center text-lg font-medium italic">Bridge patients with world-class care.</p>
         </div>
 
         <form onSubmit={handleBooking} className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Step 1: Patient Selection */}
           <div className="space-y-8">
-            <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-visible flex flex-col">
-              <CardHeader className="bg-teal-900 text-white p-8 rounded-t-[2.5rem]">
+            <Card className="rounded-[2.5rem] border-slate-100 dark:border-slate-800 shadow-sm overflow-visible flex flex-col bg-white dark:bg-[#0F172A] transition-colors duration-500">
+              <CardHeader className="bg-teal-900 dark:bg-teal-950 text-white p-8 rounded-t-[2.5rem]">
                 <CardTitle className="flex items-center gap-3">
                   <User size={24} className="text-teal-400" />
                   Select Patient
@@ -135,9 +135,9 @@ function BookingForm() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <Card className="rounded-[2.5rem] border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col bg-white dark:bg-[#0F172A] transition-colors duration-500">
               <CardHeader className="p-8 pb-0">
-                <CardTitle className="text-xl font-black text-teal-900 flex items-center gap-3">
+                <CardTitle className="text-xl font-black text-teal-900 dark:text-teal-400 flex items-center gap-3">
                   <FileText className="text-teal-600" size={24} />
                   Reason for Visit
                 </CardTitle>
@@ -147,7 +147,7 @@ function BookingForm() {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Describe the symptoms or reason for the appointment... (Optional)"
-                  className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-medium text-slate-900 min-h-[120px] resize-none"
+                  className="w-full p-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-transparent rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-600 outline-none transition-all font-medium text-slate-900 dark:text-slate-100 min-h-[120px] resize-none"
                 />
               </CardContent>
             </Card>
@@ -155,9 +155,9 @@ function BookingForm() {
 
           {/* Step 2 & 3: Doctor and Time */}
           <div className="space-y-8">
-            <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-hidden">
+            <Card className="rounded-[2.5rem] border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-[#0F172A] transition-colors duration-500">
               <CardHeader className="p-8 pb-0">
-                <CardTitle className="text-xl font-black text-teal-900 flex items-center gap-3">
+                <CardTitle className="text-xl font-black text-teal-900 dark:text-teal-400 flex items-center gap-3">
                   <Stethoscope className="text-teal-600" size={24} />
                   Choose Doctor
                 </CardTitle>
@@ -169,7 +169,7 @@ function BookingForm() {
                     setSelectedDoctor(e.target.value);
                     setAvailable(null);
                   }}
-                  className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-bold text-slate-900 appearance-none"
+                  className="w-full p-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-transparent rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-600 outline-none transition-all font-bold text-slate-900 dark:text-slate-100 appearance-none"
                   required
                 >
                   <option value="">Select a Doctor</option>
@@ -182,9 +182,9 @@ function BookingForm() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[2.5rem] border-slate-100 shadow-sm overflow-hidden">
+            <Card className="rounded-[2.5rem] border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-[#0F172A] transition-colors duration-500">
               <CardHeader className="p-8 pb-0">
-                <CardTitle className="text-xl font-black text-teal-900 flex items-center gap-3">
+                <CardTitle className="text-xl font-black text-teal-900 dark:text-teal-400 flex items-center gap-3">
                   <Calendar className="text-teal-600" size={24} />
                   Date & Time
                 </CardTitle>
@@ -192,7 +192,7 @@ function BookingForm() {
               <CardContent className="p-8 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Date</label>
+                    <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Date</label>
                     <input
                       type="date"
                       value={date}
@@ -201,19 +201,19 @@ function BookingForm() {
                         setDate(e.target.value);
                         setAvailable(null);
                       }}
-                      className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-bold text-slate-900"
+                      className="w-full p-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-transparent rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-600 outline-none transition-all font-bold text-slate-900 dark:text-slate-100"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Time Slot</label>
+                    <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Time Slot</label>
                     <select
                       value={time}
                       onChange={(e) => {
                         setTime(e.target.value);
                         setAvailable(null);
                       }}
-                      className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-teal-600 outline-none transition-all font-bold text-slate-900 appearance-none"
+                      className="w-full p-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-transparent rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-600 outline-none transition-all font-bold text-slate-900 dark:text-slate-100 appearance-none"
                       required
                     >
                       <option value="">Select time</option>
@@ -233,20 +233,20 @@ function BookingForm() {
                   type="button"
                   onClick={checkAvailability}
                   disabled={!selectedDoctor || !date || !time || checkingAvailability}
-                  className="w-full py-4 bg-teal-50 text-teal-700 rounded-2xl font-black hover:bg-teal-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-4 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 rounded-2xl font-black hover:bg-teal-100 dark:hover:bg-teal-900/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {checkingAvailability ? <Loader2 className="animate-spin" /> : <Clock size={20} />}
                   Check Slot Availability
                 </button>
 
                 {available === true && (
-                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-3 text-emerald-700 font-bold">
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-900 flex items-center gap-3 text-emerald-700 dark:text-emerald-400 font-bold">
                     <CheckCircle2 size={24} />
                     Slot is Available
                   </div>
                 )}
                 {available === false && (
-                  <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex items-center gap-3 text-red-700 font-bold">
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-900 flex items-center gap-3 text-red-700 dark:text-red-400 font-bold">
                     <AlertCircle size={24} />
                     Slot is Taken
                   </div>
