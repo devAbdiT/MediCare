@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { User, Clipboard, FileText, Pill, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import RecordForm from "./RecordForm";
+import { PrintHistoryButton } from "./PrintHistoryButton";
 
 export default async function AppointmentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,13 +27,15 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
       patient: {
         include: {
           user: { select: { name: true, phone: true, email: true } },
+          dateOfBirth: true,
+          bloodType: true,
           medicalRecords: {
             include: { doctor: { include: { user: { select: { name: true } } } } },
             orderBy: { date: "desc" }
           }
         }
       },
-      doctor: { select: { id: true } }
+      doctor: { select: { id: true, user: { select: { name: true } } } }
     }
   });
 
@@ -57,9 +60,7 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
           {/* Form Side */}
           <div className="lg:col-span-2 space-y-8">
             <RecordForm 
-              appointmentId={appointment.id} 
-              patientId={appointment.patientId} 
-              doctorId={appointment.doctorId} 
+              appointment={appointment} 
             />
           </div>
 
@@ -78,10 +79,17 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
               ) : (
                 <div className="space-y-6">
                   {appointment.patient.medicalRecords.map((record) => (
-                    <div key={record.id} className="relative pl-6 border-l-2 border-slate-100 last:border-0 pb-6 last:pb-0">
+                    <div key={record.id} className="relative pl-6 border-l-2 border-slate-100 last:border-0 pb-6 last:pb-0 group">
                       <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-600" />
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{format(record.date, "MMM dd, yyyy")}</p>
-                      <h4 className="font-bold text-slate-900 mt-1">{record.diagnosis}</h4>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{format(record.date, "MMM dd, yyyy")}</p>
+                          <h4 className="font-bold text-slate-900 mt-1">{record.diagnosis}</h4>
+                        </div>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <PrintHistoryButton record={record} patient={appointment.patient} doctorName={record.doctor.user.name} />
+                        </div>
+                      </div>
                       <p className="text-xs text-slate-500 mt-2 line-clamp-3">{record.prescription}</p>
                       <p className="text-[10px] text-slate-400 font-bold mt-2">By Dr. {record.doctor.user.name}</p>
                     </div>
