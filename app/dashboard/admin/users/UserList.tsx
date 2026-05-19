@@ -25,6 +25,7 @@ import Link from "next/link";
 import { PrintButton } from "@/components/admin/PrintButton";
 import { PrintUserList } from "@/components/admin/PrintUserList";
 import { PrintSingleUser } from "@/components/admin/PrintSingleUser";
+import { ViewUserModal } from "@/components/admin/ViewUserModal";
 import {
   Dialog,
   DialogContent,
@@ -297,7 +298,8 @@ export default function UserList({ users, adminName }: UserListProps) {
                         {format(new Date(user.createdAt), "MMM dd, yyyy")}
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-right flex items-center justify-end gap-4">
+                    <td className="px-8 py-6 text-right flex items-center justify-end gap-3">
+                      <ViewUserModal userId={user.id} userName={user.name} userRole={user.role} />
                       <Dialog>
                         <DialogTrigger asChild>
                           <button
