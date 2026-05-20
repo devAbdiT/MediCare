@@ -2,14 +2,15 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hash } from "bcrypt-ts";
+import { differenceInYears } from "date-fns";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, password, dateOfBirth, bloodType, gender } = body;
+    const { name, email, phone, password, dateOfBirth, age, bloodType, gender } = body;
 
-    // Validate required fields
-    if (!name || !email || !password || !dateOfBirth || !bloodType || !gender) {
+    // Validate required fields (bloodType & dateOfBirth are now optional)
+    if (!name || !email || !password || !gender) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -31,6 +32,20 @@ export async function POST(req: Request) {
     const sequence = String(patientCount + 1).padStart(4, "0");
     const cardNumber = `BK-P-${year}-${sequence}`;
 
+    // Compute age from DOB if age not explicitly provided
+    let resolvedAge: number | undefined = undefined;
+    let resolvedDOB: Date | undefined = undefined;
+
+    if (dateOfBirth) {
+      resolvedDOB = new Date(dateOfBirth);
+      resolvedAge = age !== undefined && age !== "" ? Number(age) : differenceInYears(new Date(), resolvedDOB);
+    } else if (age !== undefined && age !== "") {
+      resolvedAge = Number(age);
+      // Estimate DOB from age (Jan 1 of birth year) so profile still has a rough DOB
+      const birthYear = new Date().getFullYear() - resolvedAge;
+      resolvedDOB = new Date(`${birthYear}-01-01`);
+    }
+
     // Create user, patient, and account in transaction
     const result = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
@@ -43,8 +58,9 @@ export async function POST(req: Request) {
           gender,
           patient: {
             create: {
-              dateOfBirth: new Date(dateOfBirth),
-              bloodType,
+              ...(resolvedDOB ? { dateOfBirth: resolvedDOB } : {}),
+              ...(resolvedAge !== undefined ? { age: resolvedAge } : {}),
+              ...(bloodType ? { bloodType } : {}),
               cardNumber
             }
           },

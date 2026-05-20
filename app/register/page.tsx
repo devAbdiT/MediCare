@@ -15,11 +15,13 @@ import {
   ArrowLeft,
   User,
   Users,
-  Stethoscope
+  Stethoscope,
+  Hash
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
+import { differenceInYears } from "date-fns";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,21 +34,29 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
     dateOfBirth: "",
-    bloodType: "O+",
+    age: "",
+    bloodType: "",
     gender: "MALE"
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+
+    if (name === "dateOfBirth" && value) {
+      // Auto-calculate age from DOB
+      const calculated = differenceInYears(new Date(), new Date(value));
+      setFormData((prev) => ({ ...prev, dateOfBirth: value, age: String(calculated) }));
+    } else if (name === "age" && value) {
+      // If age entered manually, clear DOB so they're not out-of-sync
+      setFormData((prev) => ({ ...prev, age: value, dateOfBirth: "" }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match");
       return;
@@ -54,6 +64,11 @@ export default function RegisterPage() {
 
     if (formData.password.length < 8) {
       toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    if (!formData.dateOfBirth && !formData.age) {
+      toast.error("Please provide either a Date of Birth or an Age");
       return;
     }
 
@@ -68,8 +83,9 @@ export default function RegisterPage() {
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
-          dateOfBirth: formData.dateOfBirth,
-          bloodType: formData.bloodType,
+          dateOfBirth: formData.dateOfBirth || undefined,
+          age: formData.age ? Number(formData.age) : undefined,
+          bloodType: formData.bloodType || undefined,
           gender: formData.gender
         })
       });
@@ -87,6 +103,9 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  const inputClass = "w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all";
+  const labelClass = "text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2";
 
   return (
     <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0A122A] flex items-center justify-center p-4 transition-colors duration-700">
@@ -126,67 +145,52 @@ export default function RegisterPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-10 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
               {/* Full Name */}
               <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
-                  Full Name
-                </label>
+                <label className={labelClass}>Full Name</label>
                 <div className="relative">
                   <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all"
-                  />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" required className={inputClass} />
                 </div>
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
-                  Email Address
-                </label>
+                <label className={labelClass}>Email Address</label>
                 <div className="relative">
                   <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="john@example.com"
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all"
-                  />
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="john@example.com" required className={inputClass} />
                 </div>
               </div>
 
               {/* Phone */}
               <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
-                  Phone Number
-                </label>
+                <label className={labelClass}>Phone Number</label>
                 <div className="relative">
                   <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="+251911223344"
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all"
-                  />
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+251911223344" required className={inputClass} />
                 </div>
               </div>
 
-              {/* Date of Birth */}
+              {/* Gender */}
               <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
+                <label className={labelClass}>Gender</label>
+                <div className="relative">
+                  <Users size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
+                  <select name="gender" value={formData.gender} onChange={handleChange} required className={`${inputClass} appearance-none`}>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Date of Birth — auto-fills Age */}
+              <div className="space-y-2">
+                <label className={labelClass}>
                   Date of Birth
+                  <span className="ml-2 font-medium normal-case tracking-normal text-[#5A6E8A]/60 dark:text-[#8A9CBA]/60 lowercase">(auto-fills age)</span>
                 </label>
                 <div className="relative">
                   <Calendar size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
@@ -195,26 +199,43 @@ export default function RegisterPage() {
                     name="dateOfBirth"
                     value={formData.dateOfBirth}
                     onChange={handleChange}
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all"
+                    max={new Date().toISOString().split("T")[0]}
+                    className={inputClass}
                   />
                 </div>
               </div>
 
-              {/* Blood Type */}
+              {/* Age — can be entered manually */}
               <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
+                <label className={labelClass}>
+                  Age (years)
+                  <span className="ml-2 font-medium normal-case tracking-normal text-[#5A6E8A]/60 dark:text-[#8A9CBA]/60 lowercase">(or enter manually)</span>
+                </label>
+                <div className="relative">
+                  <Hash size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
+                  <input
+                    type="number"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleChange}
+                    placeholder="e.g. 34"
+                    min={0}
+                    max={120}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              {/* Blood Type — OPTIONAL */}
+              <div className="space-y-2">
+                <label className={labelClass}>
                   Blood Type
+                  <span className="ml-2 font-medium normal-case tracking-normal text-[#5A6E8A]/60 dark:text-[#8A9CBA]/60 lowercase">(optional)</span>
                 </label>
                 <div className="relative">
                   <Droplets size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <select
-                    name="bloodType"
-                    value={formData.bloodType}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all appearance-none"
-                  >
+                  <select name="bloodType" value={formData.bloodType} onChange={handleChange} className={`${inputClass} appearance-none`}>
+                    <option value="">— Unknown / Skip —</option>
                     <option value="O+">O+</option>
                     <option value="O-">O-</option>
                     <option value="A+">A+</option>
@@ -227,69 +248,32 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Gender */}
-              <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
-                  Gender
-                </label>
-                <div className="relative">
-                  <Users size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all appearance-none"
-                  >
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
-                  </select>
-                </div>
-              </div>
-
               {/* Password */}
               <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
-                  Password
-                </label>
+                <label className={labelClass}>Password</label>
                 <div className="relative">
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Min. 8 characters"
-                    required
-                    minLength={8}
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all"
-                  />
+                  <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Min. 8 characters" required minLength={8} className={inputClass} />
                 </div>
               </div>
 
               {/* Confirm Password */}
-              <div className="space-y-2">
-                <label className="text-xs font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-2">
-                  Confirm Password
-                </label>
+              <div className="space-y-2 md:col-span-2">
+                <label className={labelClass}>Confirm Password</label>
                 <div className="relative">
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Re-enter password"
-                    required
-                    className="w-full pl-12 pr-4 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-transparent rounded-2xl focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none font-bold text-[#1A2A4A] dark:text-[#E8EEF8] transition-all"
-                  />
+                  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Re-enter password" required className={inputClass} />
                 </div>
               </div>
             </div>
 
+            {/* Helper note */}
+            <p className="text-xs text-[#5A6E8A] dark:text-[#8A9CBA] bg-[#F0F4F8] dark:bg-[#0A122A] rounded-2xl px-6 py-4 font-medium">
+              ℹ️ At least one of <strong>Date of Birth</strong> or <strong>Age</strong> is required. If you enter a Date of Birth, the Age will be calculated automatically.
+            </p>
+
             {/* Submit Button */}
-            <div className="pt-6">
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
@@ -307,13 +291,10 @@ export default function RegisterPage() {
             </div>
 
             {/* Login Link */}
-            <div className="text-center pt-4">
+            <div className="text-center pt-2">
               <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium">
                 Already have an account?{" "}
-                <Link 
-                  href="/login" 
-                  className="text-[#1E4A8A] dark:text-[#4A8AC8] font-black hover:underline"
-                >
+                <Link href="/login" className="text-[#1E4A8A] dark:text-[#4A8AC8] font-black hover:underline">
                   Login here
                 </Link>
               </p>

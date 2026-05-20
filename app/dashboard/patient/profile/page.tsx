@@ -4,8 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import prisma from "@/lib/prisma";
-import { format } from "date-fns";
-import { User, Phone, Mail, Calendar, Droplets, ShieldCheck } from "lucide-react";
+import { format, differenceInYears } from "date-fns";
+import { User, Phone, Mail, Calendar, Droplets, ShieldCheck, Hash } from "lucide-react";
 import ProfileForm from "./ProfileForm";
 import React from "react";
 
@@ -22,6 +22,10 @@ export default async function PatientProfilePage() {
     where: { userId: session.user.id },
     include: { user: true }
   });
+
+  // Compute age: prefer stored age, else calculate from DOB
+  const computedAge = patient?.age
+    ?? (patient?.dateOfBirth ? differenceInYears(new Date(), new Date(patient.dateOfBirth)) : null);
 
   if (!patient) {
     redirect("/dashboard/patient");
@@ -45,19 +49,26 @@ export default async function PatientProfilePage() {
                <h2 className="text-2xl font-black text-[#1E293B] dark:text-[#F1F5F9]">{patient.user.name}</h2>
                <p className="text-[#64748B] dark:text-[#94A3B8] font-bold text-sm uppercase tracking-widest mt-1">Verified Patient</p>
                
-               <div className="mt-8 pt-8 border-t border-[#F8FAFC] dark:border-[#0F172A] grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Blood Type</p>
-                    <p className="text-lg font-black text-[#EF4444] dark:text-[#F87171] flex items-center justify-center gap-1">
-                      <Droplets size={16} />
-                      {patient.bloodType}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Member Since</p>
-                    <p className="text-lg font-black text-[#1E293B] dark:text-[#F1F5F9]">{format(patient.user.createdAt, "yyyy")}</p>
-                  </div>
-               </div>
+               <div className="mt-8 pt-8 border-t border-[#F8FAFC] dark:border-[#0F172A] grid grid-cols-3 gap-4">
+                   <div>
+                     <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Blood Type</p>
+                     <p className="text-base font-black text-[#EF4444] dark:text-[#F87171] flex items-center justify-center gap-1">
+                       <Droplets size={14} />
+                       {patient.bloodType || "—"}
+                     </p>
+                   </div>
+                   <div>
+                     <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Age</p>
+                     <p className="text-base font-black text-[#3B82F6] dark:text-[#60A5FA] flex items-center justify-center gap-1">
+                       <Hash size={14} />
+                       {computedAge !== null ? `${computedAge} yrs` : "—"}
+                     </p>
+                   </div>
+                   <div>
+                     <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Since</p>
+                     <p className="text-base font-black text-[#1E293B] dark:text-[#F1F5F9]">{format(patient.user.createdAt, "yyyy")}</p>
+                   </div>
+                </div>
             </div>
 
             <div className="bg-[#3B82F6] p-8 rounded-[2.5rem] text-white flex items-center gap-4 shadow-xl shadow-blue-500/10">
@@ -76,10 +87,18 @@ export default async function PatientProfilePage() {
                   Clinical Information
                </h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <DetailItem icon={<Mail />} label="Primary Email" value={patient.user.email} />
-                  <DetailItem icon={<Phone />} label="Phone Number" value={patient.user.phone || "-"} />
-                  <DetailItem icon={<Calendar />} label="Date of Birth" value={format(patient.dateOfBirth, "MMMM dd, yyyy")} />
-               </div>
+                   <DetailItem icon={<Mail />} label="Primary Email" value={patient.user.email} />
+                   <DetailItem icon={<Phone />} label="Phone Number" value={patient.user.phone || "—"} />
+                   {patient.dateOfBirth && (
+                     <DetailItem icon={<Calendar />} label="Date of Birth" value={format(new Date(patient.dateOfBirth), "MMMM dd, yyyy")} />
+                   )}
+                   {computedAge !== null && (
+                     <DetailItem icon={<Hash />} label="Age" value={`${computedAge} years old`} />
+                   )}
+                   {patient.bloodType && (
+                     <DetailItem icon={<Droplets />} label="Blood Type" value={patient.bloodType} />
+                   )}
+                </div>
             </div>
 
             <div className="bg-white dark:bg-[#1E293B] p-10 rounded-[3rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">

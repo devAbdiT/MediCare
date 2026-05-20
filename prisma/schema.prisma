@@ -92,11 +92,12 @@ model Verification {
 }
 
 model Patient {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  dateOfBirth DateTime
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  dateOfBirth DateTime?
+  age         Int?
   bloodType   String?
-  cardNumber  String?  @unique
+  cardNumber  String?   @unique
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments   Appointment[]
