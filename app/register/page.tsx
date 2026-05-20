@@ -16,58 +16,70 @@ import {
   User,
   Users,
   Stethoscope,
-  Hash
+  Hash,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import { differenceInYears } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerPatientSchema } from "@/lib/validations";
+import { formatPhoneNumber } from "@/lib/phone-format";
+import * as z from "zod";
+
+type RegisterFormValues = z.input<typeof registerPatientSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    dateOfBirth: "",
-    age: "",
-    bloodType: "",
-    gender: "MALE"
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerPatientSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      dateOfBirth: "",
+      age: undefined,
+      bloodType: "",
+      gender: "MALE"
+    }
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const dobValue = watch("dateOfBirth");
+  const ageValue = watch("age");
 
-    if (name === "dateOfBirth" && value) {
-      // Auto-calculate age from DOB
+  // Handle auto-calculation of age from DOB and clearing DOB if age is typed
+  const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setValue("dateOfBirth", value, { shouldValidate: true });
+    if (value) {
       const calculated = differenceInYears(new Date(), new Date(value));
-      setFormData((prev) => ({ ...prev, dateOfBirth: value, age: String(calculated) }));
-    } else if (name === "age" && value) {
-      // If age entered manually, clear DOB so they're not out-of-sync
-      setFormData((prev) => ({ ...prev, age: value, dateOfBirth: "" }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setValue("age", calculated, { shouldValidate: true });
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
+  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setValue("age", value ? Number(value) : undefined, { shouldValidate: true });
+    if (value) {
+      setValue("dateOfBirth", "", { shouldValidate: true });
     }
+  };
 
-    if (formData.password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-
-    if (!formData.dateOfBirth && !formData.age) {
+  const onSubmit = async (data: RegisterFormValues) => {
+    if (!data.dateOfBirth && data.age === undefined) {
       toast.error("Please provide either a Date of Birth or an Age");
       return;
     }
@@ -75,18 +87,20 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      const formattedPhone = formatPhoneNumber(data.phone);
+
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password,
-          dateOfBirth: formData.dateOfBirth || undefined,
-          age: formData.age ? Number(formData.age) : undefined,
-          bloodType: formData.bloodType || undefined,
-          gender: formData.gender
+          name: data.name,
+          email: data.email,
+          phone: formattedPhone,
+          password: data.password,
+          dateOfBirth: data.dateOfBirth || undefined,
+          age: data.age,
+          bloodType: data.bloodType || undefined,
+          gender: data.gender
         })
       });
 
@@ -143,7 +157,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-10 space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-10 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               {/* Full Name */}
@@ -151,8 +165,11 @@ export default function RegisterPage() {
                 <label className={labelClass}>Full Name</label>
                 <div className="relative">
                   <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" required className={inputClass} />
+                  <input type="text" {...register("name")} placeholder="John Doe" className={inputClass} />
                 </div>
+                {errors.name && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.name.message}</p>
+                )}
               </div>
 
               {/* Email */}
@@ -160,8 +177,11 @@ export default function RegisterPage() {
                 <label className={labelClass}>Email Address</label>
                 <div className="relative">
                   <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="john@example.com" required className={inputClass} />
+                  <input type="email" {...register("email")} placeholder="john@example.com" className={inputClass} />
                 </div>
+                {errors.email && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.email.message}</p>
+                )}
               </div>
 
               {/* Phone */}
@@ -169,8 +189,11 @@ export default function RegisterPage() {
                 <label className={labelClass}>Phone Number</label>
                 <div className="relative">
                   <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+251911223344" required className={inputClass} />
+                  <input type="tel" {...register("phone")} placeholder="+251911223344" className={inputClass} />
                 </div>
+                {errors.phone && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.phone.message}</p>
+                )}
               </div>
 
               {/* Gender */}
@@ -178,12 +201,15 @@ export default function RegisterPage() {
                 <label className={labelClass}>Gender</label>
                 <div className="relative">
                   <Users size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <select name="gender" value={formData.gender} onChange={handleChange} required className={`${inputClass} appearance-none`}>
+                  <select {...register("gender")} className={`${inputClass} appearance-none`}>
                     <option value="MALE">Male</option>
                     <option value="FEMALE">Female</option>
                     <option value="OTHER">Other</option>
                   </select>
                 </div>
+                {errors.gender && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.gender.message}</p>
+                )}
               </div>
 
               {/* Date of Birth — auto-fills Age */}
@@ -196,13 +222,15 @@ export default function RegisterPage() {
                   <Calendar size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
                   <input
                     type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
+                    {...register("dateOfBirth")}
+                    onChange={handleDobChange}
                     max={new Date().toISOString().split("T")[0]}
                     className={inputClass}
                   />
                 </div>
+                {errors.dateOfBirth && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.dateOfBirth.message}</p>
+                )}
               </div>
 
               {/* Age — can be entered manually */}
@@ -215,15 +243,17 @@ export default function RegisterPage() {
                   <Hash size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
                   <input
                     type="number"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleChange}
+                    {...register("age")}
+                    onChange={handleAgeChange}
                     placeholder="e.g. 34"
                     min={0}
                     max={120}
                     className={inputClass}
                   />
                 </div>
+                {errors.age && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.age.message}</p>
+                )}
               </div>
 
               {/* Blood Type — OPTIONAL */}
@@ -234,7 +264,7 @@ export default function RegisterPage() {
                 </label>
                 <div className="relative">
                   <Droplets size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <select name="bloodType" value={formData.bloodType} onChange={handleChange} className={`${inputClass} appearance-none`}>
+                  <select {...register("bloodType")} className={`${inputClass} appearance-none`}>
                     <option value="">— Unknown / Skip —</option>
                     <option value="O+">O+</option>
                     <option value="O-">O-</option>
@@ -246,6 +276,9 @@ export default function RegisterPage() {
                     <option value="AB-">AB-</option>
                   </select>
                 </div>
+                {errors.bloodType && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.bloodType.message}</p>
+                )}
               </div>
 
               {/* Password */}
@@ -253,8 +286,11 @@ export default function RegisterPage() {
                 <label className={labelClass}>Password</label>
                 <div className="relative">
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Min. 8 characters" required minLength={8} className={inputClass} />
+                  <input type="password" {...register("password")} placeholder="Min. 8 chars, letters, numbers, symbols" className={inputClass} />
                 </div>
+                {errors.password && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.password.message}</p>
+                )}
               </div>
 
               {/* Confirm Password */}
@@ -262,8 +298,11 @@ export default function RegisterPage() {
                 <label className={labelClass}>Confirm Password</label>
                 <div className="relative">
                   <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" />
-                  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Re-enter password" required className={inputClass} />
+                  <input type="password" {...register("confirmPassword")} placeholder="Re-enter password" className={inputClass} />
                 </div>
+                {errors.confirmPassword && (
+                  <p className="text-xs text-red-500 font-bold ml-2 flex items-center gap-1"><AlertCircle size={12}/> {errors.confirmPassword.message}</p>
+                )}
               </div>
             </div>
 

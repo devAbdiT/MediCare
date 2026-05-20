@@ -20,9 +20,17 @@ import {
   Calendar,
   Droplets,
   Hash,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, differenceInYears } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { patientSchema } from "@/lib/validations";
+import { formatPhoneNumber } from "@/lib/phone-format";
+import * as z from "zod";
+
+type RegisterFormValues = z.input<typeof patientSchema>;
 
 interface RegisteredPatient {
   id: string;
@@ -237,35 +245,70 @@ export default function RegisterPatient() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [registeredPatient, setRegisteredPatient] = useState<RegisteredPatient | null>(null);
-  const [dobValue, setDobValue] = useState("");
-  const [ageValue, setAgeValue] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(patientSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      dateOfBirth: "",
+      age: undefined,
+      bloodType: "",
+      gender: "MALE"
+    }
+  });
+
+  const dobValue = watch("dateOfBirth");
+  const ageValue = watch("age");
 
   const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dob = e.target.value;
-    setDobValue(dob);
-    if (dob) {
-      const computed = differenceInYears(new Date(), new Date(dob));
-      setAgeValue(String(computed));
+    const value = e.target.value;
+    setValue("dateOfBirth", value, { shouldValidate: true });
+    if (value) {
+      const computed = differenceInYears(new Date(), new Date(value));
+      setValue("age", computed, { shouldValidate: true });
     }
   };
 
   const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAgeValue(e.target.value);
-    if (e.target.value) setDobValue(""); // clear DOB when age typed manually
+    const value = e.target.value;
+    setValue("age", value ? Number(value) : undefined, { shouldValidate: true });
+    if (value) setValue("dateOfBirth", "", { shouldValidate: true }); // clear DOB when age typed manually
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (data: RegisterFormValues) => {
+    if (!data.dateOfBirth && data.age === undefined) {
+      toast.error("Please provide either a Date of Birth or an Age");
+      return;
+    }
+
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-
     try {
+      const formattedPhone = formatPhoneNumber(data.phone);
+
       const res = await fetch("/api/patients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: formattedPhone,
+          password: data.password,
+          dateOfBirth: data.dateOfBirth || undefined,
+          age: data.age,
+          bloodType: data.bloodType || undefined,
+          gender: data.gender
+        }),
       });
 
       if (!res.ok) {
@@ -275,6 +318,7 @@ export default function RegisterPatient() {
 
       const patient = await res.json();
       setRegisteredPatient(patient);
+      toast.success("Patient registered successfully!");
     } catch (err: any) {
       toast.error(err.message || "Failed to register patient");
     } finally {
@@ -284,8 +328,7 @@ export default function RegisterPatient() {
 
   const handleRegisterNew = () => {
     setRegisteredPatient(null);
-    setDobValue("");
-    setAgeValue("");
+    reset();
   };
 
   // ── Success Screen ──────────────────────────────────────────────────────
@@ -395,7 +438,7 @@ export default function RegisterPatient() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <Card className="rounded-[3rem] border-[#D0DCE8] dark:border-[#1A2A4A] shadow-xl shadow-blue-500/5 overflow-hidden bg-white dark:bg-[#111C3A] transition-colors duration-500">
             <CardHeader className="bg-[#F0F4F8] dark:bg-[#0A122A] border-b border-[#D0DCE8] dark:border-[#1A2A4A] p-10 transition-colors duration-500">
               <CardTitle className="text-xl font-black text-[#1A2A4A] dark:text-[#E8EEF8]">
@@ -411,30 +454,33 @@ export default function RegisterPatient() {
                 {/* Full Name */}
                 <div className="space-y-3">
                   <Label className={labelClass}>Full Name</Label>
-                  <Input name="name" placeholder="John Doe" required className={fieldClass} />
+                  <Input {...register("name")} placeholder="John Doe" className={fieldClass} />
+                  {errors.name && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.name.message}</p>}
                 </div>
 
                 {/* Email */}
                 <div className="space-y-3">
                   <Label className={labelClass}>Email Address</Label>
-                  <Input name="email" type="email" placeholder="john@example.com" required className={fieldClass} />
+                  <Input {...register("email")} type="email" placeholder="john@example.com" className={fieldClass} />
+                  {errors.email && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.email.message}</p>}
                 </div>
 
                 {/* Phone */}
                 <div className="space-y-3">
                   <Label className={labelClass}>Phone Number</Label>
-                  <Input name="phone" placeholder="+251..." required className={fieldClass} />
+                  <Input {...register("phone")} placeholder="+251..." className={fieldClass} />
+                  {errors.phone && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.phone.message}</p>}
                 </div>
 
                 {/* Gender */}
                 <div className="space-y-3">
                   <Label className={labelClass}>Gender</Label>
-                  <select name="gender" className={selectClass} required>
-                    <option value="">Select Gender</option>
+                  <select {...register("gender")} className={selectClass}>
                     <option value="MALE">Male</option>
                     <option value="FEMALE">Female</option>
                     <option value="OTHER">Other</option>
                   </select>
+                  {errors.gender && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.gender.message}</p>}
                 </div>
 
                 {/* Date of Birth — auto-fills Age */}
@@ -446,13 +492,13 @@ export default function RegisterPatient() {
                     </span>
                   </Label>
                   <Input
-                    name="dateOfBirth"
                     type="date"
-                    value={dobValue}
+                    {...register("dateOfBirth")}
                     onChange={handleDobChange}
                     max={new Date().toISOString().split("T")[0]}
                     className={fieldClass}
                   />
+                  {errors.dateOfBirth && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.dateOfBirth.message}</p>}
                 </div>
 
                 {/* Age */}
@@ -464,15 +510,15 @@ export default function RegisterPatient() {
                     </span>
                   </Label>
                   <Input
-                    name="age"
                     type="number"
-                    placeholder="e.g. 34"
-                    value={ageValue}
+                    {...register("age")}
                     onChange={handleAgeChange}
+                    placeholder="e.g. 34"
                     min={0}
                     max={120}
                     className={fieldClass}
                   />
+                  {errors.age && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.age.message}</p>}
                 </div>
 
                 {/* Blood Type — OPTIONAL */}
@@ -483,7 +529,7 @@ export default function RegisterPatient() {
                       (optional)
                     </span>
                   </Label>
-                  <select name="bloodType" className={selectClass}>
+                  <select {...register("bloodType")} className={selectClass}>
                     <option value="">— Unknown / Skip —</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
@@ -494,19 +540,19 @@ export default function RegisterPatient() {
                     <option value="O+">O+</option>
                     <option value="O-">O-</option>
                   </select>
+                  {errors.bloodType && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.bloodType.message}</p>}
                 </div>
 
                 {/* Password */}
                 <div className="space-y-3">
                   <Label className={labelClass}>Initial Password</Label>
                   <Input
-                    name="password"
                     type="password"
+                    {...register("password")}
                     placeholder="Min. 8 characters"
-                    required
-                    minLength={8}
                     className={fieldClass}
                   />
+                  {errors.password && <p className="text-xs text-red-500 font-bold flex items-center gap-1"><AlertCircle size={12}/> {errors.password.message}</p>}
                 </div>
               </div>
 
