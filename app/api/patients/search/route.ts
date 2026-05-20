@@ -41,6 +41,8 @@ export async function GET(req: Request) {
     email: p.user.email,
     phone: p.user.phone,
     bloodType: p.bloodType,
+    age: p.age,
+    dateOfBirth: p.dateOfBirth ? p.dateOfBirth.toISOString() : null,
     cardNumber: p.cardNumber
   }));
 

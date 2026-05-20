@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, email, phone, dateOfBirth, gender, bloodType, password } = body;
+    const { name, email, phone, dateOfBirth, age, gender, bloodType, password } = body;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -61,6 +61,15 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await hash(password || "patient123", 10);
+
+    // Generate unique card number
+    const year = new Date().getFullYear();
+    const patientCount = await prisma.patient.count();
+    const cardNumber = `BK-P-${year}-${String(patientCount + 1).padStart(4, "0")}`;
+
+    // Resolve DOB and age
+    const resolvedDOB = dateOfBirth ? new Date(dateOfBirth) : undefined;
+    const resolvedAge = age ? Number(age) : undefined;
 
     // Create User, Patient, and Better Auth Account in a transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -74,8 +83,10 @@ export async function POST(req: Request) {
           gender,
           patient: {
             create: {
-              dateOfBirth: new Date(dateOfBirth),
-              bloodType,
+              ...(resolvedDOB ? { dateOfBirth: resolvedDOB } : {}),
+              ...(resolvedAge !== undefined ? { age: resolvedAge } : {}),
+              ...(bloodType ? { bloodType } : {}),
+              cardNumber,
             }
           },
           accounts: {
@@ -94,9 +105,20 @@ export async function POST(req: Request) {
       return newUser;
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      id: result.id,
+      name: result.name,
+      email: result.email,
+      phone: result.phone,
+      cardNumber: result.patient?.cardNumber,
+      dateOfBirth: result.patient?.dateOfBirth,
+      age: result.patient?.age,
+      bloodType: result.patient?.bloodType,
+      registeredDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    });
   } catch (error) {
     console.error("Patient Registration Error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
