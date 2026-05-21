@@ -44,7 +44,7 @@ export function ReceptionistDashboardSearch() {
         <SearchBar
           onSearch={handleSearch}
           isSearching={isSearching}
-          placeholder="Search by name, email, or phone..."
+          placeholder="Search by name, email, phone, or card number..."
         />
 
         {/* Loading */}

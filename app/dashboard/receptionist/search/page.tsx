@@ -53,7 +53,7 @@ export default function SearchPatients() {
             Patient Search
           </h1>
           <p className="text-[#5A6E8A] dark:text-[#8A9CBA] mt-2 text-lg font-medium">
-            Find patient records by name, email, or phone number.
+            Find patient records by name, email, phone number, or card number.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default function SearchPatients() {
           <SearchBar
             onSearch={handleSearch}
             isSearching={isSearching}
-            placeholder="Type a name, email, or phone..."
+            placeholder="Type a name, email, phone, or card number..."
           />
         </div>
 
@@ -82,7 +82,7 @@ export default function SearchPatients() {
               No patients found
             </p>
             <p className="text-[#8A9CBA] dark:text-[#5A6E8A] text-sm mt-1">
-              Try searching by a different name, email, or phone number.
+              Try searching by a different name, email, phone number, or card number.
             </p>
           </div>
         )}

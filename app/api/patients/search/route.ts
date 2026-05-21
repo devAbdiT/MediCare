@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     headers: await headers()
   });
 
-  if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "RECEPTIONIST")) {
+  if (!session || ((session.user as any).role !== "ADMIN" && (session.user as any).role !== "RECEPTIONIST" && (session.user as any).role !== "DOCTOR")) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
@@ -22,6 +22,7 @@ export async function GET(req: Request) {
         { user: { name: { contains: query, mode: "insensitive" } } },
         { user: { email: { contains: query, mode: "insensitive" } } },
         { user: { phone: { contains: query, mode: "insensitive" } } },
+        { cardNumber: { contains: query, mode: "insensitive" } },
       ]
     },
     include: {

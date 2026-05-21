@@ -37,7 +37,7 @@ export default function DoctorPatientsPage() {
         </div>
 
         <div className="bg-white dark:bg-[#111C3A] p-8 rounded-[2.5rem] border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm">
-          <SearchBar onSearch={handleSearch} isSearching={isSearching} placeholder="Search patients by name, email, or phone..." />
+          <SearchBar onSearch={handleSearch} isSearching={isSearching} placeholder="Search patients by name, email, phone, or card number..." />
           
           {results.length > 0 && (
             <div className="mt-8 space-y-4">
