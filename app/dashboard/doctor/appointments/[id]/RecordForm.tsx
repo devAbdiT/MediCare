@@ -187,13 +187,13 @@ export default function RecordForm({ appointment }: RecordFormProps) {
 
   if (savedRecord) {
     return (
-      <div className="bg-white p-10 rounded-[3rem] border border-emerald-100 shadow-sm flex flex-col items-center text-center space-y-6">
-        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-2">
+      <div className="bg-white dark:bg-[#111C3A] p-10 rounded-[3rem] border border-emerald-500/20 dark:border-emerald-500/20 shadow-sm flex flex-col items-center text-center space-y-6">
+        <div className="w-20 h-20 bg-emerald-500/10 dark:bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 dark:text-[#34D399] mb-2">
           <CheckCircle2 size={40} />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Appointment Completed</h2>
-          <p className="text-slate-500 mt-2 font-medium max-w-md mx-auto">
+          <h2 className="text-2xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tight">Appointment Completed</h2>
+          <p className="text-[#5A6E8A] dark:text-[#8A9CBA] mt-2 font-medium max-w-md mx-auto">
             The medical record has been securely saved to the patient's vault.
           </p>
         </div>
@@ -201,7 +201,7 @@ export default function RecordForm({ appointment }: RecordFormProps) {
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md pt-4">
           <button
             onClick={onPrint}
-            className="flex-1 py-4 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-2xl font-black transition-colors flex items-center justify-center gap-2 border border-slate-200"
+            className="flex-1 py-4 bg-[#F0F4F8] dark:bg-[#0A122A] text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8] rounded-2xl font-black transition-colors flex items-center justify-center gap-2 border border-[#D0DCE8] dark:border-[#1A2A4A]"
           >
             <Printer size={20} />
             Print Prescription
@@ -209,7 +209,7 @@ export default function RecordForm({ appointment }: RecordFormProps) {
           
           <button
             onClick={() => setFollowUpOpen(true)}
-            className="flex-1 py-4 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-2xl font-black transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-4 bg-[#1E4A8A]/10 dark:bg-[#4A8AC8]/10 text-[#1E4A8A] dark:text-[#4A8AC8] hover:bg-[#1E4A8A]/20 dark:hover:bg-[#4A8AC8]/20 rounded-2xl font-black transition-colors flex items-center justify-center gap-2"
           >
             <CalendarIcon size={20} />
             Follow-up Visit
@@ -218,43 +218,43 @@ export default function RecordForm({ appointment }: RecordFormProps) {
 
         <button
           onClick={() => router.push("/dashboard/doctor")}
-          className="text-slate-400 font-bold hover:text-slate-600 underline underline-offset-4 mt-4"
+          className="text-[#5A6E8A] dark:text-[#8A9CBA] font-bold hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8] underline underline-offset-4 mt-4"
         >
           Return to Dashboard
         </button>
 
         {/* Follow-up Modal */}
         <Dialog open={followUpOpen} onOpenChange={setFollowUpOpen}>
-          <DialogContent className="sm:max-w-md rounded-[2.5rem] p-8 border-slate-100 shadow-2xl">
+          <DialogContent className="sm:max-w-md rounded-[2.5rem] p-8 bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black text-slate-900">Give Follow-up</DialogTitle>
+              <DialogTitle className="text-2xl font-black text-[#1A2A4A] dark:text-[#E8EEF8]">Give Follow-up</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleFollowUp} className="space-y-6 mt-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Patient</label>
-                <div className="w-full p-4 bg-slate-50 rounded-2xl font-bold text-slate-500">
+                <label className="text-xs font-bold text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-1">Patient</label>
+                <div className="w-full p-4 bg-[#F0F4F8] dark:bg-[#0A122A] rounded-2xl font-bold text-[#5A6E8A] dark:text-[#8A9CBA]">
                   {appointment.patient.user.name}
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Date</label>
+                <label className="text-xs font-bold text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-1">Date</label>
                 <input
                   type="date"
                   min={new Date().toISOString().split("T")[0]}
                   value={followUpDate}
                   onChange={(e) => setFollowUpDate(e.target.value)}
-                  className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 outline-none transition-all font-bold text-slate-900"
+                  className="w-full p-4 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-[#D0DCE8] dark:border-[#1A2A4A] rounded-2xl focus:bg-white dark:focus:bg-[#111C3A] focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none transition-all font-bold text-[#1A2A4A] dark:text-[#E8EEF8]"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Time Slot</label>
+                <label className="text-xs font-bold text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-1">Time Slot</label>
                 <div className="relative">
-                  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6E8A] dark:text-[#8A9CBA]" size={18} />
                   <select
                     value={followUpTime}
                     onChange={(e) => setFollowUpTime(e.target.value)}
-                    className="w-full pl-12 pr-4 h-14 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-600 outline-none transition-all font-bold text-slate-900 appearance-none"
+                    className="w-full pl-12 pr-4 h-14 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-[#D0DCE8] dark:border-[#1A2A4A] rounded-2xl focus:bg-white dark:focus:bg-[#111C3A] focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none transition-all font-bold text-[#1A2A4A] dark:text-[#E8EEF8] appearance-none"
                     required
                   >
                     <option value="">Select time...</option>
@@ -269,18 +269,18 @@ export default function RecordForm({ appointment }: RecordFormProps) {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Reason</label>
+                <label className="text-xs font-bold text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest ml-1">Reason</label>
                 <input
                   type="text"
                   value="Follow-up"
                   disabled
-                  className="w-full p-4 bg-slate-50 rounded-2xl font-bold text-slate-500"
+                  className="w-full p-4 bg-[#F0F4F8] dark:bg-[#0A122A] border border-[#D0DCE8] dark:border-[#1A2A4A] rounded-2xl font-bold text-[#5A6E8A] dark:text-[#8A9CBA]"
                 />
               </div>
               <button
                 type="submit"
                 disabled={followUpLoading || !followUpDate || !followUpTime}
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-4 bg-[#1E4A8A] dark:bg-[#4A8AC8] text-white dark:text-[#0A122A] rounded-2xl font-black hover:bg-[#1A3F75] dark:hover:bg-[#3B72A8] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {followUpLoading ? <Loader2 className="animate-spin" /> : <CalendarIcon size={20} />}
                 Confirm Follow-up
@@ -293,49 +293,49 @@ export default function RecordForm({ appointment }: RecordFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-[#111C3A] p-10 rounded-[3rem] border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm space-y-8">
       <div className="space-y-4">
-        <label className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase tracking-widest">
-          <FileText size={18} className="text-blue-600" />
+        <label className="flex items-center gap-2 text-sm font-black text-[#1A2A4A] dark:text-[#E8EEF8] uppercase tracking-widest">
+          <FileText size={18} className="text-[#1E4A8A] dark:text-[#4A8AC8]" />
           Diagnosis
         </label>
         <textarea
           value={diagnosis}
           onChange={(e) => setDiagnosis(e.target.value)}
           placeholder="Enter clinical diagnosis..."
-          className="w-full p-6 bg-slate-50 border-2 border-transparent rounded-3xl focus:bg-white focus:border-blue-600 outline-none transition-all font-medium text-slate-900 min-h-[120px] resize-none"
+          className="w-full p-6 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-[#D0DCE8] dark:border-[#1A2A4A] rounded-3xl focus:bg-white dark:focus:bg-[#111C3A] focus:border-[#1E4A8A] dark:focus:border-[#4A8AC8] outline-none transition-all font-medium text-[#1A2A4A] dark:text-[#E8EEF8] min-h-[120px] resize-none"
           required
         />
       </div>
 
       <div className="space-y-4">
-        <label className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase tracking-widest">
-          <Pill size={18} className="text-emerald-500" />
+        <label className="flex items-center gap-2 text-sm font-black text-[#1A2A4A] dark:text-[#E8EEF8] uppercase tracking-widest">
+          <Pill size={18} className="text-emerald-500 dark:text-[#34D399]" />
           Prescription & Treatment
         </label>
         <textarea
           value={prescription}
           onChange={(e) => setPrescription(e.target.value)}
           placeholder="List medications and dosages..."
-          className="w-full p-6 bg-slate-50 border-2 border-transparent rounded-3xl focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-slate-900 min-h-[150px] resize-none"
+          className="w-full p-6 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-[#D0DCE8] dark:border-[#1A2A4A] rounded-3xl focus:bg-white dark:focus:bg-[#111C3A] focus:border-emerald-500 outline-none transition-all font-medium text-[#1A2A4A] dark:text-[#E8EEF8] min-h-[150px] resize-none"
           required
         />
       </div>
 
       <div className="space-y-4">
-        <label className="text-sm font-black text-slate-800 uppercase tracking-widest">Internal Notes (Optional)</label>
+        <label className="text-sm font-black text-[#1A2A4A] dark:text-[#E8EEF8] uppercase tracking-widest">Internal Notes (Optional)</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Private notes for medical staff..."
-          className="w-full p-6 bg-slate-50 border-2 border-transparent rounded-3xl focus:bg-white focus:border-slate-400 outline-none transition-all font-medium text-slate-900 min-h-[100px] resize-none"
+          className="w-full p-6 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-[#D0DCE8] dark:border-[#1A2A4A] rounded-3xl focus:bg-white dark:focus:bg-[#111C3A] focus:border-[#5A6E8A] dark:focus:border-[#8A9CBA] outline-none transition-all font-medium text-[#1A2A4A] dark:text-[#E8EEF8] min-h-[100px] resize-none"
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-6 bg-blue-600 text-white rounded-3xl font-black text-xl shadow-2xl shadow-blue-100 hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+        className="w-full py-6 bg-[#1E4A8A] dark:bg-[#4A8AC8] text-white dark:text-[#0A122A] rounded-3xl font-black text-xl shadow-lg shadow-[#1E4A8A]/10 dark:shadow-[#4A8AC8]/10 hover:bg-[#1A3F75] dark:hover:bg-[#3B72A8] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
       >
         {loading ? <Loader2 className="animate-spin" /> : <Save />}
         Complete Appointment

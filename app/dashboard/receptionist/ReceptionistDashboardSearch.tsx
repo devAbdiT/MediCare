@@ -36,8 +36,8 @@ export function ReceptionistDashboardSearch() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-[#1E293B] p-8 rounded-[2.5rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">
-        <h2 className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9] mb-5 tracking-tight">
+      <div className="bg-[#F0F4F8] dark:bg-[#0A122A] p-8 rounded-[2.5rem] border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm transition-colors duration-500">
+        <h2 className="text-xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] mb-5 tracking-tight">
           Quick Patient Search
         </h2>
 
@@ -49,7 +49,7 @@ export function ReceptionistDashboardSearch() {
 
         {/* Loading */}
         {isSearching && (
-          <div className="flex items-center gap-3 mt-6 text-[#64748B] dark:text-[#94A3B8]">
+          <div className="flex items-center gap-3 mt-6 text-[#5A6E8A] dark:text-[#8A9CBA]">
             <Loader2 size={16} className="animate-spin" />
             <span className="text-sm font-bold">Searching patients...</span>
           </div>
@@ -57,8 +57,8 @@ export function ReceptionistDashboardSearch() {
 
         {/* No results */}
         {!isSearching && hasSearched && results.length === 0 && (
-          <div className="mt-5 text-center py-8 bg-[#F8FAFC] dark:bg-[#0F172A] rounded-2xl border border-dashed border-[#E2E8F0] dark:border-[#334155]">
-            <p className="text-[#64748B] dark:text-[#94A3B8] font-bold text-sm">
+          <div className="mt-5 text-center py-8 bg-white dark:bg-[#111C3A] rounded-2xl border border-dashed border-[#D0DCE8] dark:border-[#1A2A4A]">
+            <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-bold text-sm">
               No patients found matching your search.
             </p>
           </div>
@@ -70,23 +70,23 @@ export function ReceptionistDashboardSearch() {
             {results.map((patient) => (
               <div
                 key={patient.id}
-                className="p-5 rounded-2xl bg-[#F8FAFC] dark:bg-[#0F172A] border border-[#E2E8F0] dark:border-[#334155] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-[#3B82F6] dark:hover:border-[#60A5FA] transition-all"
+                className="p-5 rounded-2xl bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-[#1E4A8A] dark:hover:border-[#4A8AC8] transition-all"
               >
                 {/* Patient info */}
                 <div className="flex items-center gap-4">
-                  <div className="w-11 h-11 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-2xl flex items-center justify-center font-black text-lg shrink-0">
+                  <div className="w-11 h-11 bg-[#1E4A8A]/10 dark:bg-[#4A8AC8]/10 text-[#1E4A8A] dark:text-[#4A8AC8] rounded-2xl flex items-center justify-center font-black text-lg shrink-0">
                     {patient.name?.charAt(0) ?? "?"}
                   </div>
                   <div>
-                    <h3 className="font-bold text-[#1E293B] dark:text-[#F1F5F9]">
+                    <h3 className="font-bold text-[#1A2A4A] dark:text-[#E8EEF8]">
                       {patient.name}
                     </h3>
-                    <p className="text-xs font-medium text-[#64748B] dark:text-[#94A3B8]">
+                    <p className="text-xs font-medium text-[#5A6E8A] dark:text-[#8A9CBA]">
                       {patient.email}
                       {patient.phone && <> &bull; {patient.phone}</>}
                     </p>
                     {patient.cardNumber && (
-                      <span className="inline-block mt-1 px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black rounded-lg uppercase tracking-widest">
+                      <span className="inline-block mt-1 px-2.5 py-0.5 bg-emerald-500/10 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black rounded-lg uppercase tracking-widest">
                         {patient.cardNumber}
                       </span>
                     )}
@@ -99,7 +99,7 @@ export function ReceptionistDashboardSearch() {
                     href={`/dashboard/receptionist/book-appointment?patientId=${patient.id}`}
                     className="flex-1 sm:flex-none"
                   >
-                    <button className="w-full px-4 py-2.5 bg-[#3B82F6] hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-500/10">
+                    <button className="w-full px-4 py-2.5 bg-[#1E4A8A] dark:bg-[#4A8AC8] hover:bg-[#1A3F75] dark:hover:bg-[#3B72A8] text-white dark:text-[#0A122A] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-500/10">
                       <CalendarPlus size={14} />
                       Book
                     </button>
@@ -108,7 +108,7 @@ export function ReceptionistDashboardSearch() {
                     href={`/dashboard/receptionist/search?q=${encodeURIComponent(patient.name)}`}
                     className="flex-1 sm:flex-none"
                   >
-                    <button className="w-full px-4 py-2.5 bg-[#E2E8F0] dark:bg-[#334155] hover:bg-[#CBD5E1] dark:hover:bg-[#475569] text-[#1E293B] dark:text-[#F1F5F9] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2">
+                    <button className="w-full px-4 py-2.5 bg-[#F0F4F8] dark:bg-[#0A122A] hover:bg-[#D0DCE8] dark:hover:bg-[#1A2A4A] text-[#1E4A8A] dark:text-[#4A8AC8] border border-[#D0DCE8] dark:border-[#1A2A4A] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2">
                       <User size={14} />
                       Profile
                     </button>

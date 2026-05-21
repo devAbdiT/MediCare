@@ -48,7 +48,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
     redirect("/dashboard/admin/users");
   }
 
-  const age = user.patient ? differenceInYears(new Date(), new Date(user.patient.dateOfBirth)) : null;
+  const age = (user.patient && user.patient.dateOfBirth) ? differenceInYears(new Date(), new Date(user.patient.dateOfBirth)) : null;
   const adminName = session.user.name;
 
   return (
@@ -111,7 +111,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                 <ReportField label="System ID" value={`BK-${user.id.slice(-4).toUpperCase()}`} isBlue />
                 {user.role === "PATIENT" ? (
                   <>
-                    <ReportField label="Date of Birth" value={user.patient ? format(new Date(user.patient.dateOfBirth), "M/d/yyyy") : "-"} />
+                    <ReportField label="Date of Birth" value={(user.patient && user.patient.dateOfBirth) ? format(new Date(user.patient.dateOfBirth), "M/d/yyyy") : "-"} />
                     <ReportField label="Age" value={age?.toString() || "-"} />
                   </>
                 ) : (

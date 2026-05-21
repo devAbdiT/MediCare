@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Calendar, Clock, Loader2, Check, AlertTriangle, Lightbulb, Activity } from "lucide-react";
+import { Calendar, Clock, Loader2, Check, AlertTriangle, Lightbulb, Activity, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
