@@ -191,12 +191,12 @@ export default function DashboardLayout({
         {/* Top Header - Integrated & Rounded */}
         <header className="h-24 bg-white/50 dark:bg-[#111C3A]/50 backdrop-blur-md px-10 flex items-center justify-between z-40 transition-colors duration-500">
           <div className="flex items-center gap-4 bg-[#F0F4F8] dark:bg-[#0A122A] px-5 py-2.5 rounded-2xl border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm w-96 transition-colors duration-500">
-            <Search size={18} className="text-[#5A6E8A] dark:text-[#8A9CBA]" />
+            {/* <Search size={18} className="text-[#5A6E8A] dark:text-[#8A9CBA]" />
             <input
               type="text"
               placeholder="Search patient ID, records or labs..."
               className="bg-transparent border-none outline-none text-sm font-medium text-[#1A2A4A] dark:text-[#E8EEF8] w-full placeholder:text-[#5A6E8A] dark:placeholder:text-[#8A9CBA]"
-            />
+            /> */}
           </div>
           <div className="flex items-center gap-4">
             <button

@@ -12,7 +12,7 @@ import AdminControls from "./AdminControls";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
-    headers: await headers()
+    headers: await headers(),
   });
 
   if (!session || (session.user as any).role !== "ADMIN") {
@@ -20,23 +20,26 @@ export default async function AdminDashboard() {
   }
 
   // Fetch Stats
-  const [patientCount, appointmentTodayCount, doctorCount, userCount] = await Promise.all([
-    prisma.patient.count(),
-    prisma.appointment.count({
-      where: {
-        dateTime: {
-          gte: startOfDay(new Date()),
-          lt: new Date(new Date().setHours(23, 59, 59, 999)),
-        }
-      }
-    }),
-    prisma.doctor.count(),
-    prisma.user.count()
-  ]);
+  const [patientCount, appointmentTodayCount, doctorCount, userCount] =
+    await Promise.all([
+      prisma.patient.count(),
+      prisma.appointment.count({
+        where: {
+          dateTime: {
+            gte: startOfDay(new Date()),
+            lt: new Date(new Date().setHours(23, 59, 59, 999)),
+          },
+        },
+      }),
+      prisma.doctor.count(),
+      prisma.user.count(),
+    ]);
 
   // Fetch Analytics Data (Last 7 Days)
-  const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
-  
+  const last7Days = Array.from({ length: 7 }, (_, i) =>
+    subDays(new Date(), i),
+  ).reverse();
+
   const analyticsData = await Promise.all(
     last7Days.map(async (day) => {
       const start = startOfDay(day);
@@ -45,46 +48,48 @@ export default async function AdminDashboard() {
 
       const [appointments, registrations] = await Promise.all([
         prisma.appointment.count({
-          where: { dateTime: { gte: start, lt: end } }
+          where: { dateTime: { gte: start, lt: end } },
         }),
         prisma.user.count({
-          where: { 
+          where: {
             role: "PATIENT",
-            createdAt: { gte: start, lt: end }
-          }
-        })
+            createdAt: { gte: start, lt: end },
+          },
+        }),
       ]);
 
       return {
         date: format(day, "MMM dd"),
         appointments,
-        registrations
+        registrations,
       };
-    })
+    }),
   );
 
   // Fetch recent system activity
   const [recentUsers, recentAppts] = await Promise.all([
     prisma.user.findMany({ orderBy: { createdAt: "desc" }, take: 4 }),
-    prisma.appointment.findMany({ 
-      orderBy: { createdAt: "desc" }, 
+    prisma.appointment.findMany({
+      orderBy: { createdAt: "desc" },
       take: 4,
-      include: { patient: { include: { user: true } } }
-    })
+      include: { patient: { include: { user: true } } },
+    }),
   ]);
 
   const recentLogs = [
-    ...recentUsers.map(u => ({
+    ...recentUsers.map((u) => ({
       type: "USER",
       text: `New ${u.role.toLowerCase()} account created: ${u.name}`,
-      date: u.createdAt
+      date: u.createdAt,
     })),
-    ...recentAppts.map(a => ({
+    ...recentAppts.map((a) => ({
       type: "APPT",
       text: `Appointment booked for ${a.patient?.user?.name || "Unknown"}`,
-      date: a.createdAt
-    }))
-  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
+      date: a.createdAt,
+    })),
+  ]
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 5);
 
   const getRelativeTime = (date: Date) => {
     const diff = Math.floor((new Date().getTime() - date.getTime()) / 60000); // in minutes
@@ -104,10 +109,17 @@ export default async function AdminDashboard() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1E4A8A]/20 rounded-full border border-[#1E4A8A]/30">
                 <Zap size={14} className="text-[#4A8AC8] fill-[#4A8AC8]" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#4A8AC8]">System Performance: Optimal</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#4A8AC8]">
+                  System Performance: Optimal
+                </span>
               </div>
-              <h1 className="text-5xl font-black tracking-tighter">System Console</h1>
-              <p className="text-[#8A9CBA] text-lg font-medium max-w-lg">Monitoring global medical activity and infrastructure integrity across all nodes.</p>
+              <h1 className="text-5xl font-black tracking-tighter">
+                System Console
+              </h1>
+              <p className="text-[#8A9CBA] text-lg font-medium max-w-lg">
+                Monitoring global medical activity and infrastructure integrity
+                across all nodes.
+              </p>
             </div>
             <AdminControls />
           </div>
@@ -115,10 +127,30 @@ export default async function AdminDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <AdminStat icon={<Users />} label="Total Patients" value={patientCount.toString()} trend="+12.5%" />
-          <AdminStat icon={<Calendar />} label="Today's Visits" value={appointmentTodayCount.toString()} trend="+3.2%" />
-          <AdminStat icon={<Activity />} label="Staff Online" value={doctorCount.toString()} trend="Active" />
-          <AdminStat icon={<Zap />} label="Server Uptime" value="99.9%" trend="Stable" />
+          <AdminStat
+            icon={<Users />}
+            label="Total Patients"
+            value={patientCount.toString()}
+            trend="+12.5%"
+          />
+          <AdminStat
+            icon={<Calendar />}
+            label="Today's Visits"
+            value={appointmentTodayCount.toString()}
+            trend="+3.2%"
+          />
+          <AdminStat
+            icon={<Activity />}
+            label="Staff Online"
+            value={doctorCount.toString()}
+            trend="Active"
+          />
+          <AdminStat
+            icon={<Zap />}
+            label="Server Uptime"
+            value="99.9%"
+            trend="Stable"
+          />
         </div>
 
         {/* Analytics Charts Section */}
@@ -137,7 +169,12 @@ export default async function AdminDashboard() {
             </div>
             <div className="space-y-4">
               {recentLogs.map((log, idx) => (
-                <LogItem key={idx} type={log.type} text={log.text} time={getRelativeTime(log.date)} />
+                <LogItem
+                  key={idx}
+                  type={log.type}
+                  text={log.text}
+                  time={getRelativeTime(log.date)}
+                />
               ))}
               {recentLogs.length === 0 && (
                 <p className="text-sm text-[#8A9CBA]">No recent activity.</p>
@@ -146,7 +183,7 @@ export default async function AdminDashboard() {
           </div>
 
           {/* Quick Access */}
-          <div className="space-y-6">
+          {/* <div className="space-y-6">
              <div className="bg-[#1E4A8A] dark:bg-[#1E4A8A] p-8 rounded-[2.5rem] text-white shadow-2xl shadow-[#1E4A8A]/20 group transition-all duration-500">
                 <div className="flex items-center justify-between mb-8">
                   <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
@@ -165,34 +202,64 @@ export default async function AdminDashboard() {
                 <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.2em] mb-2">Build Version</p>
                 <p className="text-[#1A2A4A] dark:text-[#E8EEF8] font-black">MediCare Enterprise v2.4.0</p>
              </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </DashboardLayout>
   );
 }
 
-function AdminStat({ icon, label, value, trend }: { icon: React.ReactNode; label: string; value: string; trend: string }) {
+function AdminStat({
+  icon,
+  label,
+  value,
+  trend,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  trend: string;
+}) {
   return (
     <div className="bg-white dark:bg-[#111C3A] p-8 rounded-[2.5rem] border border-[#D0DCE8] dark:border-[#1A2A4A] group hover:border-[#1E4A8A] dark:hover:border-[#4A8AC8] transition-all duration-500 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="w-12 h-12 bg-[#F0F4F8] dark:bg-[#0A122A] rounded-2xl flex items-center justify-center text-[#5A6E8A] dark:text-[#8A9CBA] group-hover:bg-[#1E4A8A]/10 dark:group-hover:bg-[#4A8AC8]/10 group-hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8] transition-colors">
           {icon}
         </div>
-        <span className="text-xs font-black text-[#1E4A8A] dark:text-[#4A8AC8]">{trend}</span>
+        <span className="text-xs font-black text-[#1E4A8A] dark:text-[#4A8AC8]">
+          {trend}
+        </span>
       </div>
-      <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest mb-1">{label}</p>
-      <p className="text-4xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tighter">{value}</p>
+      <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest mb-1">
+        {label}
+      </p>
+      <p className="text-4xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tighter">
+        {value}
+      </p>
     </div>
   );
 }
 
-function LogItem({ type, text, time }: { type: string; text: string; time: string }) {
+function LogItem({
+  type,
+  text,
+  time,
+}: {
+  type: string;
+  text: string;
+  time: string;
+}) {
   return (
     <div className="flex items-center gap-6 p-4 rounded-2xl hover:bg-[#F0F4F8] dark:hover:bg-[#0A122A] transition-colors border border-transparent hover:border-[#D0DCE8] dark:hover:border-[#1A2A4A]">
-      <span className="w-10 text-[10px] font-black text-[#1E4A8A] dark:text-[#4A8AC8] uppercase tracking-widest">{type}</span>
-      <p className="flex-1 text-sm font-bold text-[#1A2A4A] dark:text-[#E8EEF8] leading-tight">{text}</p>
-      <span className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">{time}</span>
+      <span className="w-10 text-[10px] font-black text-[#1E4A8A] dark:text-[#4A8AC8] uppercase tracking-widest">
+        {type}
+      </span>
+      <p className="flex-1 text-sm font-bold text-[#1A2A4A] dark:text-[#E8EEF8] leading-tight">
+        {text}
+      </p>
+      <span className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">
+        {time}
+      </span>
     </div>
   );
 }
