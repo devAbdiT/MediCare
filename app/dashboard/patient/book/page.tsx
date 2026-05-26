@@ -28,6 +28,7 @@ export default function BookAppointment() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(false);
   const [availability, setAvailability] = useState<boolean | null>(null);
+  const [doctorAvailability, setDoctorAvailability] = useState<any[]>([]);
 
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedDoctor, setSelectedDoctor] = useState("");
@@ -58,6 +59,33 @@ export default function BookAppointment() {
       .finally(() => setLoadingDoctors(false));
   }, [selectedDate]);
 
+  useEffect(() => {
+    if (!selectedDoctor) {
+      setDoctorAvailability([]);
+      return;
+    }
+    fetch(`/api/doctors/${selectedDoctor}/availability`)
+      .then(res => res.json())
+      .then(data => setDoctorAvailability(data))
+      .catch(console.error);
+  }, [selectedDoctor]);
+
+  const formatAvailability = () => {
+    if (!doctorAvailability || doctorAvailability.length === 0) return "Loading availability...";
+    const activeDays = doctorAvailability.filter(a => a.isActive);
+    if (activeDays.length === 0) return "Not available this week.";
+    
+    const isStandard = activeDays.length === 5 && 
+                       activeDays.every(a => a.dayOfWeek >= 1 && a.dayOfWeek <= 5) &&
+                       activeDays.every(a => a.startTime === "08:00" && a.endTime === "17:00");
+                       
+    if (isStandard) return "Available Monday–Friday, 08:00–17:00";
+    
+    // Generic fallback for custom hours
+    const first = activeDays[0];
+    return `Working hours include: ${first.startTime} - ${first.endTime}`;
+  };
+
   const checkAvailability = async () => {
     if (!selectedDoctor || !selectedDate || !selectedTime) return;
     
@@ -68,7 +96,7 @@ export default function BookAppointment() {
       const data = await res.json();
       setAvailability(data.available);
       if (!data.available) {
-        toast.error("Doctor is not available at this time.");
+        toast.error(data.message || "Doctor is not available at this time.");
       } else {
         toast.success("Time slot is available!");
       }
@@ -104,8 +132,8 @@ export default function BookAppointment() {
 
       toast.success("Appointment booked successfully!");
       router.push("/dashboard/patient");
-    } catch (err) {
-      toast.error("An error occurred during booking.");
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred during booking.");
     } finally {
       setLoading(false);
     }
@@ -258,8 +286,22 @@ export default function BookAppointment() {
 
               {/* Time Selection */}
               {selectedDoctor && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="space-y-2">
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  {/* Doctor Availability Summary */}
+                  {doctorAvailability.length > 0 && (
+                    <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 flex items-start gap-3">
+                      <Clock className="text-blue-500 mt-0.5 shrink-0" size={18} />
+                      <div>
+                        <p className="text-sm font-bold text-blue-900 dark:text-blue-100">Doctor Working Hours</p>
+                        <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mt-1">
+                          {formatAvailability()}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
                     <Label className="font-bold text-slate-700 dark:text-slate-300">3. Preferred Time</Label>
                     <div className="relative">
                       <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
@@ -309,6 +351,7 @@ export default function BookAppointment() {
                     </select>
                   </div>
                 </div>
+              </div>
               )}
 
               {/* Availability Check */}

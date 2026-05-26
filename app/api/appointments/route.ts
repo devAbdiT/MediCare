@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { startOfHour, endOfHour } from "date-fns";
+import { validateDoctorAvailability } from "@/lib/availability";
 
 // GET /api/appointments - List appointments based on role
 export async function GET() {
@@ -57,7 +58,13 @@ export async function POST(req: Request) {
     const startTime = startOfHour(requestedTime);
     const endTime = endOfHour(requestedTime);
 
-    // 1. Server-side availability check
+    // 1. Doctor Working Hours validation
+    const availabilityCheck = await validateDoctorAvailability(doctorId, requestedTime);
+    if (!availabilityCheck.valid) {
+      return new NextResponse(availabilityCheck.message, { status: 400 });
+    }
+
+    // 2. Server-side conflict check
     const existing = await prisma.appointment.findFirst({
       where: {
         doctorId,
@@ -70,7 +77,7 @@ export async function POST(req: Request) {
       return new NextResponse("Doctor is already booked for this time slot", { status: 400 });
     }
 
-    // 2. Resolve IDs
+    // 3. Resolve IDs
     let finalPatientId = patientId;
     if ((session.user as any).role === "PATIENT") {
       const patient = await prisma.patient.findUnique({ where: { userId: session.user.id } });
@@ -83,7 +90,7 @@ export async function POST(req: Request) {
     const finalAppointmentType = validTypes.includes(appointmentType) ? appointmentType : "NEW_VISIT";
     const finalPriority = validPriorities.includes(priority) ? priority : "NORMAL";
 
-    // 3. Create Appointment
+    // 4. Create Appointment
     const appointment = await prisma.appointment.create({
       data: {
         patientId: finalPatientId,

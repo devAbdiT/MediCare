@@ -40,6 +40,8 @@ export default function ReceptionistSchedulePage() {
   const [rescheduleReason, setRescheduleReason] = useState("");
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
+  const [doctorAvailability, setDoctorAvailability] = useState<any[]>([]);
 
   // History Dialog state
   const [historyTarget, setHistoryTarget] = useState<any | null>(null);
@@ -74,6 +76,33 @@ export default function ReceptionistSchedulePage() {
   useEffect(() => {
     fetchAppointments(searchQuery);
   }, [showAll]);
+
+  useEffect(() => {
+    if (!rescheduleData) {
+      setDoctorAvailability([]);
+      return;
+    }
+    fetch(`/api/doctors/${rescheduleData.doctorId}/availability`)
+      .then((res) => res.json())
+      .then((data) => setDoctorAvailability(data))
+      .catch(console.error);
+  }, [rescheduleData]);
+
+  const formatAvailability = () => {
+    if (!doctorAvailability || doctorAvailability.length === 0) return "Loading availability...";
+    const activeDays = doctorAvailability.filter((a) => a.isActive);
+    if (activeDays.length === 0) return "Not available this week.";
+
+    const isStandard =
+      activeDays.length === 5 &&
+      activeDays.every((a) => a.dayOfWeek >= 1 && a.dayOfWeek <= 5) &&
+      activeDays.every((a) => a.startTime === "08:00" && a.endTime === "17:00");
+
+    if (isStandard) return "Available Monday–Friday, 08:00–17:00";
+
+    const first = activeDays[0];
+    return `Working hours include: ${first.startTime} - ${first.endTime}`;
+  };
 
   const viewHistory = async (app: any) => {
     setHistoryTarget(app);
@@ -134,6 +163,7 @@ export default function ReceptionistSchedulePage() {
 
     setCheckingAvailability(true);
     setAvailable(null);
+    setAvailabilityMessage("");
 
     const dateTime = new Date(`${newDate}T${newTime}`);
 
@@ -144,7 +174,8 @@ export default function ReceptionistSchedulePage() {
       const data = await res.json();
       setAvailable(data.available);
       if (!data.available) {
-        toast.error("Doctor is already booked at this time");
+        setAvailabilityMessage(data.message || "Doctor is not available at this time");
+        toast.error(data.message || "Doctor is not available at this time");
       }
     } catch (err) {
       toast.error("Error checking availability");
@@ -437,6 +468,18 @@ export default function ReceptionistSchedulePage() {
           </DialogHeader>
 
           <div className="space-y-6 pt-4">
+            {doctorAvailability.length > 0 && (
+              <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 flex items-start gap-3">
+                <Clock className="text-blue-500 mt-0.5 shrink-0" size={18} />
+                <div>
+                  <p className="text-sm font-bold text-blue-900 dark:text-blue-100">Doctor Working Hours</p>
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mt-1">
+                    {formatAvailability()}
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
@@ -515,6 +558,12 @@ export default function ReceptionistSchedulePage() {
               <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-900 flex items-center gap-3 text-emerald-700 dark:text-emerald-400 font-bold">
                 <CheckCircle2 size={24} />
                 Slot is Available
+              </div>
+            )}
+            {available === false && (
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-900 flex items-center gap-3 text-red-700 dark:text-red-400 font-bold">
+                <AlertTriangle size={24} />
+                {availabilityMessage || "Slot is Unavailable"}
               </div>
             )}
 

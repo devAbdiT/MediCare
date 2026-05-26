@@ -119,6 +119,7 @@ model Doctor {
   department     Department?     @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   appointments   Appointment[]
   medicalRecords MedicalRecord[]
+  availabilities DoctorAvailability[]
 
   @@map("doctors")
 }
@@ -230,4 +231,22 @@ model AppointmentHistory {
   @@index([appointmentId])
   @@index([createdAt])
   @@map("appointment_histories")
+}
+
+model DoctorAvailability {
+  id        String   @id @default(cuid())
+  doctorId  String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([doctorId])
+  @@index([dayOfWeek])
+  @@map("doctor_availabilities")
 }

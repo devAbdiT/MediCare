@@ -2,6 +2,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { startOfHour, endOfHour } from "date-fns";
+import { validateDoctorAvailability } from "@/lib/availability";
 
 // GET /api/appointments/check-availability?doctorId=...&dateTime=...
 export async function GET(req: Request) {
@@ -15,6 +16,15 @@ export async function GET(req: Request) {
 
   const requestedTime = new Date(dateTimeStr);
   
+  // Validate against working hours first
+  const availabilityCheck = await validateDoctorAvailability(doctorId, requestedTime);
+  if (!availabilityCheck.valid) {
+    return NextResponse.json({
+      available: false,
+      message: availabilityCheck.message
+    });
+  }
+
   // We assume an appointment takes 1 hour for simplicity
   const startTime = startOfHour(requestedTime);
   const endTime = endOfHour(requestedTime);
@@ -33,6 +43,7 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.json({ 
-    available: !existingAppointment 
+    available: !existingAppointment,
+    message: existingAppointment ? "Doctor is already booked at this time" : undefined
   });
 }

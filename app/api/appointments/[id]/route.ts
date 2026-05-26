@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { startOfDay, endOfDay } from "date-fns";
+import { validateDoctorAvailability } from "@/lib/availability";
 
 export async function PATCH(
   req: Request,
@@ -114,6 +115,12 @@ export async function PATCH(
       const newDate = new Date(dateTime);
       // Check if dateTime actually changed
       if (newDate.getTime() !== appointment.dateTime.getTime()) {
+        // Validate against doctor working hours first
+        const availabilityCheck = await validateDoctorAvailability(appointment.doctorId, newDate);
+        if (!availabilityCheck.valid) {
+          return new NextResponse(availabilityCheck.message, { status: 400 });
+        }
+
         if (!reason || reason.trim().length < 3) {
           return new NextResponse("Please enter a valid reason for rescheduling this appointment.", { status: 400 });
         }

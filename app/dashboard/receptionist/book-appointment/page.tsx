@@ -60,6 +60,8 @@ function BookingForm() {
   const [loading, setLoading] = useState(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
+  const [doctorAvailability, setDoctorAvailability] = useState<any[]>([]);
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
 
   useEffect(() => {
     if (!date) return;
@@ -81,11 +83,38 @@ function BookingForm() {
       .finally(() => setLoadingDoctors(false));
   }, [date]);
 
+  useEffect(() => {
+    if (!selectedDoctor) {
+      setDoctorAvailability([]);
+      return;
+    }
+    fetch(`/api/doctors/${selectedDoctor}/availability`)
+      .then(res => res.json())
+      .then(data => setDoctorAvailability(data))
+      .catch(console.error);
+  }, [selectedDoctor]);
+
+  const formatAvailability = () => {
+    if (!doctorAvailability || doctorAvailability.length === 0) return "Loading availability...";
+    const activeDays = doctorAvailability.filter(a => a.isActive);
+    if (activeDays.length === 0) return "Not available this week.";
+    
+    const isStandard = activeDays.length === 5 && 
+                       activeDays.every(a => a.dayOfWeek >= 1 && a.dayOfWeek <= 5) &&
+                       activeDays.every(a => a.startTime === "08:00" && a.endTime === "17:00");
+                       
+    if (isStandard) return "Available Monday–Friday, 08:00–17:00";
+    
+    const first = activeDays[0];
+    return `Working hours include: ${first.startTime} - ${first.endTime}`;
+  };
+
   const checkAvailability = async () => {
     if (!selectedDoctor || !date || !time) return;
     
     setCheckingAvailability(true);
     setAvailable(null);
+    setAvailabilityMessage("");
     
     const dateTime = new Date(`${date}T${time}`);
     
@@ -94,7 +123,10 @@ function BookingForm() {
       const data = await res.json();
       setAvailable(data.available);
       if (!data.available) {
-        toast.error("Doctor is already booked at this time");
+        setAvailabilityMessage(data.message || "Doctor is not available at this time");
+        toast.error(data.message || "Doctor is not available at this time");
+      } else {
+        toast.success("Time slot is available!");
       }
     } catch (err) {
       toast.error("Error checking availability");
@@ -309,8 +341,22 @@ function BookingForm() {
                 )}
                 
                 {selectedDoctor && (
-                  <div className="space-y-4 pt-6 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-500">
-                    <Label className="font-bold text-slate-700 dark:text-slate-300">3. Select Time Slot</Label>
+                  <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800 animate-in fade-in duration-500">
+                    
+                    {doctorAvailability.length > 0 && (
+                      <div className="p-4 rounded-2xl bg-teal-50 dark:bg-teal-900/10 border border-teal-100 dark:border-teal-900 flex items-start gap-3">
+                        <Clock className="text-teal-600 mt-0.5 shrink-0" size={18} />
+                        <div>
+                          <p className="text-sm font-bold text-teal-900 dark:text-teal-100">Doctor Working Hours</p>
+                          <p className="text-sm font-medium text-teal-700 dark:text-teal-300 mt-1">
+                            {formatAvailability()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      <Label className="font-bold text-slate-700 dark:text-slate-300">3. Select Time Slot</Label>
                     <div className="relative">
                       <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
                       <select
@@ -383,10 +429,11 @@ function BookingForm() {
                     {available === false && (
                       <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-100 dark:border-red-900 flex items-center gap-3 text-red-700 dark:text-red-400 font-bold">
                         <AlertCircle size={24} />
-                        Slot is Taken
+                        {availabilityMessage || "Slot is Unavailable"}
                       </div>
                     )}
                   </div>
+                </div>
                 )}
               </CardContent>
             </Card>
