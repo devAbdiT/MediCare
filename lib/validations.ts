@@ -1,17 +1,17 @@
 import { z } from "zod";
-import { formatPhoneNumber } from "./phone-format";
+import { formatPhoneNumber, validatePhoneNumber } from "./phone-format";
 
 // Common user schema
 export const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name too long"),
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().superRefine((val, ctx) => {
-    try {
-      formatPhoneNumber(val);
-    } catch (e: any) {
+    const cleaned = val.replace(/[\s\-\(\)]/g, "");
+    if (!validatePhoneNumber(cleaned)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Please enter a valid Ethiopian phone number",
+        message:
+          "Enter a valid Ethiopian phone number (e.g. +251912345678, +251712345678, 0912345678, or 0712345678)",
       });
     }
   }),

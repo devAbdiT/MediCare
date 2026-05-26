@@ -178,29 +178,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between px-2">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative flex items-center">
-                  <input
-                    type="checkbox"
-                    className="peer w-6 h-6 opacity-0 absolute cursor-pointer"
-                  />
-                  <div className="w-6 h-6 border-2 border-[#D0DCE8] dark:border-[#1A2A4A] rounded-lg peer-checked:bg-[#1E4A8A] peer-checked:border-[#1E4A8A] transition-all flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100 transition-opacity" />
-                  </div>
-                  <span className="ml-3 text-sm font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">
-                    Keep Sync Active
-                  </span>
-                </div>
-              </label>
-              <a
-                href="#"
-                className="text-xs font-black text-[#1E4A8A] dark:text-[#4A8AC8] uppercase tracking-widest hover:underline underline-offset-4"
-              >
-                Reset Credentials
-              </a>
-            </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -226,10 +203,10 @@ export default function LoginPage() {
               Node Access Manifest
             </h4>
             <div className="grid grid-cols-2 gap-6 text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">
-              <DemoItem role="Admin" email="admin@hospital.com" />
-              <DemoItem role="Doctor" email="doctor1@hospital.com" />
-              <DemoItem role="Staff" email="receptionist1@hospital.com" />
-              <DemoItem role="Patient" email="patient1@example.com" />
+              <DemoItem role="Admin" email="admin@medicare.com" />
+              <DemoItem role="Doctor" email="yonas.desta@medicare.com" />
+              <DemoItem role="Staff" email="mekdes.alemu@medicare.com" />
+              <DemoItem role="Patient" email="nahom.daniel@email.com" />
             </div>
             <p className="text-[9px] text-[#1E4A8A]/50 dark:text-[#4A8AC8]/30 mt-6 text-center font-black uppercase tracking-[0.3em]">
               Access Key for All Nodes: password123

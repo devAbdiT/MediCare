@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hash } from "bcrypt-ts";
 import { differenceInYears } from "date-fns";
+import { formatPhoneNumber } from "@/lib/phone-format";
 
 export async function POST(req: Request) {
   try {
@@ -12,6 +13,19 @@ export async function POST(req: Request) {
     // Validate required fields (bloodType & dateOfBirth are now optional)
     if (!name || !email || !password || !gender) {
       return new NextResponse("Missing required fields", { status: 400 });
+    }
+
+    // Validate and format phone number
+    let formattedPhone: string | undefined;
+    if (phone) {
+      try {
+        formattedPhone = formatPhoneNumber(phone);
+      } catch {
+        return new NextResponse(
+          "Invalid phone number. Use format: +251912345678, +251712345678, 0912345678, or 0712345678",
+          { status: 400 }
+        );
+      }
     }
 
     // Check if user already exists
@@ -52,7 +66,7 @@ export async function POST(req: Request) {
         data: {
           name,
           email,
-          phone,
+          phone: formattedPhone,
           password: hashedPassword,
           role: "PATIENT",
           gender,

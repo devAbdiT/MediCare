@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { hash } from "bcrypt-ts";
+import { formatPhoneNumber } from "@/lib/phone-format";
 
 export async function PATCH(req: Request) {
   const session = await auth.api.getSession({
@@ -16,6 +17,19 @@ export async function PATCH(req: Request) {
 
   const { phone, password } = await req.json();
 
+  // Validate and format phone number
+  let formattedPhone: string | undefined;
+  if (phone) {
+    try {
+      formattedPhone = formatPhoneNumber(phone);
+    } catch {
+      return NextResponse.json(
+        { message: "Invalid phone number. Use format: +251912345678, +251712345678, 0912345678, or 0712345678" },
+        { status: 400 }
+      );
+    }
+  }
+
   try {
     const hashedPassword = password ? await hash(password, 10) : null;
 
@@ -24,7 +38,7 @@ export async function PATCH(req: Request) {
       const updatedUser = await tx.user.update({
         where: { id: session.user.id },
         data: {
-          phone: phone || undefined,
+          phone: formattedPhone || undefined,
           ...(hashedPassword ? { password: hashedPassword } : {}),
         },
       });
