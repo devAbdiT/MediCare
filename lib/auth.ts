@@ -6,7 +6,7 @@ import { hash, compare } from "bcrypt-ts";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BASE_URL,
 
   emailAndPassword: {
     enabled: true,

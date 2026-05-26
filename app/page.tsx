@@ -101,7 +101,7 @@ export default function Home() {
             <div className="relative z-10 transition-transform duration-1000 group-hover:scale-[1.05] animate-float">
               <div className="absolute inset-0 bg-gradient-to-br from-[#1E4A8A]/30 to-[#2D8A6E]/30 blur-[100px] opacity-0 group-hover:opacity-50 transition-opacity" />
               <img 
-                src="/premium_3d_doctor_mascot_1778335022307.png" 
+                src="/char.png" 
                 alt="MediCare AI Specialist"
                 className="w-full h-auto drop-shadow-[0_80px_80px_rgba(0,0,0,0.15)] rounded-[5rem] relative z-20"
               />

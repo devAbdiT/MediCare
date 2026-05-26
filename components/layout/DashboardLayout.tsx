@@ -66,7 +66,6 @@ export default function DashboardLayout({
     doctor: [
       { name: "Schedule", icon: Calendar, href: "/dashboard/doctor" },
       { name: "Patients", icon: Users, href: "/dashboard/doctor/patients" },
-      { name: "Messages", icon: Bell, href: "/dashboard/doctor/messages" },
     ],
     receptionist: [
       {
