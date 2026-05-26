@@ -18,7 +18,7 @@ export async function PATCH(
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { status, dateTime, appointmentType, priority } = await req.json();
+  const { status, dateTime, appointmentType, priority, reason } = await req.json();
   const userRole = (session.user as any).role;
 
   try {
@@ -108,6 +108,39 @@ export async function PATCH(
       return NextResponse.json(updated);
     }
 
+    // ── RESCHEDULE logic ────────────────────────────────────────────
+    let finalStatus = status;
+    if (dateTime) {
+      const newDate = new Date(dateTime);
+      // Check if dateTime actually changed
+      if (newDate.getTime() !== appointment.dateTime.getTime()) {
+        if (!reason || reason.trim().length < 3) {
+          return new NextResponse("Please enter a valid reason for rescheduling this appointment.", { status: 400 });
+        }
+        if (appointment.status === "COMPLETED" || appointment.status === "CANCELLED") {
+          return new NextResponse(`${appointment.status.charAt(0) + appointment.status.slice(1).toLowerCase()} appointments cannot be rescheduled.`, { status: 400 });
+        }
+        
+        finalStatus = "RESCHEDULED";
+
+        // Create history record
+        await prisma.appointmentHistory.create({
+          data: {
+            appointmentId: appointment.id,
+            oldDateTime: appointment.dateTime,
+            newDateTime: newDate,
+            oldStatus: appointment.status,
+            newStatus: "RESCHEDULED",
+            reason: reason,
+            actionType: "RESCHEDULE",
+            changedByUserId: session.user.id,
+            changedByName: session.user.name,
+            changedByRole: userRole,
+          }
+        });
+      }
+    }
+
     // ── General update logic (complete, cancel, reschedule, etc.) ──
     const validTypes = ["NEW_VISIT", "FOLLOW_UP", "CONSULTATION", "EMERGENCY"];
     const validPriorities = ["NORMAL", "URGENT", "EMERGENCY"];
@@ -115,7 +148,7 @@ export async function PATCH(
     const updated = await prisma.appointment.update({
       where: { id },
       data: {
-        status: status || undefined,
+        status: finalStatus || undefined,
         dateTime: dateTime ? new Date(dateTime) : undefined,
         appointmentType: validTypes.includes(appointmentType) ? (appointmentType as any) : undefined,
         priority: validPriorities.includes(priority) ? (priority as any) : undefined,

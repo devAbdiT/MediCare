@@ -17,6 +17,7 @@ import {
   UserCheck,
   AlertTriangle,
   Hash,
+  History,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -36,8 +37,14 @@ export default function ReceptionistSchedulePage() {
   const [rescheduleData, setRescheduleData] = useState<any | null>(null);
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
+  const [rescheduleReason, setRescheduleReason] = useState("");
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
+
+  // History Dialog state
+  const [historyTarget, setHistoryTarget] = useState<any | null>(null);
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   // No-Show Confirmation Dialog state
   const [noShowTarget, setNoShowTarget] = useState<any | null>(null);
@@ -67,6 +74,20 @@ export default function ReceptionistSchedulePage() {
   useEffect(() => {
     fetchAppointments(searchQuery);
   }, [showAll]);
+
+  const viewHistory = async (app: any) => {
+    setHistoryTarget(app);
+    setLoadingHistory(true);
+    try {
+      const res = await fetch(`/api/appointments/${app.id}/history`);
+      const data = await res.json();
+      setHistoryData(data);
+    } catch (err) {
+      toast.error("Failed to fetch history");
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   const handleSearch = (q: string) => {
     setSearchQuery(q);
@@ -143,12 +164,14 @@ export default function ReceptionistSchedulePage() {
         body: JSON.stringify({
           dateTime: dateTime.toISOString(),
           status: "SCHEDULED",
+          reason: rescheduleReason,
         }),
       });
 
       if (res.ok) {
         toast.success("Appointment rescheduled successfully");
         setRescheduleData(null);
+        setRescheduleReason("");
         fetchAppointments(searchQuery);
       } else {
         const err = await res.json();
@@ -383,6 +406,13 @@ export default function ReceptionistSchedulePage() {
                               </button>
                             </>
                           )}
+                          <button
+                            onClick={() => viewHistory(app)}
+                            className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                            title="View History"
+                          >
+                            <History size={18} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -454,6 +484,19 @@ export default function ReceptionistSchedulePage() {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">
+                Reschedule Reason
+              </label>
+              <textarea
+                value={rescheduleReason}
+                onChange={(e) => setRescheduleReason(e.target.value)}
+                placeholder="Doctor unavailable, Patient requested, etc."
+                rows={2}
+                className="w-full p-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-transparent rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-blue-600 outline-none transition-all font-medium text-slate-900 dark:text-slate-100 resize-none"
+              />
+            </div>
+
             <button
               type="button"
               onClick={checkAvailability}
@@ -478,7 +521,7 @@ export default function ReceptionistSchedulePage() {
             <button
               type="button"
               onClick={handleReschedule}
-              disabled={!available}
+              disabled={!available || rescheduleReason.trim().length < 3}
               className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-slate-800 transition-all disabled:opacity-50 disabled:bg-slate-300"
             >
               Confirm Reschedule
@@ -542,6 +585,78 @@ export default function ReceptionistSchedulePage() {
                 Confirm No-Show
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* History Dialog */}
+      <Dialog
+        open={!!historyTarget}
+        onOpenChange={() => setHistoryTarget(null)}
+      >
+        <DialogContent className="sm:max-w-md rounded-[2.5rem] p-8 border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0F172A] shadow-2xl transition-colors duration-500 max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <History className="text-blue-500" />
+              Appointment History
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-4">
+            {loadingHistory ? (
+              <div className="flex justify-center p-8 text-slate-400">
+                <Loader2 className="animate-spin" size={24} />
+              </div>
+            ) : historyData.length === 0 ? (
+              <div className="text-center p-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl text-slate-500">
+                <p className="font-medium">No history recorded for this appointment.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {historyData.map((history, idx) => (
+                  <div key={history.id} className="p-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-2xl space-y-3 relative">
+                    <div className="flex justify-between items-start">
+                      <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        {history.actionType || "UPDATE"}
+                      </span>
+                      <span className="text-xs text-slate-400 font-medium">
+                        {format(new Date(history.createdAt), "MMM dd, yyyy h:mm a")}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                      <div className="bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Previous</p>
+                        <p className="font-medium text-slate-600 dark:text-slate-300">
+                          {history.oldDateTime ? format(new Date(history.oldDateTime), "MMM dd, h:mm a") : "—"}
+                        </p>
+                      </div>
+                      <div className="bg-blue-50 dark:bg-blue-900/10 p-2 rounded-xl border border-blue-100 dark:border-blue-900">
+                        <p className="text-[10px] text-blue-500 dark:text-blue-400 font-bold uppercase tracking-wider mb-1">New</p>
+                        <p className="font-medium text-blue-700 dark:text-blue-300">
+                          {history.newDateTime ? format(new Date(history.newDateTime), "MMM dd, h:mm a") : "—"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {history.reason && (
+                      <div className="mt-2">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Reason</p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          &quot;{history.reason}&quot;
+                        </p>
+                      </div>
+                    )}
+
+                    {history.changedByName && (
+                      <p className="text-xs text-slate-400 font-medium mt-2 flex justify-end">
+                        Changed by: {history.changedByName} ({history.changedByRole})
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
