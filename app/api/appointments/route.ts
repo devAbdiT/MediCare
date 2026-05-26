@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { patientId, doctorId, dateTime, reason } = body;
+    const { patientId, doctorId, dateTime, reason, appointmentType, priority } = body;
 
     const requestedTime = new Date(dateTime);
     const startTime = startOfHour(requestedTime);
@@ -77,6 +77,12 @@ export async function POST(req: Request) {
       finalPatientId = patient?.id;
     }
 
+    const validTypes = ["NEW_VISIT", "FOLLOW_UP", "CONSULTATION", "EMERGENCY"];
+    const validPriorities = ["NORMAL", "URGENT", "EMERGENCY"];
+
+    const finalAppointmentType = validTypes.includes(appointmentType) ? appointmentType : "NEW_VISIT";
+    const finalPriority = validPriorities.includes(priority) ? priority : "NORMAL";
+
     // 3. Create Appointment
     const appointment = await prisma.appointment.create({
       data: {
@@ -84,6 +90,8 @@ export async function POST(req: Request) {
         doctorId,
         dateTime: requestedTime,
         reason,
+        appointmentType: finalAppointmentType,
+        priority: finalPriority,
         receptionistId: (session.user as any).role === "RECEPTIONIST" ? 
           (await prisma.receptionist.findUnique({ where: { userId: session.user.id } }))?.id : 
           null,

@@ -33,6 +33,8 @@ export default function BookAppointment() {
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [showOnlyAlternatives, setShowOnlyAlternatives] = useState(false);
+  const [appointmentType, setAppointmentType] = useState("NEW_VISIT");
+  const [priority, setPriority] = useState("NORMAL");
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -92,7 +94,9 @@ export default function BookAppointment() {
         body: JSON.stringify({
           doctorId: selectedDoctor,
           dateTime: `${selectedDate}T${selectedTime}`,
-          reason: "General Consultation"
+          reason: "General Consultation",
+          appointmentType,
+          priority
         }),
       });
 
@@ -254,23 +258,54 @@ export default function BookAppointment() {
 
               {/* Time Selection */}
               {selectedDoctor && (
-                <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <Label className="font-bold text-slate-700 dark:text-slate-300">3. Preferred Time</Label>
-                  <div className="relative">
-                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700 dark:text-slate-300">3. Preferred Time</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
+                      <select
+                        value={selectedTime}
+                        onChange={(e) => {
+                          setSelectedTime(e.target.value);
+                          setAvailability(null);
+                        }}
+                        className="w-full pl-12 pr-4 h-14 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 outline-none appearance-none font-medium"
+                        required
+                      >
+                        <option value="">Select time...</option>
+                        {["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"].map(t => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700 dark:text-slate-300">4. Appointment Type</Label>
                     <select
-                      value={selectedTime}
-                      onChange={(e) => {
-                        setSelectedTime(e.target.value);
-                        setAvailability(null);
-                      }}
-                      className="w-full pl-12 pr-4 h-14 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 outline-none appearance-none font-medium"
+                      value={appointmentType}
+                      onChange={(e) => setAppointmentType(e.target.value)}
+                      className="w-full px-4 h-14 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 outline-none font-medium"
                       required
                     >
-                      <option value="">Select time...</option>
-                      {["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"].map(t => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
+                      <option value="NEW_VISIT">New Visit</option>
+                      <option value="FOLLOW_UP">Follow-up</option>
+                      <option value="CONSULTATION">Consultation</option>
+                      <option value="EMERGENCY">Emergency</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700 dark:text-slate-300">5. Priority</Label>
+                    <select
+                      value={priority}
+                      onChange={(e) => setPriority(e.target.value)}
+                      className="w-full px-4 h-14 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 outline-none font-medium"
+                      required
+                    >
+                      <option value="NORMAL">Normal</option>
+                      <option value="URGENT">Urgent</option>
+                      <option value="EMERGENCY">Emergency</option>
                     </select>
                   </div>
                 </div>

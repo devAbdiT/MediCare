@@ -229,6 +229,23 @@ export default function ReceptionistSchedulePage() {
                             <p className="text-xs text-slate-500 dark:text-slate-400">
                               {app.patient?.user?.phone || "No phone"}
                             </p>
+                            <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${
+                                (app.appointmentType || "NEW_VISIT") === "NEW_VISIT" ? "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900" :
+                                (app.appointmentType || "NEW_VISIT") === "FOLLOW_UP" ? "bg-teal-50 text-teal-700 border-teal-100 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-900" :
+                                (app.appointmentType || "NEW_VISIT") === "CONSULTATION" ? "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-900" :
+                                "bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900"
+                              }`}>
+                                {(app.appointmentType || "NEW_VISIT").replace("_", " ")}
+                              </span>
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                                (app.priority || "NORMAL") === "URGENT" ? "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800" :
+                                (app.priority || "NORMAL") === "EMERGENCY" ? "bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800 animate-pulse font-black" :
+                                "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                              }`}>
+                                {app.priority || "NORMAL"}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </td>

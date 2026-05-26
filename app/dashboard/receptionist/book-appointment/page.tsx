@@ -54,6 +54,8 @@ function BookingForm() {
   const [time, setTime] = useState("");
   const [reason, setReason] = useState("");
   const [showOnlyAlternatives, setShowOnlyAlternatives] = useState(false);
+  const [appointmentType, setAppointmentType] = useState("NEW_VISIT");
+  const [priority, setPriority] = useState("NORMAL");
   
   const [loading, setLoading] = useState(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -117,6 +119,8 @@ function BookingForm() {
           doctorId: selectedDoctor,
           dateTime: dateTime.toISOString(),
           reason,
+          appointmentType,
+          priority
         }),
       });
 
@@ -327,6 +331,37 @@ function BookingForm() {
                           );
                         })}
                       </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="font-bold text-slate-700 dark:text-slate-300">Appointment Type</Label>
+                        <select
+                          value={appointmentType}
+                          onChange={(e) => setAppointmentType(e.target.value)}
+                          className="w-full px-4 h-14 bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-200 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-600 outline-none transition-all font-bold text-slate-900 dark:text-slate-100"
+                          required
+                        >
+                          <option value="NEW_VISIT">New Visit</option>
+                          <option value="FOLLOW_UP">Follow-up</option>
+                          <option value="CONSULTATION">Consultation</option>
+                          <option value="EMERGENCY">Emergency</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="font-bold text-slate-700 dark:text-slate-300">Priority</Label>
+                        <select
+                          value={priority}
+                          onChange={(e) => setPriority(e.target.value)}
+                          className="w-full px-4 h-14 bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-200 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-600 outline-none transition-all font-bold text-slate-900 dark:text-slate-100"
+                          required
+                        >
+                          <option value="NORMAL">Normal</option>
+                          <option value="URGENT">Urgent</option>
+                          <option value="EMERGENCY">Emergency</option>
+                        </select>
+                      </div>
                     </div>
 
                     <button

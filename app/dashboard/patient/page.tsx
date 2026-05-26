@@ -88,9 +88,24 @@ export default async function PatientDashboard() {
                         <div>
                           <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Assigned Specialist</p>
                           <h4 className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9]">Dr. {appt.doctor.user.name}</h4>
-                          <div className="flex items-center gap-2 mt-2">
-                             <div className="w-2 h-2 bg-[#3B82F6] dark:bg-[#60A5FA] rounded-full" />
-                             <span className="text-xs font-bold text-[#64748B] dark:text-[#94A3B8]">Clinical Consultation</span>
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <span className={cn(
+                              "text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border",
+                              appt.appointmentType === "NEW_VISIT" && "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900",
+                              appt.appointmentType === "FOLLOW_UP" && "bg-teal-50 text-teal-700 border-teal-100 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-900",
+                              appt.appointmentType === "CONSULTATION" && "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-900",
+                              appt.appointmentType === "EMERGENCY" && "bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900"
+                            )}>
+                              {appt.appointmentType.replace("_", " ")}
+                            </span>
+                            <span className={cn(
+                              "text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg",
+                              appt.priority === "NORMAL" && "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                              appt.priority === "URGENT" && "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800",
+                              appt.priority === "EMERGENCY" && "bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800 animate-pulse font-black"
+                            )}>
+                              {appt.priority}
+                            </span>
                           </div>
                         </div>
                       </div>

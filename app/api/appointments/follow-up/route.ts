@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { patientId, doctorId, dateTime, reason } = await request.json();
+    const { patientId, doctorId, dateTime, reason, appointmentType, priority } = await request.json();
 
     if (!patientId || !doctorId || !dateTime) {
       return NextResponse.json(
@@ -38,6 +38,9 @@ export async function POST(request: Request) {
       );
     }
 
+    const validTypes = ["NEW_VISIT", "FOLLOW_UP", "CONSULTATION", "EMERGENCY"];
+    const validPriorities = ["NORMAL", "URGENT", "EMERGENCY"];
+
     const appointment = await prisma.appointment.create({
       data: {
         patientId,
@@ -45,6 +48,8 @@ export async function POST(request: Request) {
         dateTime: new Date(dateTime),
         reason: reason || "Follow-up",
         status: "SCHEDULED",
+        appointmentType: validTypes.includes(appointmentType) ? (appointmentType as any) : "FOLLOW_UP",
+        priority: validPriorities.includes(priority) ? (priority as any) : "NORMAL",
       },
     });
 

@@ -72,7 +72,26 @@ export default async function AdminAppointmentsPage() {
                         <div className="w-8 h-8 rounded-full bg-[#F0F4F8] dark:bg-[#0A122A] flex items-center justify-center text-[#5A6E8A] dark:text-[#8A9CBA]">
                           <User size={14} />
                         </div>
-                        <span className="font-bold text-[#1A2A4A] dark:text-[#E8EEF8]">{appt.patient.user.name}</span>
+                        <div>
+                          <p className="font-bold text-[#1A2A4A] dark:text-[#E8EEF8]">{appt.patient.user.name}</p>
+                          <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${
+                              (appt.appointmentType || "NEW_VISIT") === "NEW_VISIT" ? "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900" :
+                              (appt.appointmentType || "NEW_VISIT") === "FOLLOW_UP" ? "bg-teal-50 text-teal-700 border-teal-100 dark:bg-teal-900/20 dark:text-teal-400 dark:border-teal-900" :
+                              (appt.appointmentType || "NEW_VISIT") === "CONSULTATION" ? "bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-900" :
+                              "bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900"
+                            }`}>
+                              {(appt.appointmentType || "NEW_VISIT").replace("_", " ")}
+                            </span>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                              (appt.priority || "NORMAL") === "URGENT" ? "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800" :
+                              (appt.priority || "NORMAL") === "EMERGENCY" ? "bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800 animate-pulse font-black" :
+                              "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                            }`}>
+                              {appt.priority || "NORMAL"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-8 py-6">

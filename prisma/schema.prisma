@@ -140,6 +140,19 @@ model Receptionist {
   @@map("receptionists")
 }
 
+enum AppointmentType {
+  NEW_VISIT
+  FOLLOW_UP
+  CONSULTATION
+  EMERGENCY
+}
+
+enum AppointmentPriority {
+  NORMAL
+  URGENT
+  EMERGENCY
+}
+
 model Appointment {
   id             String  @id @default(cuid())
   patientId      String
@@ -147,10 +160,12 @@ model Appointment {
   receptionistId String?
 
   dateTime  DateTime
-  status    AppointmentStatus @default(SCHEDULED)
+  status    AppointmentStatus   @default(SCHEDULED)
   reason    String?
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  appointmentType AppointmentType @default(NEW_VISIT)
+  priority        AppointmentPriority @default(NORMAL)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 
   patient      Patient       @relation(fields: [patientId], references: [id])
   doctor       Doctor        @relation(fields: [doctorId], references: [id])

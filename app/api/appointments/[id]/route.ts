@@ -17,7 +17,7 @@ export async function PATCH(
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  const { status, dateTime } = await req.json();
+  const { status, dateTime, appointmentType, priority } = await req.json();
 
   try {
     const appointment = await prisma.appointment.findUnique({
@@ -42,12 +42,16 @@ export async function PATCH(
     }
 
     // Admins and Receptionists can do anything
-    
+    const validTypes = ["NEW_VISIT", "FOLLOW_UP", "CONSULTATION", "EMERGENCY"];
+    const validPriorities = ["NORMAL", "URGENT", "EMERGENCY"];
+
     const updated = await prisma.appointment.update({
       where: { id },
       data: {
         status: status || undefined,
         dateTime: dateTime ? new Date(dateTime) : undefined,
+        appointmentType: validTypes.includes(appointmentType) ? (appointmentType as any) : undefined,
+        priority: validPriorities.includes(priority) ? (priority as any) : undefined,
       },
     });
 
