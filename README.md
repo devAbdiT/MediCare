@@ -1,6 +1,6 @@
-# 🏥 Jimma Medical Center — Patient Management System (MediCare Cloud)
+# 🏥 Jimma Medical Center — Patient Appointment Scheduling & Medical Record Management (MediCare)
 
-A modern, highly secure, and responsive Patient Management System designed to streamline clinical workflows for healthcare organizations. Built with **Next.js 16**, **React 19**, **Prisma ORM**, **PostgreSQL**, and **Better Auth**, it provides tailored portals for Patients, Doctors, Receptionists, and Administrators.
+A modern, highly secure, and responsive Web-Based Patient Appointment Scheduling and Basic Medical Record Management System for Jimma Medical Center. Built with **Next.js 16**, **React 19**, **Prisma ORM**, **PostgreSQL**, and **Better Auth**, it provides tailored portals for Patients, Doctors, Receptionists, and Administrators.
 
 ---
 

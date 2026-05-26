@@ -27,7 +27,7 @@ export function PrintUserList({ users, title }: PrintUserListProps) {
       {/* Header */}
       <div className="text-center border-b-2 border-black pb-4 mb-8">
         <h1 className="text-3xl font-black uppercase tracking-tighter">Jimma Medical Center</h1>
-        <p className="text-lg font-bold text-gray-600">Patient Management System (PDMS)</p>
+        <p className="text-lg font-bold text-gray-600">MediCare Appointment Scheduling System</p>
         <h2 className="text-xl font-black mt-4 uppercase border border-black inline-block px-6 py-2">{title}</h2>
         <p className="text-sm text-gray-500 mt-2 italic">Report Generated: {printDate}</p>
       </div>
@@ -73,7 +73,7 @@ export function PrintUserList({ users, title }: PrintUserListProps) {
 
       {/* Footer */}
       <div className="text-center text-gray-400 text-[10px] mt-12 pt-6 border-t border-gray-200 italic font-medium">
-        <p>This document is intended for administrative use only. Jimma Medical Center Clinical Record Manifest.</p>
+        <p>This document is intended for administrative use only. Jimma Medical Center MediCare Manifest.</p>
       </div>
     </div>
   );

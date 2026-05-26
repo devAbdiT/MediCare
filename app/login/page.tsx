@@ -78,8 +78,8 @@ export default function LoginPage() {
               <span className="text-3xl font-black tracking-tighter text-white block leading-none">
                 MediCare
               </span>
-              <span className="text-xs font-black text-[#4A8AC8] uppercase tracking-[0.4em] mt-2 block">
-                Enterprise OS
+              <span className="text-[10px] font-black text-[#4A8AC8] uppercase tracking-[0.15em] mt-2 block">
+                Appointment Scheduling System
               </span>
             </div>
           </div>
@@ -217,8 +217,8 @@ export default function LoginPage() {
         {/* Cinematic Watermark */}
         <div className="absolute bottom-12 right-12 flex items-center gap-3 opacity-20">
           <HeartPulse size={24} className="text-[#1E4A8A] animate-pulse" />
-          <span className="text-[10px] font-black text-[#1A2A4A] dark:text-[#E8EEF8] uppercase tracking-[0.5em]">
-            Global Clinical OS v2.4.1
+          <span className="text-[9px] font-black text-[#1A2A4A] dark:text-[#E8EEF8] uppercase tracking-[0.2em]">
+            MediCare Appointment Scheduling System v2.4.1
           </span>
         </div>
       </div>

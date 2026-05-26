@@ -33,7 +33,7 @@ export default function Home() {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-black tracking-tighter text-[#1A2A4A] dark:text-[#E8EEF8] leading-none">MediCare</span>
-              <span className="text-[10px] font-black text-[#1E4A8A] uppercase tracking-[0.3em] mt-1">Cloud OS</span>
+              <span className="text-[9px] font-black text-[#1E4A8A] uppercase tracking-[0.1em] mt-1">Appointment Scheduling System</span>
             </div>
           </div>
           
@@ -79,7 +79,7 @@ export default function Home() {
             </h1>
             
             <p className="max-w-xl text-[#5A6E8A] dark:text-[#8A9CBA] text-xl font-medium leading-relaxed mx-auto lg:mx-0">
-              Precision-engineered clinical management system. Experience healthcare infrastructure reimagined for efficiency and security.
+              Web-Based Patient Appointment Scheduling and Basic Medical Record Management System for Jimma Medical Center.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start pt-4">
@@ -145,7 +145,7 @@ export default function Home() {
             </div>
             <span className="text-lg font-black tracking-tighter text-[#1A2A4A] dark:text-[#E8EEF8]">MediCare</span>
           </div>
-          <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.4em]">© 2026 MediCare Elite Cloud System.</p>
+          <p className="text-[9px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.1em]">© 2026 Jimma Medical Center — Web-Based Patient Appointment Scheduling and Basic Medical Record Management System.</p>
           <div className="flex items-center gap-2">
              <div className="w-2 h-2 bg-[#2D8A6E] rounded-full animate-pulse" />
              <span className="text-[10px] font-black text-[#1A2A4A] dark:text-[#E8EEF8] uppercase tracking-widest">Global Status: Online</span>

@@ -36,7 +36,7 @@ export function PrintSingleUser({ user, appointments }: PrintSingleUserProps) {
       {/* Header */}
       <div className="text-center border-b-2 border-black pb-4 mb-8">
         <h1 className="text-3xl font-black uppercase tracking-tighter">Jimma Medical Center</h1>
-        <p className="text-lg font-bold text-gray-600">Clinical Management System (PDMS)</p>
+        <p className="text-lg font-bold text-gray-600">MediCare Appointment Scheduling System</p>
         <p className="text-sm text-gray-500 mt-2">Document Generated: {printDate}</p>
       </div>
 
@@ -94,7 +94,7 @@ export function PrintSingleUser({ user, appointments }: PrintSingleUserProps) {
 
       {/* Footer */}
       <div className="text-center text-gray-400 text-xs mt-12 pt-6 border-t border-gray-200 italic">
-        <p>This is a certified electronic clinical record manifest. City Hospital PDMS v1.0</p>
+        <p>This is a certified electronic record manifest. Jimma Medical Center MediCare v1.0</p>
         <p>Jimma, Oromia, Ethiopia - Jimma Medical Center</p>
       </div>
     </div>

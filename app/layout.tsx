@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Patient Management System",
-  description: "Patient Management System",
+  title: "MediCare Appointment Scheduling System",
+  description: "Web-Based Patient Appointment Scheduling and Basic Medical Record Management System for Jimma Medical Center",
 };
 
 import { Toaster } from "sonner";
