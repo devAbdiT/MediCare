@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { SearchBar } from "@/components/SearchBar";
+import PrintAppointmentButton from "@/components/PrintAppointmentButton";
 import { format, isToday } from "date-fns";
 import {
   Calendar,
@@ -42,6 +43,9 @@ export default function ReceptionistSchedulePage() {
   const [available, setAvailable] = useState<boolean | null>(null);
   const [availabilityMessage, setAvailabilityMessage] = useState("");
   const [doctorAvailability, setDoctorAvailability] = useState<any[]>([]);
+
+  // Reminder state
+  const [markingReminder, setMarkingReminder] = useState<string | null>(null);
 
   // History Dialog state
   const [historyTarget, setHistoryTarget] = useState<any | null>(null);
@@ -145,6 +149,26 @@ export default function ReceptionistSchedulePage() {
       }
     } catch (err) {
       toast.error("An error occurred");
+    }
+  };
+
+  const markReminderSent = async (id: string) => {
+    setMarkingReminder(id);
+    try {
+      const res = await fetch(`/api/appointments/${id}/reminders`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        toast.success("Reminder marked as sent!");
+        fetchAppointments(searchQuery);
+      } else {
+        const err = await res.text();
+        toast.error(err || "Failed to mark reminder sent.");
+      }
+    } catch (err) {
+      toast.error("An error occurred.");
+    } finally {
+      setMarkingReminder(null);
     }
   };
 
@@ -377,10 +401,30 @@ export default function ReceptionistSchedulePage() {
                             at {format(new Date(app.checkedInAt), "h:mm a")}
                           </p>
                         )}
+                        <div className="mt-3">
+                          {app.reminders && app.reminders.length > 0 ? (
+                            <div>
+                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Reminder: Sent</span>
+                              <p className="text-[9px] text-slate-400">at {format(new Date(app.reminders[0].sentAt), "MMM dd, h:mm a")}</p>
+                            </div>
+                          ) : (app.status === "SCHEDULED" || app.status === "RESCHEDULED" || app.status === "CHECKED_IN") ? (
+                            <div>
+                               <span className="text-[10px] font-bold text-slate-400 block mb-1">Reminder: Not Sent</span>
+                               <button 
+                                 onClick={() => markReminderSent(app.id)} 
+                                 disabled={markingReminder === app.id} 
+                                 className="text-[9px] px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider rounded transition-colors disabled:opacity-50"
+                               >
+                                 {markingReminder === app.id ? "Marking..." : "Mark Sent"}
+                               </button>
+                            </div>
+                          ) : null}
+                        </div>
                       </td>
                       {/* Actions */}
                       <td className="px-6 py-6 text-right print:hidden">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <PrintAppointmentButton appointment={app} variant="ghost" />
                           {/* SCHEDULED → Check In, Reschedule, No-Show, Cancel */}
                           {app.status === "SCHEDULED" && (
                             <>

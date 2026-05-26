@@ -176,8 +176,28 @@ model Appointment {
   doctor       Doctor        @relation(fields: [doctorId], references: [id])
   receptionist Receptionist? @relation(fields: [receptionistId], references: [id])
   histories    AppointmentHistory[]
+  reminders    AppointmentReminder[]
 
   @@map("appointments")
+}
+
+model AppointmentReminder {
+  id            String   @id @default(cuid())
+
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  reminderType  String
+  status        String
+  message       String?
+
+  sentAt        DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([appointmentId])
+  @@index([status])
+  @@index([sentAt])
+  @@map("appointment_reminders")
 }
 
 model MedicalRecord {

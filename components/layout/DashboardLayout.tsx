@@ -102,7 +102,7 @@ export default function DashboardLayout({
   return (
     <div className="h-screen bg-[#F0F4F8] dark:bg-[#0A122A] flex p-4 gap-4 font-sans selection:bg-[#1E4A8A]/10 dark:selection:bg-[#4A8AC8]/20 selection:text-[#1E4A8A] transition-colors duration-500 overflow-hidden">
       {/* Sidebar - Floating & Rounded */}
-      <aside className="w-[280px] bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] flex flex-col rounded-[2.5rem] shadow-sm transition-all duration-500 shrink-0">
+      <aside className="w-[280px] bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] flex flex-col rounded-[2.5rem] shadow-sm transition-all duration-500 shrink-0 print:hidden">
         <div className="p-10">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-[#1E4A8A] dark:bg-[#4A8AC8] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#1E4A8A]/20 group hover:rotate-12 transition-transform duration-500">
@@ -187,9 +187,9 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content Area - Rounded & Floating */}
-      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] rounded-[2.5rem] shadow-sm overflow-hidden transition-colors duration-500">
+      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] rounded-[2.5rem] shadow-sm overflow-hidden transition-colors duration-500 print:rounded-none print:border-none print:shadow-none">
         {/* Top Header - Integrated & Rounded */}
-        <header className="h-24 bg-white/50 dark:bg-[#111C3A]/50 backdrop-blur-md px-10 flex items-center justify-between z-40 transition-colors duration-500">
+        <header className="h-24 bg-white/50 dark:bg-[#111C3A]/50 backdrop-blur-md px-10 flex items-center justify-between z-40 transition-colors duration-500 print:hidden">
           <div className="flex items-center gap-4 bg-[#F0F4F8] dark:bg-[#0A122A] px-5 py-2.5 rounded-2xl border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm w-96 transition-colors duration-500">
             {/* <Search size={18} className="text-[#5A6E8A] dark:text-[#8A9CBA]" />
             <input
@@ -219,8 +219,8 @@ export default function DashboardLayout({
         </header>
 
         {/* Content View */}
-        <main className="flex-1 p-10 overflow-y-auto custom-scrollbar border-t border-[#F0F4F8] dark:border-[#0A122A] transition-colors duration-500">
-          <div className="max-w-7xl mx-auto">{children}</div>
+        <main className="flex-1 p-10 overflow-y-auto custom-scrollbar border-t border-[#F0F4F8] dark:border-[#0A122A] transition-colors duration-500 print:overflow-visible print:p-0 print:border-none">
+          <div className="max-w-7xl mx-auto print:max-w-none">{children}</div>
         </main>
       </div>
     </div>

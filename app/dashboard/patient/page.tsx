@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { Calendar, HeartPulse, ShieldCheck, ArrowRight, Activity, Plus, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CancelAppointment from "./CancelAppointment";
+import PrintAppointmentButton from "@/components/PrintAppointmentButton";
 
 export default async function PatientDashboard() {
   const session = await auth.api.getSession({
@@ -30,7 +31,8 @@ export default async function PatientDashboard() {
       status: { in: ["SCHEDULED", "CHECKED_IN"] }
     },
     include: {
-      doctor: { include: { user: { select: { name: true } } } }
+      doctor: { include: { user: { select: { name: true } }, department: true } },
+      patient: { include: { user: true } }
     },
     orderBy: { dateTime: "asc" }
   });
@@ -126,13 +128,16 @@ export default async function PatientDashboard() {
                           </div>
                         </div>
                       </div>
-                      {appt.status === "SCHEDULED" && <CancelAppointment appointmentId={appt.id} />}
-                      {appt.status === "CHECKED_IN" && (
-                        <div className="text-center px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-800">
-                          <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Status</p>
-                          <p className="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-0.5">Checked In</p>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <PrintAppointmentButton appointment={appt} variant="ghost" />
+                        {appt.status === "SCHEDULED" && <CancelAppointment appointmentId={appt.id} />}
+                        {appt.status === "CHECKED_IN" && (
+                          <div className="text-center px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+                            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Status</p>
+                            <p className="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-0.5">Checked In</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

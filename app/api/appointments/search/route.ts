@@ -26,8 +26,9 @@ export async function GET(req: Request) {
       ]
     },
     include: {
-      patient: { include: { user: { select: { name: true, phone: true } } } },
+      patient: { include: { user: { select: { name: true, phone: true, email: true } } } },
       doctor: { include: { user: { select: { name: true } } } },
+      reminders: { orderBy: { sentAt: "desc" }, take: 1 }
     },
     orderBy: { dateTime: "asc" }
   };
