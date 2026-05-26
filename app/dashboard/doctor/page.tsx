@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
-import { Calendar, Clock, User, ExternalLink, Activity, ArrowRight } from "lucide-react";
+import { Calendar, Clock, User, ExternalLink, Activity, ArrowRight, Hash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import React from "react";
@@ -42,7 +42,8 @@ export default async function DoctorDashboard() {
   });
 
   const completedCount = appointments.filter(a => a.status === "COMPLETED").length;
-  const remainingCount = appointments.length - completedCount;
+  const checkedInCount = appointments.filter(a => a.status === "CHECKED_IN").length;
+  const remainingCount = appointments.filter(a => a.status === "SCHEDULED").length;
 
   return (
     <DashboardLayout role="doctor">
@@ -63,10 +64,11 @@ export default async function DoctorDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatBox label="Daily Quota" value={appointments.length.toString()} icon={<User />} color="text-[#1E4A8A] dark:text-[#4A8AC8]" />
+          <StatBox label="Checked In" value={checkedInCount.toString()} icon={<Hash />} color="text-emerald-600 dark:text-emerald-400" />
           <StatBox label="Successful Visits" value={completedCount.toString()} icon={<Activity />} color="text-emerald-600 dark:text-emerald-400" />
-          <StatBox label="Pending Sync" value={remainingCount.toString()} icon={<Clock />} color="text-[#F59E0B] dark:text-[#FBBF24]" />
+          <StatBox label="Awaiting" value={remainingCount.toString()} icon={<Clock />} color="text-[#F59E0B] dark:text-[#FBBF24]" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -94,7 +96,14 @@ export default async function DoctorDashboard() {
                        </div>
                        <div className="w-1.5 h-12 bg-[#F0F4F8] dark:bg-[#0A122A] rounded-full group-hover:bg-[#1E4A8A] dark:group-hover:bg-[#4A8AC8] transition-colors" />
                        <div className="flex-1">
-                          <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest mb-1">Patient Encounter</p>
+                          <div className="flex items-center gap-2 mb-1">
+                             <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">Patient Encounter</p>
+                             {(appt as any).queueNumber && (
+                               <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg text-[10px] font-black text-emerald-700 dark:text-emerald-400">
+                                 <Hash size={10} />Q{(appt as any).queueNumber}
+                               </span>
+                             )}
+                           </div>
                           <h4 className="text-xl font-black text-[#1A2A4A] dark:text-[#E8EEF8]">{appt.patient.user.name}</h4>
                           <div className="flex flex-wrap items-center gap-2 mt-2">
                             <span className={cn(
@@ -118,11 +127,14 @@ export default async function DoctorDashboard() {
                        </div>
                        <div className="flex items-center gap-4">
                           <Badge className={cn(
-                            "rounded-full px-4 py-1.5 font-black text-[10px] uppercase tracking-widest border-none shadow-sm",
-                            appt.status === "SCHEDULED" ? "bg-[#1E4A8A]/10 dark:bg-[#4A8AC8]/10 text-[#1E4A8A] dark:text-[#4A8AC8]" : "bg-emerald-500/10 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          )}>
-                             {appt.status}
-                          </Badge>
+                             "rounded-full px-4 py-1.5 font-black text-[10px] uppercase tracking-widest border-none shadow-sm",
+                             appt.status === "SCHEDULED" ? "bg-[#1E4A8A]/10 dark:bg-[#4A8AC8]/10 text-[#1E4A8A] dark:text-[#4A8AC8]" :
+                             appt.status === "CHECKED_IN" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                             appt.status === "NO_SHOW" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" :
+                             "bg-emerald-500/10 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                           )}>
+                              {appt.status === "CHECKED_IN" ? "Checked In" : appt.status === "NO_SHOW" ? "No-Show" : appt.status}
+                           </Badge>
                           <Link href={`/dashboard/doctor/appointments/${appt.id}`}>
                             <button className="p-4 bg-[#1A2A4A] dark:bg-[#111C3A] text-white rounded-[1.5rem] hover:bg-[#1E4A8A] dark:hover:bg-[#4A8AC8] hover:text-white dark:hover:text-[#0A122A] border border-[#D0DCE8] dark:border-[#1A2A4A] transition-all shadow-xl shadow-slate-200 dark:shadow-none">
                               <ArrowRight size={20} />

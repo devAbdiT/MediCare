@@ -6,7 +6,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Calendar, HeartPulse, ShieldCheck, ArrowRight, Activity, Plus } from "lucide-react";
+import { Calendar, HeartPulse, ShieldCheck, ArrowRight, Activity, Plus, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CancelAppointment from "./CancelAppointment";
 
@@ -27,7 +27,7 @@ export default async function PatientDashboard() {
     where: {
       patientId: patient?.id,
       dateTime: { gte: new Date() },
-      status: "SCHEDULED"
+      status: { in: ["SCHEDULED", "CHECKED_IN"] }
     },
     include: {
       doctor: { include: { user: { select: { name: true } } } }
@@ -78,15 +78,32 @@ export default async function PatientDashboard() {
               ) : (
                 <div className="space-y-4">
                   {appointments.map((appt) => (
-                    <div key={appt.id} className="p-6 rounded-[2.5rem] bg-white dark:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#334155] flex flex-col sm:flex-row items-center justify-between gap-6 hover:border-[#3B82F6] dark:hover:border-[#60A5FA] transition-all group">
+                    <div key={appt.id} className={cn(
+                      "p-6 rounded-[2.5rem] bg-white dark:bg-[#1E293B] border flex flex-col sm:flex-row items-center justify-between gap-6 transition-all group",
+                      appt.status === "CHECKED_IN"
+                        ? "border-emerald-300 dark:border-emerald-700 hover:border-emerald-400 shadow-sm shadow-emerald-100 dark:shadow-none"
+                        : "border-[#E2E8F0] dark:border-[#334155] hover:border-[#3B82F6] dark:hover:border-[#60A5FA]"
+                    )}>
                       <div className="flex items-center gap-8">
-                        <div className="bg-[#1E293B] dark:bg-[#0F172A] text-white p-6 rounded-[1.5rem] text-center min-w-[100px] shadow-xl group-hover:bg-[#3B82F6] dark:group-hover:bg-[#60A5FA] transition-colors">
+                        <div className={cn(
+                          "text-white p-6 rounded-[1.5rem] text-center min-w-[100px] shadow-xl transition-colors",
+                          appt.status === "CHECKED_IN"
+                            ? "bg-emerald-600 dark:bg-emerald-700 group-hover:bg-emerald-500"
+                            : "bg-[#1E293B] dark:bg-[#0F172A] group-hover:bg-[#3B82F6] dark:group-hover:bg-[#60A5FA]"
+                        )}>
                           <p className="text-[10px] font-black uppercase tracking-widest opacity-40">{format(appt.dateTime, "MMM")}</p>
                           <p className="text-3xl font-black leading-none my-1">{format(appt.dateTime, "dd")}</p>
                           <p className="text-xs font-bold opacity-60">{format(appt.dateTime, "HH:mm")}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest mb-1">Assigned Specialist</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest">Assigned Specialist</p>
+                            {appt.status === "CHECKED_IN" && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg text-[10px] font-black text-emerald-700 dark:text-emerald-400">
+                                ✓ Checked In{(appt as any).queueNumber ? ` · Q${(appt as any).queueNumber}` : ""}
+                              </span>
+                            )}
+                          </div>
                           <h4 className="text-xl font-black text-[#1E293B] dark:text-[#F1F5F9]">Dr. {appt.doctor.user.name}</h4>
                           <div className="flex flex-wrap items-center gap-2 mt-2">
                             <span className={cn(
@@ -109,7 +126,13 @@ export default async function PatientDashboard() {
                           </div>
                         </div>
                       </div>
-                      <CancelAppointment appointmentId={appt.id} />
+                      {appt.status === "SCHEDULED" && <CancelAppointment appointmentId={appt.id} />}
+                      {appt.status === "CHECKED_IN" && (
+                        <div className="text-center px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+                          <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Status</p>
+                          <p className="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-0.5">Checked In</p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

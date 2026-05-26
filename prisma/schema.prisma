@@ -17,9 +17,11 @@ enum Role {
 
 enum AppointmentStatus {
   SCHEDULED
+  CHECKED_IN
   COMPLETED
   CANCELLED
   RESCHEDULED
+  NO_SHOW
 }
 
 model User {
@@ -164,6 +166,8 @@ model Appointment {
   reason    String?
   appointmentType AppointmentType @default(NEW_VISIT)
   priority        AppointmentPriority @default(NORMAL)
+  checkedInAt     DateTime?
+  queueNumber     Int?
   createdAt DateTime            @default(now())
   updatedAt DateTime            @updatedAt
 

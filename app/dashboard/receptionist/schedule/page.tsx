@@ -14,6 +14,9 @@ import {
   Printer,
   Loader2,
   CalendarDays,
+  UserCheck,
+  AlertTriangle,
+  Hash,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -35,6 +38,9 @@ export default function ReceptionistSchedulePage() {
   const [newTime, setNewTime] = useState("");
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
+
+  // No-Show Confirmation Dialog state
+  const [noShowTarget, setNoShowTarget] = useState<any | null>(null);
 
   const fetchAppointments = async (q = "") => {
     setLoading(true);
@@ -75,14 +81,31 @@ export default function ReceptionistSchedulePage() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
-        toast.success(`Appointment marked as ${newStatus.toLowerCase()}`);
+        const statusLabels: Record<string, string> = {
+          COMPLETED: "completed",
+          CANCELLED: "cancelled",
+          CHECKED_IN: "checked in",
+          NO_SHOW: "marked as no-show",
+        };
+        toast.success(`Appointment ${statusLabels[newStatus] || newStatus.toLowerCase()}`);
         fetchAppointments(searchQuery);
       } else {
-        toast.error("Failed to update status");
+        const errText = await res.text();
+        toast.error(errText || "Failed to update status");
       }
     } catch (err) {
       toast.error("An error occurred");
     }
+  };
+
+  const handleCheckIn = async (id: string) => {
+    await updateStatus(id, "CHECKED_IN");
+  };
+
+  const handleNoShow = async () => {
+    if (!noShowTarget) return;
+    await updateStatus(noShowTarget.id, "NO_SHOW");
+    setNoShowTarget(null);
   };
 
   const checkAvailability = async () => {
@@ -136,13 +159,26 @@ export default function ReceptionistSchedulePage() {
     }
   };
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     SCHEDULED:
       "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900",
-    COMPLETED:
+    CHECKED_IN:
       "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900",
+    COMPLETED:
+      "bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700",
     CANCELLED:
       "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900",
+    NO_SHOW:
+      "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900",
+  };
+
+  const statusLabels: Record<string, string> = {
+    SCHEDULED: "Scheduled",
+    CHECKED_IN: "Checked In",
+    COMPLETED: "Completed",
+    CANCELLED: "Cancelled",
+    NO_SHOW: "No-Show",
+    RESCHEDULED: "Rescheduled",
   };
 
   return (
@@ -182,17 +218,18 @@ export default function ReceptionistSchedulePage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                  <th className="px-8 py-6">Time</th>
-                  <th className="px-8 py-6">Patient</th>
-                  <th className="px-8 py-6">Doctor</th>
-                  <th className="px-8 py-6">Status</th>
-                  <th className="px-8 py-6 text-right print:hidden">Actions</th>
+                  <th className="px-6 py-6">Queue</th>
+                  <th className="px-6 py-6">Time</th>
+                  <th className="px-6 py-6">Patient</th>
+                  <th className="px-6 py-6">Doctor</th>
+                  <th className="px-6 py-6">Status</th>
+                  <th className="px-6 py-6 text-right print:hidden">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-900">
                 {appointments.length === 0 && !loading ? (
                   <tr>
-                    <td colSpan={5} className="px-8 py-20 text-center">
+                    <td colSpan={6} className="px-8 py-20 text-center">
                       <CalendarDays
                         size={48}
                         className="mx-auto text-slate-200 mb-4"
@@ -208,7 +245,21 @@ export default function ReceptionistSchedulePage() {
                       key={app.id}
                       className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group"
                     >
-                      <td className="px-8 py-6">
+                      {/* Queue Number */}
+                      <td className="px-6 py-6">
+                        {app.queueNumber ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+                            <Hash size={14} className="text-emerald-500" />
+                            <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">
+                              {app.queueNumber}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-300 dark:text-slate-600 text-sm font-medium">—</span>
+                        )}
+                      </td>
+                      {/* Time */}
+                      <td className="px-6 py-6">
                         <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
                           <Clock size={16} className="text-blue-500" />
                           {format(new Date(app.dateTime), "h:mm a")}
@@ -217,7 +268,8 @@ export default function ReceptionistSchedulePage() {
                           {format(new Date(app.dateTime), "MMM dd, yyyy")}
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      {/* Patient */}
+                      <td className="px-6 py-6">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold">
                             {app.patient?.user?.name[0] || "?"}
@@ -249,7 +301,8 @@ export default function ReceptionistSchedulePage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      {/* Doctor */}
+                      <td className="px-6 py-6">
                         <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
                           <Stethoscope
                             size={16}
@@ -258,41 +311,75 @@ export default function ReceptionistSchedulePage() {
                           Dr. {app.doctor?.user?.name || "Unknown"}
                         </div>
                       </td>
-                      <td className="px-8 py-6">
+                      {/* Status */}
+                      <td className="px-6 py-6">
                         <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusColors[app.status as keyof typeof statusColors]}`}
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusColors[app.status] || statusColors.SCHEDULED}`}
                         >
-                          {app.status}
+                          {statusLabels[app.status] || app.status}
                         </span>
+                        {app.checkedInAt && app.status === "CHECKED_IN" && (
+                          <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium mt-1">
+                            at {format(new Date(app.checkedInAt), "h:mm a")}
+                          </p>
+                        )}
                       </td>
-                      <td className="px-8 py-6 text-right print:hidden">
+                      {/* Actions */}
+                      <td className="px-6 py-6 text-right print:hidden">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {/* SCHEDULED → Check In, Reschedule, No-Show, Cancel */}
                           {app.status === "SCHEDULED" && (
                             <>
                               <button
-                                onClick={() =>
-                                  updateStatus(app.id, "COMPLETED")
-                                }
-                                className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors tooltip-trigger"
-                                title="Mark Completed"
+                                onClick={() => handleCheckIn(app.id)}
+                                className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors"
+                                title="Check In Patient"
                               >
-                                <CheckCircle2 size={18} />
+                                <UserCheck size={18} />
                               </button>
                               <button
                                 onClick={() => setRescheduleData(app)}
-                                className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors tooltip-trigger"
+                                className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors"
                                 title="Reschedule"
                               >
                                 <Calendar size={18} />
                               </button>
                               <button
+                                onClick={() => setNoShowTarget(app)}
+                                className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors"
+                                title="Mark No-Show"
+                              >
+                                <AlertTriangle size={18} />
+                              </button>
+                              <button
                                 onClick={() =>
                                   updateStatus(app.id, "CANCELLED")
                                 }
-                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors tooltip-trigger"
+                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
                                 title="Cancel"
                               >
                                 <XCircle size={18} />
+                              </button>
+                            </>
+                          )}
+                          {/* CHECKED_IN → Complete, No-Show */}
+                          {app.status === "CHECKED_IN" && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  updateStatus(app.id, "COMPLETED")
+                                }
+                                className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors"
+                                title="Mark Completed"
+                              >
+                                <CheckCircle2 size={18} />
+                              </button>
+                              <button
+                                onClick={() => setNoShowTarget(app)}
+                                className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors"
+                                title="Mark No-Show"
+                              >
+                                <AlertTriangle size={18} />
                               </button>
                             </>
                           )}
@@ -396,6 +483,65 @@ export default function ReceptionistSchedulePage() {
             >
               Confirm Reschedule
             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* No-Show Confirmation Dialog */}
+      <Dialog
+        open={!!noShowTarget}
+        onOpenChange={() => setNoShowTarget(null)}
+      >
+        <DialogContent className="sm:max-w-md rounded-[2.5rem] p-8 border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0F172A] shadow-2xl transition-colors duration-500">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black text-slate-900 dark:text-slate-100">
+              Mark as No-Show
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 pt-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-200 dark:border-amber-800 flex items-start gap-3">
+              <AlertTriangle size={22} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-bold text-amber-800 dark:text-amber-300 text-sm">
+                  Are you sure you want to mark this appointment as no-show?
+                </p>
+                <p className="text-amber-600 dark:text-amber-400 text-xs mt-1">
+                  This action indicates the patient did not attend. It cannot be easily undone.
+                </p>
+              </div>
+            </div>
+
+            {noShowTarget && (
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl space-y-2">
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  <span className="text-slate-500 dark:text-slate-400">Patient:</span> {noShowTarget.patient?.user?.name || "Unknown"}
+                </p>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  <span className="text-slate-500 dark:text-slate-400">Doctor:</span> Dr. {noShowTarget.doctor?.user?.name || "Unknown"}
+                </p>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  <span className="text-slate-500 dark:text-slate-400">Time:</span> {format(new Date(noShowTarget.dateTime), "h:mm a, MMM dd yyyy")}
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setNoShowTarget(null)}
+                className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleNoShow}
+                className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black hover:bg-amber-600 transition-all"
+              >
+                Confirm No-Show
+              </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { startOfDay, endOfDay } from "date-fns";
 
 export async function PATCH(
   req: Request,
@@ -18,6 +19,7 @@ export async function PATCH(
   }
 
   const { status, dateTime, appointmentType, priority } = await req.json();
+  const userRole = (session.user as any).role;
 
   try {
     const appointment = await prisma.appointment.findUnique({
@@ -31,17 +33,82 @@ export async function PATCH(
 
     // Authorization check
     // Patients can only cancel their own appointments
-    if ((session.user as any).role === "PATIENT") {
+    if (userRole === "PATIENT") {
       if (appointment.patient.userId !== session.user.id) {
         return new NextResponse("Forbidden", { status: 403 });
       }
-      // Patients can only cancel, not reschedule (as per FR-10)
+      // Patients can only cancel, not change other statuses
       if (status !== "CANCELLED") {
         return new NextResponse("Patients can only cancel appointments", { status: 403 });
       }
     }
 
-    // Admins and Receptionists can do anything
+    // ── CHECK-IN logic ──────────────────────────────────────────────
+    if (status === "CHECKED_IN") {
+      // Only ADMIN or RECEPTIONIST can check in
+      if (userRole !== "ADMIN" && userRole !== "RECEPTIONIST") {
+        return new NextResponse("Only admin or receptionist can check in patients", { status: 403 });
+      }
+      // Can only check in from SCHEDULED
+      if (appointment.status !== "SCHEDULED") {
+        return new NextResponse(
+          `Cannot check in an appointment with status "${appointment.status}". Only SCHEDULED appointments can be checked in.`,
+          { status: 400 }
+        );
+      }
+
+      // Auto-increment daily queue number per doctor
+      const today = new Date();
+      const dayStart = startOfDay(today);
+      const dayEnd = endOfDay(today);
+
+      const lastQueued = await prisma.appointment.findFirst({
+        where: {
+          doctorId: appointment.doctorId,
+          status: "CHECKED_IN",
+          checkedInAt: { gte: dayStart, lte: dayEnd },
+          queueNumber: { not: null },
+        },
+        orderBy: { queueNumber: "desc" },
+      });
+
+      const nextQueue = (lastQueued?.queueNumber ?? 0) + 1;
+
+      const updated = await prisma.appointment.update({
+        where: { id },
+        data: {
+          status: "CHECKED_IN",
+          checkedInAt: new Date(),
+          queueNumber: nextQueue,
+        },
+      });
+
+      return NextResponse.json(updated);
+    }
+
+    // ── NO-SHOW logic ───────────────────────────────────────────────
+    if (status === "NO_SHOW") {
+      // Only ADMIN or RECEPTIONIST can mark no-show
+      if (userRole !== "ADMIN" && userRole !== "RECEPTIONIST") {
+        return new NextResponse("Only admin or receptionist can mark no-show", { status: 403 });
+      }
+      // Can mark no-show from SCHEDULED or CHECKED_IN
+      if (appointment.status !== "SCHEDULED" && appointment.status !== "CHECKED_IN") {
+        return new NextResponse(
+          `Cannot mark no-show for status "${appointment.status}". Only SCHEDULED or CHECKED_IN appointments can be marked as no-show.`,
+          { status: 400 }
+        );
+      }
+
+      const updated = await prisma.appointment.update({
+        where: { id },
+        data: { status: "NO_SHOW" },
+      });
+
+      return NextResponse.json(updated);
+    }
+
+    // ── General update logic (complete, cancel, reschedule, etc.) ──
     const validTypes = ["NEW_VISIT", "FOLLOW_UP", "CONSULTATION", "EMERGENCY"];
     const validPriorities = ["NORMAL", "URGENT", "EMERGENCY"];
 
