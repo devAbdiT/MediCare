@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PrintAppointmentButton from "@/components/PrintAppointmentButton";
+import WeeklyCalendar from "@/components/WeeklyCalendar";
+import { cn } from "@/lib/utils";
 import { format, isToday } from "date-fns";
 import {
   Calendar,
@@ -82,6 +84,8 @@ export default function ReceptionistSchedulePage() {
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
+  const [selectedApptDetails, setSelectedApptDetails] = useState<any | null>(null);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -379,6 +383,32 @@ export default function ReceptionistSchedulePage() {
           </div>
         </div>
 
+        {/* ── View Switcher Tabs ── */}
+        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-850 rounded-2xl w-fit print:hidden">
+          <button
+            onClick={() => setViewMode("list")}
+            className={cn(
+              "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer",
+              viewMode === "list"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+            )}
+          >
+            List View
+          </button>
+          <button
+            onClick={() => setViewMode("calendar")}
+            className={cn(
+              "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer",
+              viewMode === "calendar"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+            )}
+          >
+            Weekly Calendar View
+          </button>
+        </div>
+
         {/* ── Filter Panel ── */}
         {showFilters && (
           <div className="bg-white dark:bg-[#0F172A] border border-slate-100 dark:border-slate-800 rounded-[2rem] p-6 shadow-sm print:hidden">
@@ -504,192 +534,208 @@ export default function ReceptionistSchedulePage() {
           </div>
         )}
 
-        {/* ── Result count ── */}
-        <div className="flex items-center justify-between print:hidden">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {loading ? "Loading..." : `${appointments.length} appointment${appointments.length !== 1 ? "s" : ""} found`}
-          </p>
-        </div>
+        {viewMode === "list" ? (
+          <>
+            {/* ── Result count ── */}
+            <div className="flex items-center justify-between print:hidden">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                {loading ? "Loading..." : `${appointments.length} appointment${appointments.length !== 1 ? "s" : ""} found`}
+              </p>
+            </div>
 
-        {/* ── Table ── */}
-        <div className="bg-white dark:bg-[#0F172A] rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-500 print:border-none print:rounded-none print:shadow-none">
-          <div className="overflow-x-auto print:overflow-visible">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest print:bg-slate-100">
-                  <th className="px-6 py-5">No.</th>
-                  <th className="px-6 py-5">Queue</th>
-                  <th className="px-6 py-5">Date & Time</th>
-                  <th className="px-6 py-5">Patient</th>
-                  <th className="px-6 py-5">Doctor</th>
-                  <th className="px-6 py-5">Status</th>
-                  <th className="px-6 py-5 text-right print:hidden">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-900 print:divide-slate-200">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="px-8 py-20 text-center">
-                      <Loader2 size={32} className="mx-auto text-blue-400 animate-spin mb-3" />
-                      <p className="text-slate-400 font-medium">Loading schedule...</p>
-                    </td>
-                  </tr>
-                ) : appointments.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-8 py-20 text-center">
-                      <CalendarDays size={48} className="mx-auto text-slate-200 dark:text-slate-700 mb-4" />
-                      <p className="text-slate-500 font-bold">No appointments found for the selected filters.</p>
-                      {activeFilterCount > 0 && (
-                        <button onClick={clearFilters} className="mt-3 text-blue-500 text-sm font-bold hover:underline">Clear filters</button>
-                      )}
-                    </td>
-                  </tr>
-                ) : (
-                  appointments.map((app, idx) => (
-                    <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group print:hover:bg-transparent">
-                      {/* No. */}
-                      <td className="px-6 py-5 text-slate-400 font-bold text-sm">{idx + 1}</td>
-
-                      {/* Queue */}
-                      <td className="px-6 py-5">
-                        {app.queueNumber ? (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl print:border-emerald-300">
-                            <Hash size={13} className="text-emerald-500" />
-                            <span className="text-base font-black text-emerald-700 dark:text-emerald-400">{app.queueNumber}</span>
-                          </div>
-                        ) : (
-                          <span className="text-slate-300 dark:text-slate-600 text-sm font-medium">—</span>
-                        )}
-                      </td>
-
-                      {/* Date & Time */}
-                      <td className="px-6 py-5">
-                        <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-                          {format(new Date(app.dateTime), "h:mm a")}
-                        </div>
-                        <div className="text-xs text-slate-400 font-medium mt-0.5">
-                          {format(new Date(app.dateTime), "MMM dd, yyyy")}
-                        </div>
-                      </td>
-
-                      {/* Patient */}
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold text-sm print:hidden">
-                            {app.patient?.user?.name?.[0] || "?"}
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{app.patient?.user?.name || "Unknown"}</p>
-                            {app.patient?.cardNumber && (
-                              <p className="text-[10px] text-slate-400 font-mono font-bold">{app.patient.cardNumber}</p>
-                            )}
-                            <p className="text-[10px] text-slate-400">{app.patient?.user?.phone || ""}</p>
-                            <div className="flex gap-1 mt-1 flex-wrap">
-                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${TYPE_COLORS[app.appointmentType] || TYPE_COLORS.NEW_VISIT}`}>
-                                {TYPE_LABELS[app.appointmentType] || app.appointmentType}
-                              </span>
-                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${PRIORITY_COLORS[app.priority] || PRIORITY_COLORS.NORMAL}`}>
-                                {PRIORITY_LABELS[app.priority] || app.priority}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Doctor */}
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300 text-sm">
-                          <Stethoscope size={15} className="text-slate-400 dark:text-slate-500 print:hidden" />
-                          Dr. {app.doctor?.user?.name || "Unknown"}
-                        </div>
-                        {app.doctor?.specialization && (
-                          <p className="text-[10px] text-slate-400 mt-0.5">{app.doctor.specialization}</p>
-                        )}
-                        {app.doctor?.department?.name && (
-                          <p className="text-[10px] text-blue-500 dark:text-blue-400 font-bold">{app.doctor.department.name}</p>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-6 py-5">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${STATUS_COLORS[app.status] || STATUS_COLORS.SCHEDULED}`}>
-                          {STATUS_LABELS[app.status] || app.status}
-                        </span>
-                        {app.checkedInAt && app.status === "CHECKED_IN" && (
-                          <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium mt-1">
-                            at {format(new Date(app.checkedInAt), "h:mm a")}
-                          </p>
-                        )}
-                        {/* Reminder status */}
-                        <div className="mt-2">
-                          {app.reminders?.length > 0 ? (
-                            <div>
-                              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Reminder: Sent</span>
-                              <p className="text-[9px] text-slate-400">at {format(new Date(app.reminders[0].sentAt), "MMM dd, h:mm a")}</p>
-                            </div>
-                          ) : (["SCHEDULED", "RESCHEDULED", "CHECKED_IN"].includes(app.status)) ? (
-                            <div>
-                              <span className="text-[10px] font-bold text-slate-400 block mb-1">Reminder: Not Sent</span>
-                              <button
-                                onClick={() => markReminderSent(app.id)}
-                                disabled={markingReminder === app.id}
-                                className="text-[9px] px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider rounded transition-colors disabled:opacity-50 print:hidden"
-                              >
-                                {markingReminder === app.id ? "Marking..." : "Mark Sent"}
-                              </button>
-                            </div>
-                          ) : null}
-                        </div>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-6 py-5 text-right print:hidden">
-                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <PrintAppointmentButton appointment={app} variant="ghost" />
-                          {app.status === "SCHEDULED" && (
-                            <>
-                              <button onClick={() => updateStatus(app.id, "CHECKED_IN")} className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors" title="Check In">
-                                <UserCheck size={17} />
-                              </button>
-                              <button onClick={() => setRescheduleData(app)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors" title="Reschedule">
-                                <Calendar size={17} />
-                              </button>
-                              <button onClick={() => setNoShowTarget(app)} className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors" title="Mark No-Show">
-                                <AlertTriangle size={17} />
-                              </button>
-                              <button onClick={() => updateStatus(app.id, "CANCELLED")} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors" title="Cancel">
-                                <XCircle size={17} />
-                              </button>
-                            </>
-                          )}
-                          {app.status === "CHECKED_IN" && (
-                            <>
-                              <button onClick={() => updateStatus(app.id, "COMPLETED")} className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors" title="Mark Completed">
-                                <CheckCircle2 size={17} />
-                              </button>
-                              <button onClick={() => setNoShowTarget(app)} className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors" title="Mark No-Show">
-                                <AlertTriangle size={17} />
-                              </button>
-                            </>
-                          )}
-                          <button onClick={() => viewHistory(app)} className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors" title="View History">
-                            <History size={17} />
-                          </button>
-                        </div>
-                      </td>
+            {/* ── Table ── */}
+            <div className="bg-white dark:bg-[#0F172A] rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-500 print:border-none print:rounded-none print:shadow-none">
+              <div className="overflow-x-auto print:overflow-visible">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest print:bg-slate-100">
+                      <th className="px-6 py-5">No.</th>
+                      <th className="px-6 py-5">Queue</th>
+                      <th className="px-6 py-5">Date & Time</th>
+                      <th className="px-6 py-5">Patient</th>
+                      <th className="px-6 py-5">Doctor</th>
+                      <th className="px-6 py-5">Status</th>
+                      <th className="px-6 py-5 text-right print:hidden">Actions</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-900 print:divide-slate-200">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="px-8 py-20 text-center">
+                          <Loader2 size={32} className="mx-auto text-blue-400 animate-spin mb-3" />
+                          <p className="text-slate-400 font-medium">Loading schedule...</p>
+                        </td>
+                      </tr>
+                    ) : appointments.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-8 py-20 text-center">
+                          <CalendarDays size={48} className="mx-auto text-slate-200 dark:text-slate-700 mb-4" />
+                          <p className="text-slate-500 font-bold">No appointments found for the selected filters.</p>
+                          {activeFilterCount > 0 && (
+                            <button onClick={clearFilters} className="mt-3 text-blue-500 text-sm font-bold hover:underline">Clear filters</button>
+                          )}
+                        </td>
+                      </tr>
+                    ) : (
+                      appointments.map((app, idx) => (
+                        <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group print:hover:bg-transparent">
+                          {/* No. */}
+                          <td className="px-6 py-5 text-slate-400 font-bold text-sm">{idx + 1}</td>
 
-          {/* Print footer */}
-          <div className="hidden print:block px-6 py-4 border-t-2 border-slate-200 mt-4">
-            <p className="text-sm font-bold text-slate-700">Total Appointments: {appointments.length}</p>
-            <p className="text-xs text-slate-500 mt-1">This is a system-generated appointment report. — MediCare Appointment Scheduling System</p>
+                          {/* Queue */}
+                          <td className="px-6 py-5">
+                            {app.queueNumber ? (
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl print:border-emerald-300">
+                                <Hash size={13} className="text-emerald-500" />
+                                <span className="text-base font-black text-emerald-700 dark:text-emerald-400">{app.queueNumber}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-300 dark:text-slate-600 text-sm font-medium">—</span>
+                            )}
+                          </td>
+
+                          {/* Date & Time */}
+                          <td className="px-6 py-5">
+                            <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                              {format(new Date(app.dateTime), "h:mm a")}
+                            </div>
+                            <div className="text-xs text-slate-400 font-medium mt-0.5">
+                              {format(new Date(app.dateTime), "MMM dd, yyyy")}
+                            </div>
+                          </td>
+
+                          {/* Patient */}
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold text-sm print:hidden">
+                                {app.patient?.user?.name?.[0] || "?"}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{app.patient?.user?.name || "Unknown"}</p>
+                                {app.patient?.cardNumber && (
+                                  <p className="text-[10px] text-slate-400 font-mono font-bold">{app.patient.cardNumber}</p>
+                                )}
+                                <p className="text-[10px] text-slate-400">{app.patient?.user?.phone || ""}</p>
+                                <div className="flex gap-1 mt-1 flex-wrap">
+                                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${TYPE_COLORS[app.appointmentType] || TYPE_COLORS.NEW_VISIT}`}>
+                                    {TYPE_LABELS[app.appointmentType] || app.appointmentType}
+                                  </span>
+                                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${PRIORITY_COLORS[app.priority] || PRIORITY_COLORS.NORMAL}`}>
+                                    {PRIORITY_LABELS[app.priority] || app.priority}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Doctor */}
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300 text-sm">
+                              <Stethoscope size={15} className="text-slate-400 dark:text-slate-500 print:hidden" />
+                              Dr. {app.doctor?.user?.name || "Unknown"}
+                            </div>
+                            {app.doctor?.specialization && (
+                              <p className="text-[10px] text-slate-400 mt-0.5">{app.doctor.specialization}</p>
+                            )}
+                            {app.doctor?.department?.name && (
+                              <p className="text-[10px] text-blue-500 dark:text-blue-400 font-bold">{app.doctor.department.name}</p>
+                            )}
+                          </td>
+
+                          {/* Status */}
+                          <td className="px-6 py-5">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${STATUS_COLORS[app.status] || STATUS_COLORS.SCHEDULED}`}>
+                              {STATUS_LABELS[app.status] || app.status}
+                            </span>
+                            {app.checkedInAt && app.status === "CHECKED_IN" && (
+                              <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium mt-1">
+                                at {format(new Date(app.checkedInAt), "h:mm a")}
+                              </p>
+                            )}
+                            {/* Reminder status */}
+                            <div className="mt-2">
+                              {app.reminders?.length > 0 ? (
+                                <div>
+                                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Reminder: Sent</span>
+                                  <p className="text-[9px] text-slate-400">at {format(new Date(app.reminders[0].sentAt), "MMM dd, h:mm a")}</p>
+                                </div>
+                              ) : (["SCHEDULED", "RESCHEDULED", "CHECKED_IN"].includes(app.status)) ? (
+                                <div>
+                                  <span className="text-[10px] font-bold text-slate-400 block mb-1">Reminder: Not Sent</span>
+                                  <button
+                                    onClick={() => markReminderSent(app.id)}
+                                    disabled={markingReminder === app.id}
+                                    className="text-[9px] px-2 py-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider rounded transition-colors disabled:opacity-50 print:hidden"
+                                  >
+                                    {markingReminder === app.id ? "Marking..." : "Mark Sent"}
+                                  </button>
+                                </div>
+                              ) : null}
+                            </div>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="px-6 py-5 text-right print:hidden">
+                            <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <PrintAppointmentButton appointment={app} variant="ghost" />
+                              {app.status === "SCHEDULED" && (
+                                <>
+                                  <button onClick={() => updateStatus(app.id, "CHECKED_IN")} className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors" title="Check In">
+                                    <UserCheck size={17} />
+                                  </button>
+                                  <button onClick={() => setRescheduleData(app)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors" title="Reschedule">
+                                    <Calendar size={17} />
+                                  </button>
+                                  <button onClick={() => setNoShowTarget(app)} className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors" title="Mark No-Show">
+                                    <AlertTriangle size={17} />
+                                  </button>
+                                  <button onClick={() => updateStatus(app.id, "CANCELLED")} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors" title="Cancel">
+                                    <XCircle size={17} />
+                                  </button>
+                                </>
+                              )}
+                              {app.status === "CHECKED_IN" && (
+                                <>
+                                  <button onClick={() => updateStatus(app.id, "COMPLETED")} className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors" title="Mark Completed">
+                                    <CheckCircle2 size={17} />
+                                  </button>
+                                  <button onClick={() => setNoShowTarget(app)} className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors" title="Mark No-Show">
+                                    <AlertTriangle size={17} />
+                                  </button>
+                                </>
+                              )}
+                              <button onClick={() => viewHistory(app)} className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors" title="View History">
+                                <History size={17} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Print footer */}
+              <div className="hidden print:block px-6 py-4 border-t-2 border-slate-200 mt-4">
+                <p className="text-sm font-bold text-slate-700">Total Appointments: {appointments.length}</p>
+                <p className="text-xs text-slate-500 mt-1">This is a system-generated appointment report. — MediCare Appointment Scheduling System</p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="print:hidden">
+            <WeeklyCalendar
+              onAppointmentClick={setSelectedApptDetails}
+              searchQuery={searchQuery}
+              filterStatus={filterStatus}
+              filterDoctorId={filterDoctorId}
+              filterDepartmentId={filterDepartmentId}
+              filterType={filterType}
+              filterPriority={filterPriority}
+            />
           </div>
-        </div>
+        )}
 
         {/* ── Reschedule Dialog ── */}
         <Dialog open={!!rescheduleData} onOpenChange={() => setRescheduleData(null)}>
@@ -808,6 +854,207 @@ export default function ReceptionistSchedulePage() {
                 ))
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ── Appointment Details Dialog ── */}
+        <Dialog open={!!selectedApptDetails} onOpenChange={() => setSelectedApptDetails(null)}>
+          <DialogContent className="sm:max-w-lg rounded-[2.5rem] p-8 border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0F172A] shadow-2xl transition-colors duration-500 max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 dark:text-slate-100">
+                Appointment Details
+              </DialogTitle>
+            </DialogHeader>
+            {selectedApptDetails && (
+              <div className="space-y-6 pt-4">
+                {/* Patient Profile info */}
+                <div className="p-5 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-3">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Information</p>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{selectedApptDetails.patient?.user?.name}</h3>
+                    {selectedApptDetails.patient?.cardNumber && (
+                      <p className="text-xs font-mono font-bold text-slate-500 mt-0.5">Card Number: {selectedApptDetails.patient.cardNumber}</p>
+                    )}
+                    {selectedApptDetails.patient?.user?.phone && (
+                      <p className="text-xs text-slate-500 mt-0.5">Phone: {selectedApptDetails.patient.user.phone}</p>
+                    )}
+                    {selectedApptDetails.patient?.user?.email && (
+                      <p className="text-xs text-slate-500 mt-0.5">Email: {selectedApptDetails.patient.user.email}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Consultation Details */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Doctor</p>
+                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Dr. {selectedApptDetails.doctor?.user?.name}</p>
+                    {selectedApptDetails.doctor?.specialization && (
+                      <p className="text-[10px] text-slate-450">{selectedApptDetails.doctor.specialization}</p>
+                    )}
+                  </div>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Date & Time</p>
+                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{format(new Date(selectedApptDetails.dateTime), "h:mm a")}</p>
+                    <p className="text-[10px] text-slate-450">{format(new Date(selectedApptDetails.dateTime), "MMM dd, yyyy")}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Status</p>
+                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${STATUS_COLORS[selectedApptDetails.status] || STATUS_COLORS.SCHEDULED}`}>
+                      {STATUS_LABELS[selectedApptDetails.status] || selectedApptDetails.status}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Type</p>
+                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${TYPE_COLORS[selectedApptDetails.appointmentType] || TYPE_COLORS.NEW_VISIT}`}>
+                      {TYPE_LABELS[selectedApptDetails.appointmentType] || selectedApptDetails.appointmentType}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Priority</p>
+                    <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${PRIORITY_COLORS[selectedApptDetails.priority] || PRIORITY_COLORS.NORMAL}`}>
+                      {PRIORITY_LABELS[selectedApptDetails.priority] || selectedApptDetails.priority}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedApptDetails.reason && (
+                  <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Reason for Visit</p>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300 italic">
+                      &quot;{selectedApptDetails.reason}&quot;
+                    </p>
+                  </div>
+                )}
+
+                {selectedApptDetails.queueNumber && (
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900 flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Queue Status</p>
+                      <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">Checked-in and queued</p>
+                    </div>
+                    <div className="flex items-center gap-1 px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-800 rounded-xl">
+                      <Hash size={14} className="text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-lg font-black text-emerald-700 dark:text-emerald-355">Q{selectedApptDetails.queueNumber}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reminder Log inside popup */}
+                <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Reminder Log</p>
+                    {selectedApptDetails.reminders?.length > 0 ? (
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-1">
+                        Sent at {format(new Date(selectedApptDetails.reminders[0].sentAt), "MMM dd, h:mm a")}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-500 font-medium mt-1">No reminder recorded yet</p>
+                    )}
+                  </div>
+                  {(!selectedApptDetails.reminders || selectedApptDetails.reminders.length === 0) &&
+                    ["SCHEDULED", "RESCHEDULED", "CHECKED_IN"].includes(selectedApptDetails.status) && (
+                      <button
+                        onClick={async () => {
+                          const apptId = selectedApptDetails.id;
+                          await markReminderSent(apptId);
+                          setSelectedApptDetails(null);
+                        }}
+                        disabled={markingReminder === selectedApptDetails.id}
+                        className="px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-widest rounded-xl transition-colors disabled:opacity-50"
+                      >
+                        {markingReminder === selectedApptDetails.id ? "Marking..." : "Mark Sent"}
+                      </button>
+                    )}
+                </div>
+
+                {/* Action buttons inside details popup */}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  <p className="text-[9px] font-black text-slate-450 uppercase tracking-widest">Reception Actions</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {selectedApptDetails.status === "SCHEDULED" && (
+                      <>
+                        <button
+                          onClick={() => {
+                            updateStatus(selectedApptDetails.id, "CHECKED_IN");
+                            setSelectedApptDetails(null);
+                          }}
+                          className="flex-1 min-w-[120px] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                        >
+                          Check In
+                        </button>
+                        <button
+                          onClick={() => {
+                            setRescheduleData(selectedApptDetails);
+                            setSelectedApptDetails(null);
+                          }}
+                          className="flex-1 min-w-[120px] py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                        >
+                          Reschedule
+                        </button>
+                        <button
+                          onClick={() => {
+                            setNoShowTarget(selectedApptDetails);
+                            setSelectedApptDetails(null);
+                          }}
+                          className="flex-1 min-w-[120px] py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                        >
+                          Mark No-Show
+                        </button>
+                        <button
+                          onClick={() => {
+                            updateStatus(selectedApptDetails.id, "CANCELLED");
+                            setSelectedApptDetails(null);
+                          }}
+                          className="flex-1 min-w-[120px] py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                        >
+                          Cancel Appointment
+                        </button>
+                      </>
+                    )}
+
+                    {selectedApptDetails.status === "CHECKED_IN" && (
+                      <>
+                        <button
+                          onClick={() => {
+                            updateStatus(selectedApptDetails.id, "COMPLETED");
+                            setSelectedApptDetails(null);
+                          }}
+                          className="flex-1 min-w-[120px] py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                        >
+                          Mark Completed
+                        </button>
+                        <button
+                          onClick={() => {
+                            setNoShowTarget(selectedApptDetails);
+                            setSelectedApptDetails(null);
+                          }}
+                          className="flex-1 min-w-[120px] py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                        >
+                          Mark No-Show
+                        </button>
+                      </>
+                    )}
+
+                    <div className="w-full flex gap-2 items-center">
+                      <PrintAppointmentButton appointment={selectedApptDetails} variant="solid" />
+                      <button
+                        onClick={() => {
+                          viewHistory(selectedApptDetails);
+                          setSelectedApptDetails(null);
+                        }}
+                        className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-350 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all cursor-pointer"
+                      >
+                        View Reschedule History
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
