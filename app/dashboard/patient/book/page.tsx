@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar, Clock, Loader2, Check, AlertTriangle, Lightbulb, Activity, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import SlotPicker from "@/components/SlotPicker";
 
 interface DoctorWorkload {
   doctorId: string;
@@ -302,24 +303,13 @@ export default function BookAppointment() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
-                    <Label className="font-bold text-slate-700 dark:text-slate-300">3. Preferred Time</Label>
-                    <div className="relative">
-                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
-                      <select
-                        value={selectedTime}
-                        onChange={(e) => {
-                          setSelectedTime(e.target.value);
-                          setAvailability(null);
-                        }}
-                        className="w-full pl-12 pr-4 h-14 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 dark:text-slate-100 focus:ring-2 focus:ring-blue-600 outline-none appearance-none font-medium"
-                        required
-                      >
-                        <option value="">Select time...</option>
-                        {["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"].map(t => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <SlotPicker
+  doctorId={selectedDoctor}
+  date={selectedDate}
+  selectedTime={selectedTime}
+  onSelect={setSelectedTime}
+  className="w-full"
+/>
                   </div>
 
                   <div className="space-y-2">

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import SlotPicker from "@/components/SlotPicker";
 import { 
   Search, 
   Calendar, 
@@ -359,24 +360,16 @@ function BookingForm() {
                       <Label className="font-bold text-slate-700 dark:text-slate-300">3. Select Time Slot</Label>
                     <div className="relative">
                       <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
-                      <select
-                        value={time}
-                        onChange={(e) => {
-                          setTime(e.target.value);
+                      <SlotPicker
+                        doctorId={selectedDoctor}
+                        date={date}
+                        selectedTime={time}
+                        onSelect={(t) => {
+                          setTime(t);
                           setAvailable(null);
                         }}
-                        className="w-full pl-12 pr-4 h-14 bg-slate-50 dark:bg-slate-900/50 border-2 border-slate-200 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-600 outline-none transition-all font-bold text-slate-900 dark:text-slate-100 appearance-none"
-                        required
-                      >
-                        <option value="">Select time</option>
-                        {Array.from({ length: 9 }, (_, i) => i + 9).map(hour => {
-                          const formattedHour = hour < 10 ? `0${hour}` : hour;
-                          const label = hour > 12 ? `${hour - 12}:00 PM` : hour === 12 ? `12:00 PM` : `${hour}:00 AM`;
-                          return (
-                            <option key={hour} value={`${formattedHour}:00:00`}>{label}</option>
-                          );
-                        })}
-                      </select>
+                        className="w-full"
+                      />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
