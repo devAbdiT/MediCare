@@ -117,7 +117,7 @@ export default function BookAppointment() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/appointments", {
+      const res = await fetch("/api/appointments/book-with-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -129,14 +129,21 @@ export default function BookAppointment() {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to book appointment");
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to book appointment");
+      }
 
-      toast.success("Appointment booked successfully!");
-      router.push("/dashboard/patient");
+      const data = await res.json();
+      toast.success("Redirecting to secure payment...");
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error("No checkout URL returned from payment provider.");
+      }
     } catch (err: any) {
       toast.error(err.message || "An error occurred during booking.");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only set to false on error, if success we are redirecting
     }
   };
 
@@ -375,7 +382,7 @@ export default function BookAppointment() {
                   className="bg-blue-600 hover:bg-blue-700 text-white font-black h-14 px-12 rounded-2xl shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50"
                 >
                   {loading ? <Loader2 className="animate-spin mr-2" /> : null}
-                  Confirm Appointment
+                  {loading ? "Preparing secure payment..." : "Book Appointment & Pay"}
                 </Button>
               </div>
             </form>

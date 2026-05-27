@@ -63,6 +63,7 @@ function BookingForm() {
   const [available, setAvailable] = useState<boolean | null>(null);
   const [doctorAvailability, setDoctorAvailability] = useState<any[]>([]);
   const [availabilityMessage, setAvailabilityMessage] = useState("");
+  const [checkoutUrl, setCheckoutUrl] = useState("");
 
   useEffect(() => {
     if (!date) return;
@@ -144,7 +145,7 @@ function BookingForm() {
     const dateTime = new Date(`${date}T${time}`);
 
     try {
-      const res = await fetch("/api/appointments", {
+      const res = await fetch("/api/appointments/book-with-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -158,11 +159,14 @@ function BookingForm() {
       });
 
       if (res.ok) {
-        toast.success("Appointment booked successfully!");
-        router.push("/dashboard/receptionist/schedule");
+        const data = await res.json();
+        toast.success("Appointment payment link generated!");
+        if (data.checkoutUrl) {
+          setCheckoutUrl(data.checkoutUrl);
+        }
       } else {
-        const error = await res.json();
-        toast.error(error.message || "Failed to book appointment");
+        const errorText = await res.text();
+        toast.error(errorText || "Failed to book appointment");
       }
     } catch (err) {
       toast.error("An unexpected error occurred");
@@ -203,6 +207,50 @@ function BookingForm() {
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-center text-lg font-medium italic">Bridge patients with world-class care.</p>
         </div>
 
+        {checkoutUrl ? (
+          <Card className="max-w-2xl mx-auto rounded-[2.5rem] border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-[#0F172A] text-center p-8">
+            <CardContent className="space-y-6">
+              <div className="w-24 h-24 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-12 h-12 text-teal-600 dark:text-teal-400" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">Appointment Created</h2>
+              <p className="text-slate-500 dark:text-slate-400">The appointment requires payment. Please share this payment link with the patient or complete the payment now.</p>
+              
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl break-all border border-slate-200 dark:border-slate-800">
+                <code className="text-sm font-medium text-slate-700 dark:text-slate-300">{checkoutUrl}</code>
+              </div>
+              
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(checkoutUrl);
+                    toast.success("Link copied to clipboard!");
+                  }}
+                  variant="outline" 
+                  className="rounded-xl font-bold h-12"
+                >
+                  Copy Link
+                </Button>
+                <Button 
+                  onClick={() => window.open(checkoutUrl, "_blank")}
+                  className="rounded-xl font-bold h-12 bg-teal-600 hover:bg-teal-700 text-white"
+                >
+                  Open Payment Link
+                </Button>
+              </div>
+              
+              <div className="pt-8">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => router.push("/dashboard/receptionist/schedule")}
+                  className="font-bold text-slate-500"
+                >
+                  Return to Schedule
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
         <form onSubmit={handleBooking} className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-8">
           {/* Left Column: Patient & Date */}
           <div className="space-y-8">
@@ -437,11 +485,12 @@ function BookingForm() {
               className="w-full py-6 bg-teal-700 text-white rounded-[2.5rem] font-black text-xl shadow-2xl shadow-teal-900/20 hover:bg-teal-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none"
             >
               {loading ? <Loader2 className="animate-spin" /> : <CheckCircle2 />}
-              Confirm Booking
+              {loading ? "Generating Link..." : "Book & Generate Payment Link"}
               <ArrowRight size={24} />
             </button>
           </div>
         </form>
+        )}
       </div>
     </DashboardLayout>
   );

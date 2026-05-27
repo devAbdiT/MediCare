@@ -647,6 +647,22 @@ export default function ReceptionistSchedulePage() {
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${STATUS_COLORS[app.status] || STATUS_COLORS.SCHEDULED}`}>
                               {STATUS_LABELS[app.status] || app.status}
                             </span>
+                            
+                            {(app as any).paymentRequired && (app as any).paymentStatus === "PENDING" && (
+                              <span className="block mt-1 w-max px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">
+                                Payment Pending
+                              </span>
+                            )}
+                            {(app as any).paymentRequired && (app as any).paymentStatus === "PAID" && (
+                              <span className="block mt-1 w-max px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
+                                Paid
+                              </span>
+                            )}
+                            {(app as any).paymentRequired && (app as any).paymentStatus === "FAILED" && (
+                              <span className="block mt-1 w-max px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
+                                Payment Failed
+                              </span>
+                            )}
                             {app.checkedInAt && app.status === "CHECKED_IN" && (
                               <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium mt-1">
                                 at {format(new Date(app.checkedInAt), "h:mm a")}
@@ -680,7 +696,22 @@ export default function ReceptionistSchedulePage() {
                               <PrintAppointmentButton appointment={app} variant="ghost" />
                               {app.status === "SCHEDULED" && (
                                 <>
-                                  <button onClick={() => updateStatus(app.id, "CHECKED_IN")} className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors" title="Check In">
+                                  <button 
+                                    onClick={() => {
+                                      if ((app as any).paymentRequired && (app as any).paymentStatus !== "PAID") {
+                                        toast.error("Appointment payment must be completed before check-in.");
+                                        return;
+                                      }
+                                      updateStatus(app.id, "CHECKED_IN")
+                                    }} 
+                                    className={cn(
+                                      "p-2 rounded-xl transition-colors",
+                                      (app as any).paymentRequired && (app as any).paymentStatus !== "PAID"
+                                        ? "text-slate-300 dark:text-slate-600 cursor-not-allowed"
+                                        : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                    )}
+                                    title={((app as any).paymentRequired && (app as any).paymentStatus !== "PAID") ? "Payment required before check-in" : "Check In"}
+                                  >
                                     <UserCheck size={17} />
                                   </button>
                                   <button onClick={() => setRescheduleData(app)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors" title="Reschedule">

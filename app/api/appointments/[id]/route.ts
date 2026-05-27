@@ -50,6 +50,12 @@ export async function PATCH(
       if (userRole !== "ADMIN" && userRole !== "RECEPTIONIST") {
         return new NextResponse("Only admin or receptionist can check in patients", { status: 403 });
       }
+
+      // Enforce Payment
+      if (appointment.paymentRequired && appointment.paymentStatus !== "PAID") {
+        return new NextResponse("Appointment payment must be completed before check-in.", { status: 400 });
+      }
+
       // Can only check in from SCHEDULED
       if (appointment.status !== "SCHEDULED") {
         return new NextResponse(

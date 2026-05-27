@@ -23,7 +23,8 @@ export async function GET(req: Request) {
     include: {
       patient: { include: { user: { select: { name: true, phone: true, email: true } } } },
       doctor: { include: { user: { select: { name: true } }, department: true } },
-      reminders: { orderBy: { sentAt: "desc" }, take: 1 }
+      reminders: { orderBy: { sentAt: "desc" }, take: 1 },
+      payments: { orderBy: { createdAt: "desc" }, take: 1 }
     },
     orderBy: { dateTime: "asc" }
   };

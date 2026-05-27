@@ -17,6 +17,7 @@ enum Role {
 
 enum AppointmentStatus {
   SCHEDULED
+  PAYMENT_PENDING
   CHECKED_IN
   COMPLETED
   CANCELLED
@@ -25,13 +26,13 @@ enum AppointmentStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String?
-  phone     String?
-  role      Role     @default(PATIENT)
-  gender    String?
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String?
+  phone         String?
+  role          Role     @default(PATIENT)
+  gender        String?
   emailVerified Boolean  @default(false)
   image         String?
   createdAt     DateTime @default(now())
@@ -102,21 +103,22 @@ model Patient {
   bloodType   String?
   cardNumber  String?   @unique
 
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  appointments   Appointment[]
-  medicalRecords MedicalRecord[]
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments        Appointment[]
+  medicalRecords      MedicalRecord[]
+  appointmentPayments AppointmentPayment[]
 
   @@map("patients")
 }
 
 model Doctor {
-  id             String @id @default(cuid())
-  userId         String @unique
+  id             String  @id @default(cuid())
+  userId         String  @unique
   specialization String
   departmentId   String?
 
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  department     Department?     @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department     Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   appointments   Appointment[]
   medicalRecords MedicalRecord[]
   availabilities DoctorAvailability[]
@@ -162,37 +164,43 @@ model Appointment {
   doctorId       String
   receptionistId String?
 
-  dateTime  DateTime
-  status    AppointmentStatus   @default(SCHEDULED)
-  reason    String?
-  appointmentType AppointmentType @default(NEW_VISIT)
+  dateTime        DateTime
+  status          AppointmentStatus   @default(SCHEDULED)
+  reason          String?
+  appointmentType AppointmentType     @default(NEW_VISIT)
   priority        AppointmentPriority @default(NORMAL)
   checkedInAt     DateTime?
   queueNumber     Int?
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
 
-  patient      Patient       @relation(fields: [patientId], references: [id])
-  doctor       Doctor        @relation(fields: [doctorId], references: [id])
-  receptionist Receptionist? @relation(fields: [receptionistId], references: [id])
+  paymentStatus   AppointmentPaymentStatus @default(PENDING)
+  paymentRequired Boolean                  @default(true)
+  paidAt          DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient      Patient               @relation(fields: [patientId], references: [id])
+  doctor       Doctor                @relation(fields: [doctorId], references: [id])
+  receptionist Receptionist?         @relation(fields: [receptionistId], references: [id])
   histories    AppointmentHistory[]
   reminders    AppointmentReminder[]
+  payments     AppointmentPayment[]
 
   @@map("appointments")
 }
 
 model AppointmentReminder {
-  id            String   @id @default(cuid())
+  id String @id @default(cuid())
 
   appointmentId String
   appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
 
-  reminderType  String
-  status        String
-  message       String?
+  reminderType String
+  status       String
+  message      String?
 
-  sentAt        DateTime?
-  createdAt     DateTime @default(now())
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([appointmentId])
   @@index([status])
@@ -229,24 +237,24 @@ model Department {
 }
 
 model AppointmentHistory {
-  id              String   @id @default(cuid())
-  appointmentId   String
-  appointment     Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
 
-  oldDateTime     DateTime?
-  newDateTime     DateTime?
+  oldDateTime DateTime?
+  newDateTime DateTime?
 
-  oldStatus       AppointmentStatus?
-  newStatus       AppointmentStatus?
+  oldStatus AppointmentStatus?
+  newStatus AppointmentStatus?
 
-  reason          String?
-  actionType      String?
+  reason     String?
+  actionType String?
 
   changedByUserId String?
   changedByName   String?
   changedByRole   String?
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([appointmentId])
   @@index([createdAt])
@@ -254,14 +262,14 @@ model AppointmentHistory {
 }
 
 model DoctorAvailability {
-  id        String   @id @default(cuid())
-  doctorId  String
-  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
 
   dayOfWeek Int
   startTime String
   endTime   String
-  isActive  Boolean  @default(true)
+  isActive  Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -269,4 +277,55 @@ model DoctorAvailability {
   @@index([doctorId])
   @@index([dayOfWeek])
   @@map("doctor_availabilities")
+}
+
+enum AppointmentPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum AppointmentPaymentProvider {
+  CHAPA
+}
+
+model AppointmentPayment {
+  id String @id @default(cuid())
+
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  provider AppointmentPaymentProvider @default(CHAPA)
+  status   AppointmentPaymentStatus   @default(PENDING)
+
+  txRef       String  @unique
+  chapaRefId  String?
+  checkoutUrl String?
+
+  amount      Decimal
+  currency    String  @default("ETB")
+  description String?
+
+  initializedAt DateTime  @default(now())
+  paidAt        DateTime?
+  failedAt      DateTime?
+  cancelledAt   DateTime?
+  expiresAt     DateTime?
+
+  rawInitializeResponse Json?
+  rawVerifyResponse     Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([appointmentId])
+  @@index([patientId])
+  @@index([status])
+  @@index([txRef])
+  @@map("appointment_payments")
 }

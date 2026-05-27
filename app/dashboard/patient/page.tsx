@@ -10,6 +10,7 @@ import { Calendar, HeartPulse, ShieldCheck, ArrowRight, Activity, Plus, Hash } f
 import { cn } from "@/lib/utils";
 import CancelAppointment from "./CancelAppointment";
 import PrintAppointmentButton from "@/components/PrintAppointmentButton";
+import { Button } from "@/components/ui/button";
 
 export default async function PatientDashboard() {
   const session = await auth.api.getSession({
@@ -24,18 +25,26 @@ export default async function PatientDashboard() {
     where: { userId: session.user.id }
   });
 
-  const appointments = await prisma.appointment.findMany({
+  const appointmentsData = await prisma.appointment.findMany({
     where: {
       patientId: patient?.id,
-      dateTime: { gte: new Date() },
-      status: { in: ["SCHEDULED", "CHECKED_IN"] }
     },
     include: {
       doctor: { include: { user: { select: { name: true } }, department: true } },
-      patient: { include: { user: true } }
+      patient: { include: { user: true } },
+      payments: { orderBy: { createdAt: "desc" }, take: 1 }
     },
-    orderBy: { dateTime: "asc" }
+    orderBy: { dateTime: "desc" }
   });
+
+  // Serialize Decimal objects to numbers so they can be passed to Client Components
+  const appointments = appointmentsData.map(appt => ({
+    ...appt,
+    payments: appt.payments.map(p => ({
+      ...p,
+      amount: p.amount.toNumber()
+    }))
+  }));
 
   const latestRecord = await prisma.medicalRecord.findFirst({
     where: { patientId: patient?.id },
@@ -65,7 +74,7 @@ export default async function PatientDashboard() {
             <div className="bg-white dark:bg-[#1E293B] p-10 rounded-[3rem] border border-[#E2E8F0] dark:border-[#334155] shadow-sm transition-colors duration-500">
               <div className="flex items-center justify-between mb-10">
                 <h2 className="text-2xl font-black text-[#1E293B] dark:text-[#F1F5F9] tracking-tight flex items-center gap-3">
-                  Upcoming Visits
+                  My Appointments
                 </h2>
                 <Badge className="bg-[#F8FAFC] dark:bg-[#0F172A] text-[#64748B] dark:text-[#94A3B8] rounded-full px-4 py-1.5 font-black text-[10px] uppercase tracking-widest">
                   {appointments.length} Pending
@@ -100,9 +109,43 @@ export default async function PatientDashboard() {
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <p className="text-[10px] font-black text-[#64748B] dark:text-[#94A3B8] uppercase tracking-widest">Assigned Specialist</p>
+                            
+                            {/* Status Badges */}
+                            {appt.status === "COMPLETED" && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg text-[10px] font-black text-blue-700 dark:text-blue-400">
+                                ✓ Completed
+                              </span>
+                            )}
+                            {appt.status === "CANCELLED" && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-[10px] font-black text-red-700 dark:text-red-400">
+                                ✗ Cancelled
+                              </span>
+                            )}
+                            {appt.status === "NO_SHOW" && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-700 dark:text-slate-400">
+                                ✗ No Show
+                              </span>
+                            )}
                             {appt.status === "CHECKED_IN" && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg text-[10px] font-black text-emerald-700 dark:text-emerald-400">
                                 ✓ Checked In{(appt as any).queueNumber ? ` · Q${(appt as any).queueNumber}` : ""}
+                              </span>
+                            )}
+
+                            {/* Payment Badges */}
+                            {(appt as any).paymentRequired && (appt as any).paymentStatus === "PAID" && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg text-[10px] font-black text-emerald-700 dark:text-emerald-400">
+                                ✓ Paid
+                              </span>
+                            )}
+                            {(appt as any).paymentRequired && (appt as any).paymentStatus === "PENDING" && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg text-[10px] font-black text-amber-700 dark:text-amber-400">
+                                Payment Pending
+                              </span>
+                            )}
+                            {(appt as any).paymentRequired && (appt as any).paymentStatus === "FAILED" && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-[10px] font-black text-red-700 dark:text-red-400">
+                                Payment Failed
                               </span>
                             )}
                           </div>
@@ -129,8 +172,28 @@ export default async function PatientDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {/* Show Print Receipt if paid */}
+                        {(appt as any).paymentRequired && (appt as any).paymentStatus === "PAID" && (
+                          <Link href={`/dashboard/patient/payments/result?tx_ref=${(appt as any).payments?.[0]?.txRef}`}>
+                            <Button variant="outline" size="sm" className="h-8 text-xs font-bold rounded-lg border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-900/30">
+                              Receipt
+                            </Button>
+                          </Link>
+                        )}
+                        {/* Show Complete Payment if pending/failed */}
+                        {(appt as any).paymentRequired && ((appt as any).paymentStatus === "PENDING" || (appt as any).paymentStatus === "FAILED") && (appt as any).payments?.[0]?.checkoutUrl && (
+                          <a href={(appt as any).payments[0].checkoutUrl}>
+                            <Button 
+                              variant="default" 
+                              size="sm" 
+                              className="h-8 text-xs font-bold rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              Pay
+                            </Button>
+                          </a>
+                        )}
                         <PrintAppointmentButton appointment={appt} variant="ghost" />
-                        {appt.status === "SCHEDULED" && <CancelAppointment appointmentId={appt.id} />}
+                        {(appt.status === "SCHEDULED" || appt.status === "PAYMENT_PENDING") && <CancelAppointment appointmentId={appt.id} />}
                         {appt.status === "CHECKED_IN" && (
                           <div className="text-center px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-200 dark:border-emerald-800">
                             <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Status</p>
