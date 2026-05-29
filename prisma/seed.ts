@@ -149,9 +149,12 @@ async function main() {
   const doctors = [];
   phoneCounter = 10;
   for (const doc of doctorsData) {
-    const cleanName = doc.name.replace("Dr. ", "").toLowerCase().replace(" ", ".");
+    const cleanName = doc.name
+      .replace("Dr. ", "")
+      .toLowerCase()
+      .replace(" ", ".");
     const email = `${cleanName}@medicare.com`;
-    
+
     const createdDoc = await prisma.user.create({
       data: {
         name: doc.name,
@@ -180,6 +183,8 @@ async function main() {
   console.log(`✅ Created 15 doctors\n`);
 
   // 6. Create Patient Users
+  // 6. Create Patient Users
+
   console.log("🏥 Creating patient users...");
   const patientNames = [
     { name: "Almaz Bekele", gender: "FEMALE" },
@@ -205,14 +210,15 @@ async function main() {
   ];
 
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-  
+
   const patients = [];
   phoneCounter = 1;
   for (let i = 0; i < patientNames.length; i++) {
     const pt = patientNames[i];
     const email = `${pt.name.toLowerCase().replace(" ", ".")}@email.com`;
-    const formattedPhone = phoneCounter < 10 ? `0${phoneCounter}` : `${phoneCounter}`;
-    
+    const formattedPhone =
+      phoneCounter < 10 ? `0${phoneCounter}` : `${phoneCounter}`;
+
     // Random DOB between 1975 and 2000
     const year = Math.floor(Math.random() * (2000 - 1975 + 1)) + 1975;
     const month = Math.floor(Math.random() * 12);
@@ -253,7 +259,12 @@ async function main() {
 
   // 7. Create Appointments
   console.log("📅 Creating appointments...");
-  const appointmentStatuses = ["SCHEDULED", "COMPLETED", "CANCELLED", "RESCHEDULED"];
+  const appointmentStatuses = [
+    "SCHEDULED",
+    "COMPLETED",
+    "CANCELLED",
+    "RESCHEDULED",
+  ];
   const reasons = [
     "General checkup",
     "Follow-up visit",
@@ -262,7 +273,7 @@ async function main() {
     "Routine physical examination",
     "Skin rash evaluation",
     "Headache and dizziness",
-    "Consultation for test results"
+    "Consultation for test results",
   ];
 
   // Fetch the actual patient, doctor, and receptionist records to get their role IDs
@@ -274,18 +285,22 @@ async function main() {
   // Create 2-3 appointments per patient
   for (const patient of patientRecords) {
     const numAppts = Math.floor(Math.random() * 2) + 2; // 2 or 3
-    
+
     for (let i = 0; i < numAppts; i++) {
       // Pick a random doctor
-      const randomDoctor = doctorRecords[Math.floor(Math.random() * doctorRecords.length)];
+      const randomDoctor =
+        doctorRecords[Math.floor(Math.random() * doctorRecords.length)];
       // Pick a random receptionist
-      const randomReceptionist = receptionistRecords[Math.floor(Math.random() * receptionistRecords.length)];
-      
+      const randomReceptionist =
+        receptionistRecords[
+          Math.floor(Math.random() * receptionistRecords.length)
+        ];
+
       // Random date within the last 30 days or next 15 days
-      const daysOffset = Math.floor(Math.random() * 45) - 30; 
+      const daysOffset = Math.floor(Math.random() * 45) - 30;
       const apptDate = new Date();
       apptDate.setDate(apptDate.getDate() + daysOffset);
-      
+
       // Set time between 9 AM and 4 PM
       apptDate.setHours(Math.floor(Math.random() * 8) + 9, 0, 0, 0);
 
@@ -313,7 +328,9 @@ async function main() {
   // 8. Create Medical Records
   console.log("📋 Creating medical records...");
   const medicalRecords = [];
-  const completedAppointments = appointments.filter(a => a.status === "COMPLETED");
+  const completedAppointments = appointments.filter(
+    (a) => a.status === "COMPLETED",
+  );
 
   const diagnoses = [
     "Acute viral pharyngitis",
@@ -323,7 +340,7 @@ async function main() {
     "Gastroesophageal reflux disease",
     "Vitamin D deficiency",
     "Migraine without aura",
-    "Contact dermatitis"
+    "Contact dermatitis",
   ];
 
   const prescriptions = [
@@ -334,14 +351,14 @@ async function main() {
     "Omeprazole 20mg, 1 capsule daily before breakfast",
     "Cholecalciferol 1000 IU, 1 tablet daily",
     "Sumatriptan 50mg as needed for pain",
-    "Hydrocortisone 1% cream, apply BID to affected area"
+    "Hydrocortisone 1% cream, apply BID to affected area",
   ];
 
   // Create a medical record for about 80% of completed appointments
   for (const appt of completedAppointments) {
     if (Math.random() > 0.2) {
       const randomIndex = Math.floor(Math.random() * diagnoses.length);
-      
+
       const record = await prisma.medicalRecord.create({
         data: {
           patientId: appt.patientId,
