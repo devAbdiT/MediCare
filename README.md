@@ -23,7 +23,15 @@ A modern, highly secure, and responsive Web-Based Patient Appointment Scheduling
 *   **Unified Role-Based Portals:** Dedicated dashboards for Administrators, Doctors, Receptionists, and Patients.
 *   **Modern Authentication:** Fully integrated login, session, and role checking powered by **Better Auth** with a credentials provider.
 *   **Smart Patient Search:** Multi-criteria search allowing Receptionists and Doctors to lookup patients instantly by **Name**, **Email**, **Phone**, or **Unique Card Number** (`BK-P-YYYY-XXXX`).
-*   **Appointment Management:** Real-time appointment scheduling, doctor availability checking, status tracking (`SCHEDULED`, `COMPLETED`, `CANCELLED`, `RESCHEDULED`), and automated follow-up scheduling.
+*   **Comprehensive Appointment Management:** 
+    *   Real-time appointment scheduling with conflict detection.
+    *   Support for specialized **Appointment Types** (New Visit, Follow-up, Consultation, Emergency) and **Priorities** (Normal, Urgent, Emergency).
+    *   **Check-in & Queue System** for receptionists to manage patient flow.
+    *   Advanced tracking with `SCHEDULED`, `COMPLETED`, `CANCELLED`, `RESCHEDULED`, and `NO_SHOW` statuses.
+    *   Complete **Appointment History** logging for tracking reschedules and status changes.
+*   **Chapa Payment Integration:** Secure, integrated appointment booking payments using Chapa. Patients must complete a booking fee before the system confirms the slot and allows check-in.
+*   **Printable Receipts & Slips:** Automated generation of printable appointment slips and payment receipts.
+*   **Doctor Availability Management:** Doctors can configure their exact working days and hours, ensuring patients and receptionists can only book within valid operational windows.
 *   **Electronic Health Records (EHR):** Clinical record management where doctors can log diagnoses, input prescriptions, and write internal notes. Patients can securely access their own medical history.
 *   **Robust Input Validation:** Standardized schemas (via `zod` & `react-hook-form`) across all registration forms, including localized phone formatting.
 *   **Premium Dark/Light UI:** A unified **Midnight Navy & Ice Blue** design system supporting fluid dark mode transitions via `next-themes`.
