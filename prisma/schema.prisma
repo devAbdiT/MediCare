@@ -13,6 +13,8 @@ enum Role {
   DOCTOR
   RECEPTIONIST
   ADMIN
+  PHARMACIST
+  LABTECH
 }
 
 enum AppointmentStatus {

@@ -26,7 +26,7 @@ import {
 } from "@/lib/validations";
 import { formatPhoneNumber } from "@/lib/phone-format";
 
-type Role = "PATIENT" | "DOCTOR" | "RECEPTIONIST";
+type Role = "PATIENT" | "DOCTOR" | "RECEPTIONIST" | "PHARMACIST" | "LABTECH";
 
 interface AddUserModalProps {
   role: Role;
@@ -42,7 +42,7 @@ export default function AddUserModal({ role, isOpen, onClose }: AddUserModalProp
   const currentSchema =
     role === "DOCTOR"
       ? doctorSchema
-      : role === "RECEPTIONIST"
+      : (role === "RECEPTIONIST" || role === "PHARMACIST" || role === "LABTECH")
       ? receptionistSchema
       : patientSchema;
 

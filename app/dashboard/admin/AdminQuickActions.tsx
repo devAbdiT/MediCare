@@ -20,27 +20,41 @@ export default function AdminQuickActions() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
         <ActionButton 
           icon={<UserPlus />} 
           label="Add Patient" 
-          description="Register new clinical patient"
+          description="Register patient"
           color="bg-[#2D8A6E]" 
           onClick={() => setModalRole("PATIENT")} 
         />
         <ActionButton 
           icon={<Stethoscope />} 
           label="Add Doctor" 
-          description="Onboard medical specialist"
+          description="Onboard specialist"
           color="bg-[#1E4A8A]" 
           onClick={() => setModalRole("DOCTOR")} 
         />
         <ActionButton 
           icon={<Briefcase />} 
           label="Add Staff" 
-          description="Create receptionist account"
+          description="Create receptionist"
           color="bg-[#3A7BC8]" 
           onClick={() => setModalRole("RECEPTIONIST")} 
+        />
+        <ActionButton 
+          icon={<Briefcase />} 
+          label="Add Pharmacist" 
+          description="Create pharmacist"
+          color="bg-emerald-600" 
+          onClick={() => setModalRole("PHARMACIST" as any)} 
+        />
+        <ActionButton 
+          icon={<Briefcase />} 
+          label="Add Lab Tech" 
+          description="Create lab tech"
+          color="bg-teal-600" 
+          onClick={() => setModalRole("LABTECH" as any)} 
         />
       </div>
 
