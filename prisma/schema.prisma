@@ -105,10 +105,25 @@ model Patient {
   bloodType   String?
   cardNumber  String?   @unique
 
+  address           String?
+  city              String?
+  region            String?
+  emergencyName     String?
+  emergencyPhone    String?
+  emergencyRelation String?
+  patientStatus     PatientStatus @default(ACTIVE)
+  insuranceProvider String?
+  insurancePolicyNo String?
+  insuranceCoverage String?
+  insuranceExpiry   DateTime?
+
   user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments        Appointment[]
   medicalRecords      MedicalRecord[]
   appointmentPayments AppointmentPayment[]
+  allergies           Allergy[]
+  conditions          MedicalCondition[]
+  // invoices            Invoice[] // Commented out to prevent schema error until Invoice model is added
 
   @@map("patients")
 }
@@ -330,4 +345,40 @@ model AppointmentPayment {
   @@index([status])
   @@index([txRef])
   @@map("appointment_payments")
+}
+
+enum PatientStatus {
+  ACTIVE
+  INACTIVE
+  DECEASED
+}
+
+model Allergy {
+  id          String          @id @default(cuid())
+  patientId   String
+  allergen    String
+  severity    AllergySeverity @default(MILD)
+  reaction    String?
+  confirmedAt DateTime?
+  patient     Patient @relation(fields:[patientId],references:[id],onDelete:Cascade)
+  @@map("allergies")
+}
+
+enum AllergySeverity {
+  MILD
+  MODERATE
+  SEVERE
+  LIFE_THREATENING
+}
+
+model MedicalCondition {
+  id          String   @id @default(cuid())
+  patientId   String
+  name        String
+  icdCode     String?
+  diagnosedAt DateTime?
+  isActive    Boolean  @default(true)
+  notes       String?
+  patient     Patient @relation(fields:[patientId],references:[id],onDelete:Cascade)
+  @@map("medical_conditions")
 }
