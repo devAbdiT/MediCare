@@ -17,7 +17,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       where: { id },
       data: {
         name: body.name,
-        description: body.description
+        description: body.description,
+        ...(body.consultationFee !== undefined && {
+          consultationFee: parseFloat(body.consultationFee) || 0,
+        }),
       }
     });
     return NextResponse.json(department);

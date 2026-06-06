@@ -12,7 +12,7 @@ export default function AdminDepartmentsPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingDept, setEditingDept] = useState<any>(null);
   
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [formData, setFormData] = useState({ name: "", description: "", consultationFee: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchDepartments = async () => {
@@ -41,14 +41,18 @@ export default function AdminDepartmentsPage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          name: formData.name,
+          description: formData.description,
+          consultationFee: formData.consultationFee ? parseFloat(formData.consultationFee) : 0,
+        })
       });
       
       if (res.ok) {
         toast.success(editingDept ? "Department updated" : "Department created");
         setIsAddOpen(false);
         setEditingDept(null);
-        setFormData({ name: "", description: "" });
+        setFormData({ name: "", description: "", consultationFee: "" });
         fetchDepartments();
       } else {
         const data = await res.json();
@@ -80,7 +84,11 @@ export default function AdminDepartmentsPage() {
 
   const openEdit = (dept: any) => {
     setEditingDept(dept);
-    setFormData({ name: dept.name, description: dept.description || "" });
+    setFormData({
+      name: dept.name,
+      description: dept.description || "",
+      consultationFee: dept.consultationFee ? String(dept.consultationFee) : "",
+    });
     setIsAddOpen(true);
   };
 
@@ -96,7 +104,7 @@ export default function AdminDepartmentsPage() {
           <Dialog open={isAddOpen} onOpenChange={(open) => { setIsAddOpen(open); if(!open) setEditingDept(null); }}>
             <DialogTrigger asChild>
               <button 
-                onClick={() => { setEditingDept(null); setFormData({ name: "", description: "" }); }}
+                onClick={() => { setEditingDept(null); setFormData({ name: "", description: "", consultationFee: "" }); }}
                 className="flex items-center gap-2 px-6 py-4 bg-[#1E4A8A] hover:bg-[#0F3A6A] text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-[#1E4A8A]/20"
               >
                 <Plus size={18} />
@@ -130,6 +138,22 @@ export default function AdminDepartmentsPage() {
                     placeholder="Optional details..."
                     rows={3}
                   />
+                </div>
+                <div className="space-y-2">
+                   <label className="text-xs font-bold text-[#5A6E8A] uppercase tracking-widest">Default Consultation Fee (ETB)</label>
+                   <div className="relative">
+                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-[#5A6E8A]">ETB</span>
+                     <input
+                       type="number"
+                       min="0"
+                       step="0.01"
+                       value={formData.consultationFee}
+                       onChange={(e) => setFormData({ ...formData, consultationFee: e.target.value })}
+                       className="w-full pl-12 pr-4 p-4 bg-[#F0F4F8] dark:bg-[#0A122A] rounded-2xl border border-transparent focus:border-[#1E4A8A] outline-none font-bold text-[#1A2A4A] dark:text-white"
+                       placeholder="e.g. 200.00"
+                     />
+                   </div>
+                   <p className="text-[10px] text-[#5A6E8A] font-medium">Used as the default fee for doctors in this department with no individual fee set.</p>
                 </div>
                 <button
                   type="submit"
@@ -193,11 +217,18 @@ export default function AdminDepartmentsPage() {
                   )}
                 </div>
 
-                <div className="pt-6 border-t border-[#D0DCE8] dark:border-[#1A2A4A] flex justify-between items-center mt-auto">
+                <div className="pt-6 border-t border-[#D0DCE8] dark:border-[#1A2A4A] flex justify-between items-center mt-auto flex-wrap gap-3">
                   <span className="text-xs font-black text-[#5A6E8A] uppercase tracking-widest">Total Staff</span>
-                  <span className="px-3 py-1 bg-[#F0F4F8] dark:bg-[#0A122A] text-[#1A2A4A] dark:text-[#E8EEF8] rounded-lg font-black text-xs">
-                    {dept.doctors.length} Doctors
-                  </span>
+                  <div className="flex items-center gap-3">
+                    {dept.consultationFee > 0 && (
+                      <span className="px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-lg font-black text-xs">
+                        ETB {Number(dept.consultationFee).toFixed(0)} default
+                      </span>
+                    )}
+                    <span className="px-3 py-1 bg-[#F0F4F8] dark:bg-[#0A122A] text-[#1A2A4A] dark:text-[#E8EEF8] rounded-lg font-black text-xs">
+                      {dept.doctors.length} Doctors
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
