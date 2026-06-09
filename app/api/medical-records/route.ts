@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { createConsultationInvoice } from "@/lib/billing";
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
@@ -32,6 +33,23 @@ export async function POST(req: Request) {
         where: { id: appointmentId },
         data: { status: "COMPLETED" },
       });
+
+      // Automatically create Consultation Invoice
+      try {
+        await createConsultationInvoice(tx, {
+          patientId,
+          appointmentId,
+          doctorId,
+          createdById: session.user.id,
+        });
+      } catch (invoiceErr: any) {
+        // If it's a unique constraint error (P2002) for the appointmentId, skip and do not throw/rollback.
+        if (invoiceErr?.code === "P2002") {
+          console.warn(`[medical-records] Invoice already exists for appointment ${appointmentId}. Skipping...`);
+        } else {
+          throw invoiceErr;
+        }
+      }
 
       return record;
     });
