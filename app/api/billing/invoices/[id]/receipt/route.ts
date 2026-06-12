@@ -16,6 +16,11 @@ export async function GET(
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
+  const role = (session.user as any).role;
+  if (role !== "RECEPTIONIST" && role !== "ADMIN") {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   const { id } = await params;
 
   try {
@@ -29,7 +34,6 @@ export async function GET(
             user: {
               select: {
                 name: true,
-                email: true,
                 phone: true
               }
             }
@@ -55,15 +59,24 @@ export async function GET(
       return new NextResponse("Invoice Not Found", { status: 404 });
     }
 
-    const { role } = session.user as any;
-    if (role === "PATIENT") {
-      const patient = await prisma.patient.findUnique({ where: { userId: session.user.id } });
-      if (!patient || invoice.patientId !== patient.id) {
-        return new NextResponse("Forbidden", { status: 403 });
-      }
-    } else if (role !== "RECEPTIONIST" && role !== "ADMIN") {
-      return new NextResponse("Forbidden", { status: 403 });
-    }
+    const todayStr = new Date().toLocaleDateString(undefined, {
+      month: "long",
+      day: "numeric",
+      year: "numeric"
+    });
+
+    const apptDateStr = invoice.appointment?.dateTime
+      ? new Date(invoice.appointment.dateTime).toLocaleDateString(undefined, {
+          month: "long",
+          day: "numeric",
+          year: "numeric"
+        })
+      : "N/A";
+
+    const totalAmount = Number(invoice.totalAmount);
+    const discountAmt = Number(invoice.discountAmt);
+    const paidAmount = Number(invoice.paidAmount);
+    const balanceDue = totalAmount - paidAmount;
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -72,292 +85,287 @@ export async function GET(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt - ${invoice.invoiceNumber}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Outfit', sans-serif;
-            color: #1A2A4A;
+            font-family: 'Courier New', Courier, monospace;
+            color: #000;
             background-color: #fff;
             margin: 0;
-            padding: 40px;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.5;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
-            border: 1px solid #D0DCE8;
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(30, 58, 95, 0.05);
+            padding: 20px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
         }
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #F0F4F8;
-            padding-bottom: 24px;
             margin-bottom: 30px;
         }
-        .logo {
-            font-size: 26px;
-            font-weight: 900;
-            color: #1E3A5F;
-            letter-spacing: -0.5px;
-        }
-        .receipt-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: #1E4A8A;
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            background-color: #EBF3FC;
-            padding: 8px 16px;
-            border-radius: 12px;
         }
-        .info-grid {
+        .header h2 {
+            font-size: 16px;
+            margin: 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .divider {
+            border-top: 2px dashed #000;
+            margin: 20px 0;
+        }
+        .meta-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
+            gap: 20px;
+            margin-bottom: 20px;
         }
-        .info-section h3 {
-            margin-top: 0;
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #5A6E8A;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
-            font-weight: 800;
-        }
-        .info-section p {
-            margin: 0;
-            font-weight: 600;
+        .meta-section h3 {
             font-size: 14px;
-            line-height: 1.6;
+            text-transform: uppercase;
+            margin: 0 0 8px 0;
+            font-weight: bold;
+            text-decoration: underline;
         }
-        .table {
+        .meta-section p {
+            margin: 4px 0;
+        }
+        .receipt-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin: 20px 0;
         }
-        .table th {
+        .receipt-table th {
+            border-bottom: 2px dashed #000;
+            border-top: 2px dashed #000;
+            padding: 8px;
+            font-weight: bold;
             text-align: left;
-            padding: 12px;
-            font-size: 11px;
             text-transform: uppercase;
-            color: #5A6E8A;
-            letter-spacing: 1px;
-            border-bottom: 2px solid #F0F4F8;
-            font-weight: 800;
         }
-        .table td {
-            padding: 18px 12px;
-            font-size: 14px;
-            border-bottom: 1px solid #F0F4F8;
-            font-weight: 600;
+        .receipt-table td {
+            padding: 8px;
+            border-bottom: 1px dashed #eee;
         }
-        .table td.amount-col {
-            text-align: right;
-            font-weight: 800;
+        .totals-block {
+            width: 100%;
+            margin-top: 15px;
         }
-        .totals-section {
+        .totals-row {
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            margin-bottom: 40px;
+            justify-content: flex-end;
+            margin: 4px 0;
         }
-        .total-row {
+        .totals-label {
+            width: 180px;
+            text-align: right;
+            font-weight: bold;
+        }
+        .totals-value {
+            width: 120px;
+            text-align: right;
+        }
+        .payment-block {
+            margin-top: 25px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+        .payment-block h3 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .payment-row {
             display: flex;
             justify-content: space-between;
-            width: 280px;
-            padding: 10px 0;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .total-row.grand-total {
-            font-size: 20px;
-            font-weight: 900;
-            color: #1E3A5F;
-            border-top: 3px solid #1E3A5F;
-            padding-top: 14px;
-            margin-top: 8px;
-        }
-        .payments-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-            border: 1px solid #E2E8F0;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        .payments-table th {
-            background-color: #F8FAFC;
-            padding: 12px;
-            font-size: 11px;
-            color: #5A6E8A;
-            text-transform: uppercase;
-            font-weight: 800;
-            border-bottom: 1px solid #E2E8F0;
-        }
-        .payments-table td {
-            padding: 14px 12px;
-            font-size: 13px;
-            text-align: center;
-            border-bottom: 1px solid #E2E8F0;
-            font-weight: 600;
-        }
-        .payments-table tr:last-child td {
-            border-bottom: none;
+            margin: 4px 0;
         }
         .footer {
-            text-align: center;
-            font-size: 13px;
-            color: #5A6E8A;
-            margin-top: 60px;
-            border-top: 2px solid #F0F4F8;
-            padding-top: 24px;
+            margin-top: 50px;
+            font-size: 12px;
+        }
+        .footer p {
+            margin: 4px 0;
+        }
+        .no-print-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
         }
         .btn-print {
-            margin-top: 24px;
-            padding: 12px 28px;
-            background-color: #1E4A8A;
-            color: white;
+            padding: 10px 24px;
+            background-color: #1E3A5F;
+            color: #fff;
             border: none;
-            border-radius: 14px;
-            font-weight: 800;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            border-radius: 4px;
+            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(30, 74, 138, 0.2);
-            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-family: inherit;
         }
         .btn-print:hover {
-            background-color: #163C70;
-            transform: translateY(-1px);
+            background-color: #1A3050;
         }
         @media print {
-            body {
-                padding: 0;
-            }
-            .container {
-                border: none;
-                box-shadow: none;
-                padding: 0;
-            }
             .no-print {
                 display: none !important;
+            }
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                padding: 0;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="logo">MediCare Clinic</div>
-            <div class="receipt-title">Receipt / Invoice</div>
+        <!-- Print Button (Hidden on Print) -->
+        <div class="no-print-container no-print">
+            <button class="btn-print" onclick="window.print()">Print Receipt</button>
         </div>
 
-        <div class="info-grid">
-            <div class="info-section">
-                <h3>Billed To</h3>
-                <p style="font-size: 16px; color: #1E3A5F; font-weight: 800;">${invoice.patient.user.name}</p>
-                <p style="color: #5A6E8A;">Email: ${invoice.patient.user.email || 'N/A'}</p>
-                <p style="color: #5A6E8A;">Phone: ${invoice.patient.user.phone || 'N/A'}</p>
+        <!-- JUMC Official Header -->
+        <div class="header text-center">
+            <h1>Jimma University Medical Center</h1>
+            <h2>Official Payment Receipt</h2>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Meta Grid Info -->
+        <div class="meta-grid">
+            <div class="meta-section">
+                <h3>Patient Information</h3>
+                <p><strong>Name:</strong> ${invoice.patient.user.name}</p>
+                <p><strong>Card Number:</strong> ${invoice.patient.cardNumber || "N/A"}</p>
+                <p><strong>Phone:</strong> ${invoice.patient.user.phone || "N/A"}</p>
             </div>
-            <div class="info-section" style="text-align: right;">
-                <h3>Billing Info</h3>
-                <p>Invoice No: <strong style="color: #1E3A5F;">${invoice.invoiceNumber}</strong></p>
-                <p>Date Generated: ${new Date(invoice.createdAt).toLocaleDateString()}</p>
-                <p>Doctor: Dr. ${invoice.appointment?.doctor?.user?.name || 'N/A'}</p>
-                <p>Status: <span style="
-                    color: ${invoice.status === 'PAID' ? '#10B981' : invoice.status === 'PARTIAL' ? '#F59E0B' : '#EF4444'};
-                    font-weight: 800;
-                ">${invoice.status}</span></p>
+            <div class="meta-section" style="text-align: right;">
+                <h3>Receipt Information</h3>
+                <p><strong>Receipt No:</strong> ${invoice.invoiceNumber}</p>
+                <p><strong>Date Issued:</strong> ${todayStr}</p>
+                <p><strong>Appointment Date:</strong> ${apptDateStr}</p>
+                <p><strong>Doctor:</strong> Dr. ${invoice.appointment?.doctor?.user?.name || "N/A"} (${invoice.appointment?.doctor?.specialization || "General Specialist"})</p>
             </div>
         </div>
 
-        <table class="table">
+        <!-- Line Items Table -->
+        <table class="receipt-table">
             <thead>
                 <tr>
                     <th>Item Description</th>
-                    <th style="text-align: center;">Qty</th>
-                    <th style="text-align: right;">Unit Price</th>
-                    <th style="text-align: right;">Total</th>
+                    <th style="text-align: center; width: 80px;">Qty</th>
+                    <th style="text-align: right; width: 150px;">Unit Price (ETB)</th>
+                    <th style="text-align: right; width: 150px;">Total (ETB)</th>
                 </tr>
             </thead>
             <tbody>
-                ${invoice.lineItems.map(item => `
+                ${invoice.lineItems
+                  .map(
+                    (item) => `
                     <tr>
                         <td>${item.description}</td>
                         <td style="text-align: center;">${item.quantity}</td>
-                        <td style="text-align: right;">ETB ${Number(item.unitPrice).toFixed(2)}</td>
-                        <td style="text-align: right; font-weight: 800; color: #1E3A5F;">ETB ${Number(item.totalPrice).toFixed(2)}</td>
+                        <td style="text-align: right;">${Number(item.unitPrice).toFixed(2)}</td>
+                        <td style="text-align: right; font-weight: bold;">${Number(item.totalPrice).toFixed(2)}</td>
                     </tr>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </tbody>
         </table>
 
-        <div class="totals-section">
-            <div class="total-row">
-                <span style="color: #5A6E8A;">Subtotal:</span>
-                <span>ETB ${Number(invoice.totalAmount).toFixed(2)}</span>
+        <!-- Totals Block -->
+        <div class="totals-block">
+            <div class="totals-row">
+                <div class="totals-label">Subtotal:</div>
+                <div class="totals-value">ETB ${totalAmount.toFixed(2)}</div>
             </div>
-            <div class="total-row">
-                <span style="color: #5A6E8A;">Discount:</span>
-                <span>ETB ${Number(invoice.discountAmt).toFixed(2)}</span>
+            ${
+              discountAmt > 0
+                ? `
+            <div class="totals-row">
+                <div class="totals-label">Discount:</div>
+                <div class="totals-value">ETB ${discountAmt.toFixed(2)}</div>
             </div>
-            <div class="total-row">
-                <span style="color: #5A6E8A;">Total Paid:</span>
-                <span style="color: #10B981; font-weight: 800;">ETB ${Number(invoice.paidAmount).toFixed(2)}</span>
-            </div>
-            <div class="total-row grand-total">
-                <span>Balance Due:</span>
-                <span>ETB ${Math.max(0, Number(invoice.totalAmount) - Number(invoice.paidAmount)).toFixed(2)}</span>
+            `
+                : ""
+            }
+            <div class="totals-row" style="font-size: 16px; font-weight: bold;">
+                <div class="totals-label">Total Amount:</div>
+                <div class="totals-value" style="border-top: 1px dashed #000; padding-top: 4px;">ETB ${totalAmount.toFixed(2)}</div>
             </div>
         </div>
 
-        ${invoice.payments.length > 0 ? `
-        <div style="margin-top: 40px;">
-            <h3 style="margin-bottom: 12px; font-size: 11px; text-transform: uppercase; color: #5A6E8A; letter-spacing: 1.5px; font-weight: 800;">Payments History</h3>
-            <table class="payments-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Payment Method</th>
-                        <th>Reference</th>
-                        <th>Notes</th>
-                        <th style="text-align: right; padding-right: 16px;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${invoice.payments.map(payment => `
-                        <tr>
-                            <td>${new Date(payment.receivedAt).toLocaleDateString()}</td>
-                            <td><span style="background-color: #F1F5F9; padding: 4px 8px; border-radius: 6px; font-size: 11px; text-transform: uppercase;">${payment.method}</span></td>
-                            <td>${payment.reference || '-'}</td>
-                            <td>${payment.notes || '-'}</td>
-                            <td style="font-weight: 800; text-align: right; padding-right: 16px; color: #10B981;">ETB ${Number(payment.amount).toFixed(2)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-        ` : ''}
+        <div class="divider"></div>
 
-        <div class="footer">
-            <p>Thank you for your payment to MediCare Clinic.</p>
-            <p style="font-size: 11px; color: #94A3B8; margin-top: 8px;">System Generated Receipt. Signature Not Required.</p>
-            <button class="btn-print no-print" onclick="window.print()">Print Receipt</button>
+        <!-- Payments Log -->
+        ${
+          invoice.payments.length > 0
+            ? invoice.payments
+                .map(
+                  (payment, idx) => `
+            <div class="payment-block" style="margin-bottom: 10px;">
+                <h3>Payment Section (Transaction #${idx + 1})</h3>
+                <div class="payment-row">
+                    <span><strong>Amount Paid:</strong> ETB ${Number(payment.amount).toFixed(2)}</span>
+                    <span><strong>Method:</strong> ${payment.method}</span>
+                </div>
+                <div class="payment-row">
+                    <span><strong>Reference:</strong> ${payment.reference || "N/A"}</span>
+                    <span><strong>Payment Date:</strong> ${new Date(payment.receivedAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    })}</span>
+                </div>
+            </div>
+        `
+                )
+                .join("")
+            : `
+            <div class="payment-block">
+                <p style="margin: 0; font-style: italic; color: #777;">No payments recorded against this invoice yet.</p>
+            </div>
+        `
+        }
+
+        <!-- Balance Due (Only if PARTIAL) -->
+        ${
+          invoice.status === "PARTIAL"
+            ? `
+            <div class="totals-row" style="font-size: 15px; font-weight: bold; color: red; margin-top: 15px;">
+                <div class="totals-label">Balance Due:</div>
+                <div class="totals-value">ETB ${Math.max(0, balanceDue).toFixed(2)}</div>
+            </div>
+        `
+            : ""
+        }
+
+        <div class="divider"></div>
+
+        <!-- Footer -->
+        <div class="footer text-center">
+            <p><strong>Thank you for choosing JUMC</strong></p>
+            <p>This is an official receipt issued by Jimma University Medical Center Front Desk Operations.</p>
         </div>
     </div>
-
-    <script>
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                window.print();
-            }, 600);
-        });
-    </script>
 </body>
 </html>
     `;
@@ -368,7 +376,7 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error("Receipt Generation Error:", error);
+    console.error("Official Receipt Generation Error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
