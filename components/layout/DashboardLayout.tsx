@@ -84,6 +84,11 @@ export default function DashboardLayout({
         icon: Calendar,
         href: "/dashboard/receptionist/schedule",
       },
+      {
+        name: "Billing & Payments",
+        icon: ClipboardList,
+        href: "/dashboard/receptionist/billing",
+      },
     ],
     patient: [
       { name: "Overview", icon: LayoutDashboard, href: "/dashboard/patient" },

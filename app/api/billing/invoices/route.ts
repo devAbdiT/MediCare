@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-// GET /api/billing/invoices - Retrieve billing invoices
+// GET /api/billing/invoices - Retrieve billing invoices with filters (RECEPTIONIST/ADMIN)
 export async function GET(req: Request) {
   const session = await auth.api.getSession({
     headers: await headers()
@@ -14,29 +14,38 @@ export async function GET(req: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
+  const role = (session.user as any).role;
+  if (role !== "RECEPTIONIST" && role !== "ADMIN") {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
-    const appointmentId = searchParams.get("appointmentId");
+    const status = searchParams.get("status");
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
 
     const whereClause: any = {};
-    if (appointmentId) {
-      whereClause.appointmentId = appointmentId;
+    
+    if (status && status !== "ALL") {
+      whereClause.status = status;
     }
-
-    const role = (session.user as any).role;
-    if (role === "PATIENT") {
-      const patient = await prisma.patient.findUnique({ where: { userId: session.user.id } });
-      if (patient) {
-        whereClause.patientId = patient.id;
-      } else {
-        return NextResponse.json([]);
+    
+    if (from || to) {
+      whereClause.createdAt = {};
+      if (from) {
+        const fromDate = new Date(from);
+        if (!isNaN(fromDate.getTime())) {
+          whereClause.createdAt.gte = fromDate;
+        }
       }
-    } else if (role === "DOCTOR") {
-      const doctor = await prisma.doctor.findUnique({ where: { userId: session.user.id } });
-      if (doctor) {
-        whereClause.appointment = { doctorId: doctor.id };
-      } else {
-        return NextResponse.json([]);
+      if (to) {
+        const toDate = new Date(to);
+        if (!isNaN(toDate.getTime())) {
+          // Set to the very end of that day
+          toDate.setHours(23, 59, 59, 999);
+          whereClause.createdAt.lte = toDate;
+        }
       }
     }
 
@@ -44,6 +53,7 @@ export async function GET(req: Request) {
       where: whereClause,
       include: {
         lineItems: true,
+        payments: true,
         patient: {
           include: {
             user: {
@@ -51,6 +61,19 @@ export async function GET(req: Request) {
                 name: true,
                 email: true,
                 phone: true
+              }
+            }
+          }
+        },
+        appointment: {
+          include: {
+            doctor: {
+              include: {
+                user: {
+                  select: {
+                    name: true
+                  }
+                }
               }
             }
           }
