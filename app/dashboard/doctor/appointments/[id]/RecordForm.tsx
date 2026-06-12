@@ -99,12 +99,16 @@ export function printPrescription(record: any, patient: any, doctorName: string)
   }
 }
 
+import PrescriptionBuilder from "@/components/doctor/PrescriptionBuilder";
+
 export default function RecordForm({ appointment }: RecordFormProps) {
   const router = useRouter();
   
   // Record Form State
   const [diagnosis, setDiagnosis] = useState("");
-  const [prescription, setPrescription] = useState("");
+  const [prescriptionItems, setPrescriptionItems] = useState<any[]>([
+    { drugName: "", dose: "", frequency: "Once daily", duration: "", route: "Oral", quantity: "", instructions: "" }
+  ]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [savedRecord, setSavedRecord] = useState<any>(null);
@@ -119,6 +123,17 @@ export default function RecordForm({ appointment }: RecordFormProps) {
     e.preventDefault();
     setLoading(true);
 
+    const activeItems = prescriptionItems.filter(item => item.drugName && item.dose && item.duration);
+    if (activeItems.length === 0) {
+      toast.error("Please add at least one valid drug with Dose and Duration");
+      setLoading(false);
+      return;
+    }
+
+    const prescriptionSummary = activeItems
+      .map(item => `${item.drugName} ${item.dose} (${item.route}) - ${item.frequency} for ${item.duration}`)
+      .join("\n");
+
     try {
       const res = await fetch("/api/medical-records", {
         method: "POST",
@@ -128,15 +143,26 @@ export default function RecordForm({ appointment }: RecordFormProps) {
           patientId: appointment.patientId,
           doctorId: appointment.doctorId,
           diagnosis,
-          prescription,
+          prescription: prescriptionSummary,
           notes,
         }),
       });
 
       if (res.ok) {
         const record = await res.json();
-        setSavedRecord({ ...record, diagnosis, prescription }); // Keep data for printing
-        toast.success("Medical record saved successfully!");
+
+        // Save structured prescription items
+        await fetch("/api/prescriptions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            medicalRecordId: record.id,
+            items: activeItems
+          })
+        });
+
+        setSavedRecord({ ...record, diagnosis, prescription: prescriptionSummary }); // Keep data for printing
+        toast.success("Medical record and prescriptions saved successfully!");
       } else {
         const error = await res.json();
         toast.error(error.message || "Failed to save record");
@@ -181,7 +207,7 @@ export default function RecordForm({ appointment }: RecordFormProps) {
 
   const onPrint = () => {
     if (savedRecord) {
-      printPrescription(savedRecord, appointment.patient, appointment.doctor.user.name);
+      window.open(`/api/print/prescription/${savedRecord.id}`, '_blank');
     }
   };
 
@@ -313,13 +339,7 @@ export default function RecordForm({ appointment }: RecordFormProps) {
           <Pill size={18} className="text-emerald-500 dark:text-[#34D399]" />
           Prescription & Treatment
         </label>
-        <textarea
-          value={prescription}
-          onChange={(e) => setPrescription(e.target.value)}
-          placeholder="List medications and dosages..."
-          className="w-full p-6 bg-[#F0F4F8] dark:bg-[#0A122A] border-2 border-[#D0DCE8] dark:border-[#1A2A4A] rounded-3xl focus:bg-white dark:focus:bg-[#111C3A] focus:border-emerald-500 outline-none transition-all font-medium text-[#1A2A4A] dark:text-[#E8EEF8] min-h-[150px] resize-none"
-          required
-        />
+        <PrescriptionBuilder onChange={setPrescriptionItems} />
       </div>
 
       <div className="space-y-4">

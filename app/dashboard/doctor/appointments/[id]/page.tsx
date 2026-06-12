@@ -9,6 +9,7 @@ import { User, Clipboard, FileText, Pill, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import RecordForm from "./RecordForm";
 import { PrintHistoryButton } from "./PrintHistoryButton";
+import VitalsForm from "@/components/doctor/VitalsForm";
 
 export default async function AppointmentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -57,9 +58,17 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form Side */}
           <div className="lg:col-span-2 space-y-8">
-            <RecordForm 
-              appointment={appointment} 
-            />
+            <div className="space-y-2">
+              <span className="text-xs font-black text-[#5A6E8A] uppercase tracking-widest">Step 1: Record Vital Signs</span>
+              <VitalsForm appointmentId={appointment.id} patientId={appointment.patientId} />
+            </div>
+            
+            <div className="space-y-2">
+              <span className="text-xs font-black text-[#5A6E8A] uppercase tracking-widest">Step 2: Submit Medical Record</span>
+              <RecordForm 
+                appointment={appointment} 
+              />
+            </div>
           </div>
 
           {/* History Side */}
