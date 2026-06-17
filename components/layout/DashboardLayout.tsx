@@ -98,6 +98,11 @@ export default function DashboardLayout({
         href: "/dashboard/patient/records",
       },
       { name: "Book Visit", icon: Calendar, href: "/dashboard/patient/book" },
+      {
+        name: "My Invoices",
+        icon: ClipboardList,
+        href: "/dashboard/patient/invoices",
+      },
       { name: "Profile", icon: UserCircle, href: "/dashboard/patient/profile" },
     ],
   };
