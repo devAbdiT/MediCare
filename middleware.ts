@@ -1,6 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
+ * Maps a role string to its dashboard path.
+ * Needed because some roles have different path names (e.g. LABTECH → lab, PHARMACIST → pharmacy).
+ */
+function roleToDashboardPath(role: string): string {
+  switch (role.toUpperCase()) {
+    case "LABTECH":    return "lab";
+    case "PHARMACIST": return "pharmacy";
+    default:           return role.toLowerCase();
+  }
+}
+
+/**
  * Fetch session from the API to avoid loading Prisma Client in the Next.js Edge Runtime.
  */
 async function getSession(request: NextRequest) {
@@ -46,8 +58,8 @@ export async function middleware(request: NextRequest) {
   // Login page handling
   if (pathname === "/login") {
     if (user) {
-      const role = (user.role as string).toLowerCase();
-      return NextResponse.redirect(new URL(`/dashboard/${role}`, nextUrl));
+      const dashPath = roleToDashboardPath(user.role as string);
+      return NextResponse.redirect(new URL(`/dashboard/${dashPath}`, nextUrl));
     }
     return NextResponse.next();
   }
@@ -62,27 +74,27 @@ export async function middleware(request: NextRequest) {
     const userRole = (user.role as string).toUpperCase();
 
     if (pathname.startsWith("/dashboard/doctor") && userRole !== "DOCTOR" && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/dashboard/${userRole.toLowerCase()}`, nextUrl));
+      return NextResponse.redirect(new URL(`/dashboard/${roleToDashboardPath(userRole)}`, nextUrl));
     }
 
     if (pathname.startsWith("/dashboard/receptionist") && userRole !== "RECEPTIONIST" && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/dashboard/${userRole.toLowerCase()}`, nextUrl));
+      return NextResponse.redirect(new URL(`/dashboard/${roleToDashboardPath(userRole)}`, nextUrl));
     }
 
     if (pathname.startsWith("/dashboard/patient") && userRole !== "PATIENT" && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/dashboard/${userRole.toLowerCase()}`, nextUrl));
+      return NextResponse.redirect(new URL(`/dashboard/${roleToDashboardPath(userRole)}`, nextUrl));
     }
 
     if (pathname.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/dashboard/${userRole.toLowerCase()}`, nextUrl));
+      return NextResponse.redirect(new URL(`/dashboard/${roleToDashboardPath(userRole)}`, nextUrl));
     }
 
     if (pathname.startsWith("/dashboard/pharmacy") && userRole !== "PHARMACIST" && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/dashboard/${userRole.toLowerCase()}`, nextUrl));
+      return NextResponse.redirect(new URL(`/dashboard/${roleToDashboardPath(userRole)}`, nextUrl));
     }
 
     if (pathname.startsWith("/dashboard/lab") && userRole !== "LABTECH" && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL(`/dashboard/${userRole.toLowerCase()}`, nextUrl));
+      return NextResponse.redirect(new URL(`/dashboard/${roleToDashboardPath(userRole)}`, nextUrl));
     }
   }
 
