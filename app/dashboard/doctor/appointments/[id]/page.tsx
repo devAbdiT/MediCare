@@ -10,6 +10,7 @@ import Link from "next/link";
 import RecordForm from "./RecordForm";
 import { PrintHistoryButton } from "./PrintHistoryButton";
 import VitalsForm from "@/components/doctor/VitalsForm";
+import AllergyAlert from "@/components/doctor/AllergyAlert";
 
 export default async function AppointmentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,6 +29,7 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
       patient: {
         include: {
           user: { select: { name: true, phone: true, email: true } },
+          allergies: true,
           medicalRecords: {
             include: { doctor: { include: { user: { select: { name: true } } } } },
             orderBy: { date: "desc" }
@@ -45,6 +47,8 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
   return (
     <DashboardLayout role="doctor">
       <div className="space-y-8">
+        <AllergyAlert allergies={appointment.patient.allergies} />
+
         <div className="flex items-center gap-4">
           <Link href="/dashboard/doctor" className="p-3 bg-[#F0F4F8] dark:bg-[#0A122A] border border-[#D0DCE8] dark:border-[#1A2A4A] rounded-2xl text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8] transition-colors">
             <ChevronLeft size={24} />
