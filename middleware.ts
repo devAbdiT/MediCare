@@ -1,5 +1,25 @@
-import { auth } from "@/lib/auth";
 import { NextResponse, type NextRequest } from "next/server";
+
+/**
+ * Fetch session from the API to avoid loading Prisma Client in the Next.js Edge Runtime.
+ */
+async function getSession(request: NextRequest) {
+  try {
+    const origin = request.nextUrl.origin;
+    const response = await fetch(`${origin}/api/auth/get-session`, {
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+        "user-agent": request.headers.get("user-agent") || "",
+      },
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (err) {
+    console.error("Middleware session fetch error:", err);
+  }
+  return null;
+}
 
 /**
  * Next.js 16 Middleware
@@ -9,22 +29,23 @@ export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
   const pathname = nextUrl.pathname;
 
-  // Check for session (Better Auth)
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-
-  const user = session?.user;
-
-  // 1. Public / Login handling
+  // 1. Fast Path for public, static and auth endpoints
   if (
     pathname === "/" ||
-    pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/api/register" ||
     pathname.startsWith("/api/auth")
   ) {
-    if (user && pathname === "/login") {
+    return NextResponse.next();
+  }
+
+  // Get session details
+  const session = await getSession(request);
+  const user = session?.user;
+
+  // Login page handling
+  if (pathname === "/login") {
+    if (user) {
       const role = (user.role as string).toLowerCase();
       return NextResponse.redirect(new URL(`/dashboard/${role}`, nextUrl));
     }
@@ -68,7 +89,6 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Next.js 16 requires a config for the proxy matcher
 export const config = {
   matcher: ["/dashboard/:path*", "/login", "/api/:path*"],
 };
