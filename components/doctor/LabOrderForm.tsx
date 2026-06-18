@@ -111,7 +111,7 @@ export default function LabOrderForm({ appointmentId, patientId }: LabOrderFormP
   const [searchLoading, setSearchLoading]   = useState(false);
   const [showDropdown, setShowDropdown]     = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchDebounceRef = useRef<NodeJS.Timeout>();
+  const searchDebounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // ── Fetch existing orders for this appointment ──────────────────────────
   const fetchOrders = useCallback(async () => {

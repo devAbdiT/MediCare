@@ -124,6 +124,7 @@ model Patient {
   allergies           Allergy[]
   conditions          MedicalCondition[]
   invoices            Invoice[]
+  labOrders           LabOrder[]
 
   @@map("patients")
 }
@@ -645,6 +646,7 @@ model LabOrder {
   notes           String?
   orderedAt       DateTime       @default(now())
   appointment     Appointment    @relation(fields:[appointmentId],references:[id])
+  patient         Patient        @relation(fields:[patientId],references:[id])
   doctor          Doctor         @relation(fields:[doctorId],references:[id])
   result          LabResult?
   testCatalogue   LabTestCatalogue? @relation(fields:[testCatalogueId],references:[id])
