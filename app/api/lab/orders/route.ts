@@ -6,11 +6,15 @@ import { headers } from "next/headers";
 
 /**
  * GET /api/lab/orders
- * Returns lab orders for the LABTECH dashboard.
+ *
+ * DOCTOR  → only their own orders
+ * LABTECH / ADMIN → all orders
  *
  * Query params:
- *   ?queue=true  → only non-cancelled, non-resulted orders (pending work queue)
- *   (no param)   → all orders (for stats computation)
+ *   ?status=ORDERED            filter by status
+ *   ?appointmentId=<id>        filter by appointment
+ *   ?urgency=STAT              filter by urgency
+ *   ?queue=true                shorthand: non-completed, non-cancelled orders
  */
 export async function GET(req: Request) {
   try {
@@ -20,21 +24,39 @@ export async function GET(req: Request) {
     }
 
     const role = (session.user as any).role as string;
-    if (role !== "LABTECH" && role !== "ADMIN") {
+    if (!["DOCTOR", "LABTECH", "ADMIN"].includes(role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
-    const queueOnly = searchParams.get("queue") === "true";
+    const statusFilter      = searchParams.get("status");
+    const appointmentId     = searchParams.get("appointmentId");
+    const urgencyFilter     = searchParams.get("urgency");
+    const queueOnly         = searchParams.get("queue") === "true";
+
+    // For DOCTOR — restrict to their own orders only
+    let doctorId: string | undefined;
+    if (role === "DOCTOR") {
+      const doctor = await prisma.doctor.findUnique({
+        where: { userId: (session.user as any).id },
+        select: { id: true },
+      });
+      if (!doctor) {
+        return NextResponse.json({ error: "Doctor profile not found" }, { status: 404 });
+      }
+      doctorId = doctor.id;
+    }
 
     const orders = await prisma.labOrder.findMany({
-      where: queueOnly
-        ? {
-            status: {
-              in: ["ORDERED", "SAMPLE_COLLECTED", "PROCESSING"],
-            },
-          }
-        : undefined,
+      where: {
+        ...(doctorId ? { doctorId } : {}),
+        ...(appointmentId ? { appointmentId } : {}),
+        ...(statusFilter ? { status: statusFilter as any } : {}),
+        ...(urgencyFilter ? { urgency: urgencyFilter as any } : {}),
+        ...(queueOnly
+          ? { status: { in: ["ORDERED", "SAMPLE_COLLECTED", "PROCESSING"] } }
+          : {}),
+      },
       include: {
         patient: {
           select: {
@@ -43,13 +65,12 @@ export async function GET(req: Request) {
           },
         },
         doctor: {
-          select: {
-            user: { select: { name: true } },
-          },
+          select: { user: { select: { name: true } } },
         },
         testCatalogue: {
-          select: { name: true, code: true, category: true },
+          select: { name: true, code: true, category: true, turnaroundHrs: true },
         },
+        result: true,
       },
       orderBy: { orderedAt: "asc" },
     });
@@ -57,9 +78,71 @@ export async function GET(req: Request) {
     return NextResponse.json(orders);
   } catch (error) {
     console.error("GET Lab Orders Error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch lab orders" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch lab orders" }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/lab/orders
+ * Only DOCTOR can create orders.
+ *
+ * Body: { appointmentId, patientId, testCatalogueId?, testName, urgency, sampleType?, notes? }
+ */
+export async function POST(req: Request) {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session || (session.user as any).role !== "DOCTOR") {
+      return NextResponse.json({ error: "Only doctors can order lab tests" }, { status: 403 });
+    }
+
+    const doctor = await prisma.doctor.findUnique({
+      where: { userId: (session.user as any).id },
+      select: { id: true },
+    });
+    if (!doctor) {
+      return NextResponse.json({ error: "Doctor profile not found" }, { status: 404 });
+    }
+
+    const body = await req.json();
+    const { appointmentId, patientId, testCatalogueId, testName, urgency, sampleType, notes } = body;
+
+    if (!appointmentId || !patientId || !testName) {
+      return NextResponse.json(
+        { error: "appointmentId, patientId, and testName are required" },
+        { status: 400 }
+      );
+    }
+
+    const validUrgencies = ["ROUTINE", "URGENT", "STAT"];
+    if (urgency && !validUrgencies.includes(urgency)) {
+      return NextResponse.json({ error: "Invalid urgency value" }, { status: 400 });
+    }
+
+    const order = await prisma.labOrder.create({
+      data: {
+        appointmentId,
+        patientId,
+        doctorId: doctor.id,
+        testCatalogueId: testCatalogueId || null,
+        testName,
+        urgency: urgency ?? "ROUTINE",
+        sampleType: sampleType || null,
+        notes: notes || null,
+        status: "ORDERED",
+      },
+      include: {
+        testCatalogue: {
+          select: { name: true, code: true },
+        },
+        patient: {
+          select: { user: { select: { name: true } } },
+        },
+      },
+    });
+
+    return NextResponse.json(order, { status: 201 });
+  } catch (error) {
+    console.error("POST Lab Order Error:", error);
+    return NextResponse.json({ error: "Failed to create lab order" }, { status: 500 });
   }
 }

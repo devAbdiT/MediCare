@@ -11,6 +11,7 @@ import RecordForm from "./RecordForm";
 import { PrintHistoryButton } from "./PrintHistoryButton";
 import VitalsForm from "@/components/doctor/VitalsForm";
 import AllergyAlert from "@/components/doctor/AllergyAlert";
+import LabOrderForm from "@/components/doctor/LabOrderForm";
 
 export default async function AppointmentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -66,9 +67,14 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
               <span className="text-xs font-black text-[#5A6E8A] uppercase tracking-widest">Step 1: Record Vital Signs</span>
               <VitalsForm appointmentId={appointment.id} patientId={appointment.patientId} />
             </div>
-            
+
             <div className="space-y-2">
-              <span className="text-xs font-black text-[#5A6E8A] uppercase tracking-widest">Step 2: Submit Medical Record</span>
+              <span className="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Step 2: Order Lab Tests</span>
+              <LabOrderForm appointmentId={appointment.id} patientId={appointment.patientId} />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-black text-[#5A6E8A] uppercase tracking-widest">Step 3: Submit Medical Record</span>
               <RecordForm 
                 appointment={appointment} 
               />
