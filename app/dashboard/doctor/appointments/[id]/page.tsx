@@ -12,6 +12,7 @@ import { PrintHistoryButton } from "./PrintHistoryButton";
 import VitalsForm from "@/components/doctor/VitalsForm";
 import AllergyAlert from "@/components/doctor/AllergyAlert";
 import LabOrderForm from "@/components/doctor/LabOrderForm";
+import LabResultCard from "@/components/lab/LabResultCard";
 
 export default async function AppointmentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -37,7 +38,8 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
           }
         }
       },
-      doctor: { select: { id: true, user: { select: { name: true } } } }
+      doctor: { select: { id: true, user: { select: { name: true } } } },
+      labOrders: { include: { result: true } }
     }
   });
 
@@ -71,6 +73,27 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
             <div className="space-y-2">
               <span className="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Step 2: Order Lab Tests</span>
               <LabOrderForm appointmentId={appointment.id} patientId={appointment.patientId} />
+              
+              {appointment.labOrders && appointment.labOrders.length > 0 && (
+                <div className="mt-6 space-y-3">
+                  <h4 className="text-sm font-bold text-[#1A2A4A] dark:text-[#E8EEF8]">Ordered Tests</h4>
+                  {appointment.labOrders.map(order => (
+                    order.result ? (
+                      <LabResultCard key={order.id} labOrder={order} />
+                    ) : (
+                      <div key={order.id} className="p-4 bg-white dark:bg-[#111C3A] rounded-2xl border border-[#D0DCE8] dark:border-[#1A2A4A] flex justify-between items-center shadow-sm">
+                        <div>
+                          <p className="text-sm font-bold text-[#1A2A4A] dark:text-[#E8EEF8]">{order.testName}</p>
+                          <p className="text-[10px] uppercase font-black text-[#5A6E8A] dark:text-[#8A9CBA] mt-0.5 tracking-wider">Status: {order.status}</p>
+                        </div>
+                        <span className="px-3 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider rounded-xl">
+                          Pending
+                        </span>
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
