@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     // Check if the lab order exists
     const order = await prisma.labOrder.findUnique({
       where: { id: labOrderId },
+      include: { testCatalogue: true },
     });
 
     if (!order) {
@@ -62,6 +63,37 @@ export async function POST(req: Request) {
         where: { id: labOrderId },
         data: { status: "RESULTED" },
       });
+
+      // Add billing integration
+      const price = Number(order.testCatalogue?.price || 0);
+      if (order.appointmentId && price > 0) {
+        const invoice = await tx.invoice.findFirst({
+          where: { appointmentId: order.appointmentId },
+        });
+
+        if (invoice) {
+          await tx.invoiceItem.create({
+            data: {
+              invoiceId: invoice.id,
+              description: `${order.testName} (Laboratory)`,
+              quantity: 1,
+              unitPrice: price,
+              totalPrice: price,
+            },
+          });
+
+          const newTotal = Number(invoice.totalAmount) + price;
+          const newStatus = invoice.status === "PAID" ? "PARTIAL" : invoice.status;
+
+          await tx.invoice.update({
+            where: { id: invoice.id },
+            data: {
+              totalAmount: newTotal,
+              status: newStatus,
+            },
+          });
+        }
+      }
 
       return newResult;
     });
