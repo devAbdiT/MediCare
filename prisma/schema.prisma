@@ -125,6 +125,7 @@ model Patient {
   conditions          MedicalCondition[]
   invoices            Invoice[]
   labOrders           LabOrder[]
+  referrals           Referral[]
 
   @@map("patients")
 }
@@ -164,7 +165,7 @@ model Receptionist {
   userId String @unique
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  appointments Appointment[] // ← Add this line
+  appointments Appointment[]
 
   @@map("receptionists")
 }
@@ -267,6 +268,7 @@ model Department {
   updatedAt   DateTime @updatedAt
 
   doctors Doctor[]
+  referrals Referral[]
 
   @@map("departments")
 }
@@ -533,8 +535,10 @@ model Referral {
   createdAt      DateTime        @default(now())
   resolvedAt     DateTime?
   appointment    Appointment     @relation(fields:[appointmentId],references:[id])
+  patient        Patient         @relation(fields:[patientId],references:[id])
   fromDoctor     Doctor          @relation("FromDoctor",fields:[fromDoctorId],references:[id])
   toDoctor       Doctor?         @relation("ToDoctor",fields:[toDoctorId],references:[id])
+  toDepartment   Department?     @relation(fields:[toDepartmentId],references:[id])
   @@map("referrals")
 }
 

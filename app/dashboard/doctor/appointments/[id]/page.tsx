@@ -13,6 +13,7 @@ import VitalsForm from "@/components/doctor/VitalsForm";
 import AllergyAlert from "@/components/doctor/AllergyAlert";
 import LabOrderForm from "@/components/doctor/LabOrderForm";
 import LabResultCard from "@/components/lab/LabResultCard";
+import ReferralForm from "@/components/doctor/ReferralForm";
 
 export default async function AppointmentDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -101,6 +102,11 @@ export default async function AppointmentDetailsPage({ params }: { params: Promi
               <RecordForm 
                 appointment={appointment} 
               />
+            </div>
+
+            <div className="space-y-2 pt-4">
+              <span className="text-xs font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">Step 4: Refer Patient (Optional)</span>
+              <ReferralForm appointmentId={appointment.id} patientId={appointment.patientId} />
             </div>
           </div>
 
