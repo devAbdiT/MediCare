@@ -18,6 +18,8 @@ import {
   Sun,
   Moon,
   FlaskConical,
+  BarChart2,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -238,6 +240,76 @@ export default function DashboardLayout({
                   )}
                 >
                   Lab Catalogue
+                </span>
+              </Link>
+
+              {/* Referrals Section */}
+              <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest px-4 mt-6 mb-4">
+                Referrals
+              </p>
+              <Link
+                href="/dashboard/doctor/referrals"
+                className={cn(
+                  "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 relative group",
+                  pathname === "/dashboard/doctor/referrals"
+                    ? "bg-[#1E4A8A]/10 text-[#1E4A8A] dark:bg-[#4A8AC8]/10 dark:text-[#4A8AC8]"
+                    : "text-[#5A6E8A] dark:text-[#8A9CBA] hover:bg-[#F0F4F8] dark:hover:bg-[#0A122A] hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8]",
+                )}
+              >
+                {pathname === "/dashboard/doctor/referrals" && (
+                  <div className="absolute left-0 w-1.5 h-6 bg-[#1E4A8A] dark:bg-[#4A8AC8] rounded-r-full shadow-[0_0_15px_rgba(30,74,138,0.5)]" />
+                )}
+                <Share2
+                  size={20}
+                  className={cn(
+                    "transition-all duration-300",
+                    pathname === "/dashboard/doctor/referrals" ? "scale-110" : "group-hover:scale-110",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-sm font-bold tracking-tight",
+                    pathname === "/dashboard/doctor/referrals"
+                      ? ""
+                      : "group-hover:translate-x-1 transition-transform",
+                  )}
+                >
+                  Referrals
+                </span>
+              </Link>
+
+              {/* Analytics Section */}
+              <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest px-4 mt-6 mb-4">
+                Analytics
+              </p>
+              <Link
+                href="/dashboard/admin/reports"
+                className={cn(
+                  "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 relative group",
+                  pathname.startsWith("/dashboard/admin/reports")
+                    ? "bg-[#1E4A8A]/10 text-[#1E4A8A] dark:bg-[#4A8AC8]/10 dark:text-[#4A8AC8]"
+                    : "text-[#5A6E8A] dark:text-[#8A9CBA] hover:bg-[#F0F4F8] dark:hover:bg-[#0A122A] hover:text-[#1E4A8A] dark:hover:text-[#4A8AC8]",
+                )}
+              >
+                {pathname.startsWith("/dashboard/admin/reports") && (
+                  <div className="absolute left-0 w-1.5 h-6 bg-[#1E4A8A] dark:bg-[#4A8AC8] rounded-r-full shadow-[0_0_15px_rgba(30,74,138,0.5)]" />
+                )}
+                <BarChart2
+                  size={20}
+                  className={cn(
+                    "transition-all duration-300",
+                    pathname.startsWith("/dashboard/admin/reports") ? "scale-110" : "group-hover:scale-110",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-sm font-bold tracking-tight",
+                    pathname.startsWith("/dashboard/admin/reports")
+                      ? ""
+                      : "group-hover:translate-x-1 transition-transform",
+                  )}
+                >
+                  Reports
                 </span>
               </Link>
             </>

@@ -4,11 +4,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import prisma from "@/lib/prisma";
-import { Users, Calendar, Activity, Zap, ArrowUpRight } from "lucide-react";
+import { Users, Calendar, Activity, Zap, ArrowUpRight, BarChart2 } from "lucide-react";
 import { subDays, startOfDay, format } from "date-fns";
 import AnalyticsCharts from "./AnalyticsCharts";
 import AdminQuickActions from "./AdminQuickActions";
 import AdminControls from "./AdminControls";
+import Link from "next/link";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
@@ -183,26 +184,30 @@ export default async function AdminDashboard() {
           </div>
 
           {/* Quick Access */}
-          {/* <div className="space-y-6">
-             <div className="bg-[#1E4A8A] dark:bg-[#1E4A8A] p-8 rounded-[2.5rem] text-white shadow-2xl shadow-[#1E4A8A]/20 group transition-all duration-500">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-                    <ArrowUpRight size={24} />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-60">High Priority</span>
+          <div className="space-y-6">
+            {/* Reports Card */}
+            <Link
+              href="/dashboard/admin/reports"
+              className="block bg-[#1E4A8A] dark:bg-[#1A3A7A] p-8 rounded-[2.5rem] text-white shadow-2xl shadow-[#1E4A8A]/20 hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 group"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                  <BarChart2 size={24} />
                 </div>
-                <h3 className="text-2xl font-black mb-2">Pending Verifications</h3>
-                <p className="text-blue-100 text-sm font-medium mb-8">4 medical licenses require immediate manual review.</p>
-                <button className="w-full py-4 bg-white text-[#1E4A8A] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#F0F4F8] transition-all">
-                  Open Review Queue
-                </button>
-             </div>
+                <ArrowUpRight size={20} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+              </div>
+              <h3 className="text-2xl font-black mb-1">Reports &amp; Analytics</h3>
+              <p className="text-blue-200 text-sm font-medium">
+                Revenue, appointments, and department insights with CSV export.
+              </p>
+            </Link>
 
-             <div className="bg-white dark:bg-[#111C3A] p-8 rounded-[2.5rem] border border-[#D0DCE8] dark:border-[#1A2A4A] text-center transition-colors duration-500">
-                <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.2em] mb-2">Build Version</p>
-                <p className="text-[#1A2A4A] dark:text-[#E8EEF8] font-black">MediCare Enterprise v2.4.0</p>
-             </div>
-          </div> */}
+            {/* Version card */}
+            <div className="bg-white dark:bg-[#111C3A] p-8 rounded-[2.5rem] border border-[#D0DCE8] dark:border-[#1A2A4A] text-center transition-colors duration-500">
+              <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.2em] mb-2">Build Version</p>
+              <p className="text-[#1A2A4A] dark:text-[#E8EEF8] font-black">MediCare Enterprise v2.4.0</p>
+            </div>
+          </div>
         </div>
       </div>
     </DashboardLayout>
