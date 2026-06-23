@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { format } from "date-fns";
+import { getSystemSettings } from "@/lib/settings";
 
 export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
   try {
@@ -59,6 +60,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
     const tech = await prisma.user.findUnique({ where: { id: result.enteredById } });
     const techName = tech?.name || "Lab Technician";
 
+    const settings = await getSystemSettings();
+
     const html = `
     <!DOCTYPE html>
     <html lang="en">
@@ -100,8 +103,20 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
           margin: 5px 0 0 0;
           color: #4a5568;
           font-size: 16px;
-          font-weight: 600;
-          letter-spacing: 2px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        .header h2 {
+          margin: 5px 0 0 0;
+          color: #4a5568;
+          font-size: 16px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        .header p {
+          margin: 5px 0 0 0;
+          color: #718096;
+          font-size: 14px;
         }
         .info-grid {
           display: grid;
@@ -223,9 +238,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
       <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
       
       <div class="report-container">
+        <!-- Header -->
         <div class="header">
-          <h1>Jimma University Medical Center</h1>
-          <h2>Laboratory Report</h2>
+          <h1>${settings.clinicName}</h1>
+          <p>${settings.clinicAddress} | Phone: ${settings.clinicPhone || "N/A"} | Email: ${settings.clinicEmail || "N/A"}</p>
+          <br/>
+          <h2>Laboratory Test Report</h2>
         </div>
 
         <div class="info-grid">

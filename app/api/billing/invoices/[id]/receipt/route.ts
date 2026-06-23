@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { getSystemSettings } from "@/lib/settings";
 
 export async function GET(
   req: Request,
@@ -78,6 +79,8 @@ export async function GET(
     const paidAmount = Number(invoice.paidAmount);
     const balanceDue = totalAmount - paidAmount;
 
+    const settings = await getSystemSettings();
+
     const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -105,21 +108,22 @@ export async function GET(
         }
         .text-right {
             text-align: right;
+            color: #666;
         }
         .header {
             margin-bottom: 30px;
         }
-        .header h1 {
+        .header-content h1 {
             font-size: 24px;
             font-weight: bold;
+            color: #1e3a8a;
             margin: 0 0 5px 0;
             text-transform: uppercase;
         }
-        .header h2 {
-            font-size: 16px;
-            margin: 0;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        .header-content p {
+            margin: 0 0 5px 0;
+            font-size: 12px;
+            font-weight: bold;
         }
         .divider {
             border-top: 2px dashed #000;
@@ -240,10 +244,15 @@ export async function GET(
             <button class="btn-print" onclick="window.print()">Print Receipt</button>
         </div>
 
-        <!-- JUMC Official Header -->
-        <div class="header text-center">
-            <h1>Jimma University Medical Center</h1>
-            <h2>Official Payment Receipt</h2>
+        <div class="header">
+            <div class="header-content">
+                <h1>${settings.clinicName}</h1>
+                <p>${settings.clinicAddress}</p>
+                <p>Phone: ${settings.clinicPhone || "+251-XXX-XXX-XXXX"}</p>
+            </div>
+            <div class="header-info">
+                <p><strong>RECEIPT NO:</strong> ${invoice.invoiceNumber}</p>
+            </div>
         </div>
 
         <div class="divider"></div>

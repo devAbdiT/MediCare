@@ -686,3 +686,10 @@ model LabResult {
   labOrder       LabOrder @relation(fields:[labOrderId],references:[id])
   @@map("lab_results")
 }
+
+model SystemSettings {
+  id        String   @id @default("singleton")
+  data      Json
+  updatedAt DateTime @updatedAt
+  @@map("system_settings")
+}

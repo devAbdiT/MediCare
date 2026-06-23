@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { differenceInYears } from "date-fns";
+import { getSystemSettings } from "@/lib/settings";
 
 export async function GET(
   req: Request,
@@ -62,6 +63,8 @@ export async function GET(
 
     const mockLicenseNumber = `JUMC-LIC-${record.doctor.id.substring(0, 6).toUpperCase()}`;
 
+    const settings = await getSystemSettings();
+
     const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -93,19 +96,17 @@ export async function GET(
         .header {
             margin-bottom: 20px;
         }
-        .header h1 {
+        .header-content h1 {
             font-size: 26px;
             font-weight: bold;
+            color: #1e3a8a;
             margin: 0 0 5px 0;
             text-transform: uppercase;
         }
-        .header h2 {
-            font-size: 20px;
-            margin: 0;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-weight: 900;
-            text-decoration: underline;
+        .header-content p {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            font-weight: bold;
         }
         .divider {
             border-top: 2px dashed #000;
@@ -209,11 +210,17 @@ export async function GET(
             <button class="btn-print" onclick="window.print()">Print Prescription</button>
         </div>
 
-        <!-- JUMC Clinic Header -->
+        <!-- Official Header -->
         <div class="header text-center">
-            <h1>Jimma University Medical Center</h1>
-            <h2>Prescription</h2>
+            <div class="header-content">
+                <h1>${settings.clinicName}</h1>
+                <p>${settings.clinicAddress}</p>
+                <p>Phone: ${settings.clinicPhone || "+251-XXX-XXX-XXXX"}</p>
+            </div>
+            <h2 style="font-size:18px; margin-top: 10px;">Official Prescription</h2>
         </div>
+
+        <div class="divider"></div>
 
         <div class="text-center rx-symbol">℞</div>
 
