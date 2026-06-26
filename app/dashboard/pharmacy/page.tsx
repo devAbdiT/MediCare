@@ -85,6 +85,27 @@ export default async function PharmacyDashboard() {
         <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium mt-1">Welcome back, {(session.user as any).name}. Here is today's snapshot.</p>
       </div>
 
+      {(lowStockCount > 0 || expiringSoonCount > 0) && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-red-600 dark:text-red-400">
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <h3 className="font-bold text-red-800 dark:text-red-300 tracking-tight">Action Required</h3>
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium mt-0.5">
+                {lowStockCount > 0 && `${lowStockCount} items need restocking.`}
+                {lowStockCount > 0 && expiringSoonCount > 0 && " "}
+                {expiringSoonCount > 0 && `${expiringSoonCount} batches expiring soon.`}
+              </p>
+            </div>
+          </div>
+          <Link href="/dashboard/pharmacy/alerts" className="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/40 dark:hover:bg-red-900/60 text-red-700 dark:text-red-300 text-sm font-bold rounded-xl transition-colors">
+            View Alerts
+          </Link>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-[#111C3A] p-6 rounded-3xl border border-[#D0DCE8] dark:border-[#1A2A4A] shadow-sm flex items-center gap-4">
           <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">

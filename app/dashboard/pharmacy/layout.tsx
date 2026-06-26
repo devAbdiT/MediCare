@@ -49,12 +49,29 @@ export default function PharmacyLayout({ children }: { children: React.ReactNode
     router.push("/login");
   };
 
+  const [alertCount, setAlertCount] = useState<number>(0);
+
+  useEffect(() => {
+    async function checkAlerts() {
+      try {
+        const res = await fetch("/api/pharmacy/alerts");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.summary) {
+            setAlertCount(data.summary.totalAlerts);
+          }
+        }
+      } catch (err) {}
+    }
+    checkAlerts();
+  }, [pathname]);
+
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard/pharmacy" },
     { name: "Drug Catalogue", icon: Pill, href: "/dashboard/pharmacy/drugs" },
     { name: "Stock Management", icon: Package, href: "/dashboard/pharmacy/stock" },
     { name: "Dispense", icon: ShoppingCart, href: "/dashboard/pharmacy/dispense" },
-    { name: "Alerts", icon: Bell, href: "/dashboard/pharmacy/alerts" },
+    { name: "Alerts", icon: Bell, href: "/dashboard/pharmacy/alerts", badge: alertCount },
   ];
 
   return (
@@ -106,12 +123,17 @@ export default function PharmacyLayout({ children }: { children: React.ReactNode
                 />
                 <span
                   className={cn(
-                    "text-sm font-bold tracking-tight",
+                    "text-sm font-bold tracking-tight flex-1",
                     isActive ? "" : "group-hover:translate-x-1 transition-transform"
                   )}
                 >
                   {item.name}
                 </span>
+                {item.badge && item.badge > 0 ? (
+                  <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-black">
+                    {item.badge}
+                  </span>
+                ) : null}
               </Link>
             );
           })}
