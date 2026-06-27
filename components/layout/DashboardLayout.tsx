@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   UserCircle,
   Calendar,
+  CalendarDays,
   Users,
   LogOut,
   Stethoscope,
@@ -20,6 +21,8 @@ import {
   FlaskConical,
   BarChart2,
   Share2,
+  MonitorPlay,
+  LayoutList,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -68,6 +71,7 @@ export default function DashboardLayout({
     ],
     doctor: [
       { name: "Schedule", icon: Calendar, href: "/dashboard/doctor" },
+      { name: "Calendar", icon: CalendarDays, href: "/dashboard/doctor/calendar" },
       { name: "Patients", icon: Users, href: "/dashboard/doctor/patients" },
     ],
     receptionist: [
@@ -86,6 +90,16 @@ export default function DashboardLayout({
         name: "Schedule",
         icon: Calendar,
         href: "/dashboard/receptionist/schedule",
+      },
+      {
+        name: "Calendar",
+        icon: CalendarDays,
+        href: "/dashboard/receptionist/calendar",
+      },
+      {
+        name: "Queue Board",
+        icon: LayoutList,
+        href: "/dashboard/receptionist/queue",
       },
       {
         name: "Billing & Payments",

@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { format } from "date-fns";
 import { ArrowRight, Hash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import WeeklyCalendar from "@/components/WeeklyCalendar";
+
 
 // Label maps
 const TYPE_LABELS: Record<string, string> = {
@@ -37,7 +37,6 @@ interface DoctorActiveScheduleProps {
 }
 
 export default function DoctorActiveSchedule({ initialAppointments }: DoctorActiveScheduleProps) {
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const router = useRouter();
 
   return (
@@ -53,36 +52,9 @@ export default function DoctorActiveSchedule({ initialAppointments }: DoctorActi
           </div>
         </div>
 
-        {/* Tab switch */}
-        <div className="flex gap-2 p-1 bg-white/40 dark:bg-[#111C3A]/40 rounded-2xl border border-[#D0DCE8] dark:border-[#1A2A4A]">
-          <button
-            onClick={() => setViewMode("list")}
-            className={cn(
-              "px-5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-              viewMode === "list"
-                ? "bg-[#1E4A8A] text-white dark:bg-[#4A8AC8] dark:text-[#0A122A] shadow-md shadow-blue-500/10"
-                : "text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1A2A4A] dark:hover:text-[#E8EEF8]"
-            )}
-          >
-            List View
-          </button>
-          <button
-            onClick={() => setViewMode("calendar")}
-            className={cn(
-              "px-5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-              viewMode === "calendar"
-                ? "bg-[#1E4A8A] text-white dark:bg-[#4A8AC8] dark:text-[#0A122A] shadow-md shadow-blue-500/10"
-                : "text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1A2A4A] dark:hover:text-[#E8EEF8]"
-            )}
-          >
-            Weekly Calendar View
-          </button>
-        </div>
       </div>
 
-      {/* Render content based on view mode */}
-      {viewMode === "list" ? (
-        <div className="space-y-4">
+      <div className="space-y-4">
           {initialAppointments.length === 0 ? (
             <div className="text-center py-20 bg-white dark:bg-[#111C3A] rounded-[2rem] border-2 border-dashed border-[#D0DCE8] dark:border-[#1A2A4A]">
               <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-bold italic">No upcoming patients queued.</p>
@@ -179,13 +151,6 @@ export default function DoctorActiveSchedule({ initialAppointments }: DoctorActi
             ))
           )}
         </div>
-      ) : (
-        <WeeklyCalendar
-          onAppointmentClick={(appt) => {
-            router.push(`/dashboard/doctor/appointments/${appt.id}`);
-          }}
-        />
-      )}
     </div>
   );
 }

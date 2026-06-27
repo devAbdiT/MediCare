@@ -1,7 +1,7 @@
 // app/page.tsx
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Stethoscope, 
@@ -17,6 +17,8 @@ import { useTheme } from "next-themes";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0A122A] overflow-hidden relative selection:bg-[#1E4A8A]/10 dark:selection:bg-[#4A8AC8]/20 selection:text-[#1E4A8A] transition-colors duration-700">
@@ -43,7 +45,7 @@ export default function Home() {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="w-12 h-12 rounded-2xl bg-white/50 dark:bg-[#0A122A]/50 border border-white/20 dark:border-white/5 flex items-center justify-center text-[#1A2A4A] dark:text-[#E8EEF8] hover:bg-white dark:hover:bg-[#0A122A] transition-all shadow-lg"
             >
-              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+              {mounted ? (theme === "dark" ? <Sun size={20} /> : <Moon size={20} />) : <Sun size={20} />}
             </button>
             
             {/* Register Button */}

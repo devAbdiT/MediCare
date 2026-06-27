@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PrintAppointmentButton from "@/components/PrintAppointmentButton";
-import WeeklyCalendar from "@/components/WeeklyCalendar";
+
 import { cn } from "@/lib/utils";
 import { format, isToday } from "date-fns";
 import {
@@ -84,7 +84,6 @@ export default function ReceptionistSchedulePage() {
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selectedApptDetails, setSelectedApptDetails] = useState<any | null>(null);
 
   // Filters
@@ -383,31 +382,7 @@ export default function ReceptionistSchedulePage() {
           </div>
         </div>
 
-        {/* ── View Switcher Tabs ── */}
-        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-850 rounded-2xl w-fit print:hidden">
-          <button
-            onClick={() => setViewMode("list")}
-            className={cn(
-              "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer",
-              viewMode === "list"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-            )}
-          >
-            List View
-          </button>
-          <button
-            onClick={() => setViewMode("calendar")}
-            className={cn(
-              "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer",
-              viewMode === "calendar"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-            )}
-          >
-            Weekly Calendar View
-          </button>
-        </div>
+
 
         {/* ── Filter Panel ── */}
         {showFilters && (
@@ -420,12 +395,26 @@ export default function ReceptionistSchedulePage() {
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Search */}
-              <div className="lg:col-span-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Search</label>
-                <div className="relative">
-                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-3 space-y-4">
+                {/* Search */}
+                <div className="lg:col-span-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Search</label>
+                  <div className="relative">
+                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Patient name, card number, phone..."
+                      className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-400 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Date */}
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Date</label>
                   <input
                     type="text"
                     value={searchQuery}
@@ -534,8 +523,7 @@ export default function ReceptionistSchedulePage() {
           </div>
         )}
 
-        {viewMode === "list" ? (
-          <>
+        <div className="lg:col-span-3 space-y-4">
             {/* ── Result count ── */}
             <div className="flex items-center justify-between print:hidden">
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -753,20 +741,8 @@ export default function ReceptionistSchedulePage() {
                 <p className="text-xs text-slate-500 mt-1">This is a system-generated appointment report. — MediCare Appointment Scheduling System</p>
               </div>
             </div>
-          </>
-        ) : (
-          <div className="print:hidden">
-            <WeeklyCalendar
-              onAppointmentClick={setSelectedApptDetails}
-              searchQuery={searchQuery}
-              filterStatus={filterStatus}
-              filterDoctorId={filterDoctorId}
-              filterDepartmentId={filterDepartmentId}
-              filterType={filterType}
-              filterPriority={filterPriority}
-            />
-          </div>
-        )}
+              </div>
+            </div>
 
         {/* ── Reschedule Dialog ── */}
         <Dialog open={!!rescheduleData} onOpenChange={() => setRescheduleData(null)}>
@@ -1088,7 +1064,6 @@ export default function ReceptionistSchedulePage() {
             )}
           </DialogContent>
         </Dialog>
-      </div>
     </DashboardLayout>
   );
 }
