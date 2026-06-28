@@ -11,6 +11,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import AppointmentActions from "./AppointmentActions";
 import { ReceptionistDashboardSearch } from "./ReceptionistDashboardSearch";
+import { WalkInButton } from "./WalkInButton";
 
 export default async function ReceptionistDashboard() {
   const session = await auth.api.getSession({
@@ -51,7 +52,8 @@ export default async function ReceptionistDashboard() {
                  <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium">Operational Hub for Patient Flow</p>
               </div>
           </div>
-          <div className="flex gap-4 w-full lg:w-auto">
+          <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+             <WalkInButton />
              <Link href="/dashboard/receptionist/book-appointment" className="flex-1 lg:flex-none">
                  <button className="w-full bg-[#1E4A8A] dark:bg-[#4A8AC8] text-white dark:text-[#0A122A] px-10 py-5 rounded-[1.5rem] font-black shadow-2xl shadow-blue-500/20 hover:bg-[#1A3F75] dark:hover:bg-[#3B72A8] transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest">
                    <Calendar size={20} />

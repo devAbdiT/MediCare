@@ -90,16 +90,18 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { patientId, doctorId, dateTime, reason, appointmentType, priority } = body;
+    const { patientId, doctorId, dateTime, reason, appointmentType, priority, walkIn, chiefComplaint, status } = body;
 
     const requestedTime = new Date(dateTime);
     const startTime = startOfHour(requestedTime);
     const endTime = endOfHour(requestedTime);
 
-    // 1. Doctor Working Hours validation
-    const availabilityCheck = await validateDoctorAvailability(doctorId, requestedTime);
-    if (!availabilityCheck.valid) {
-      return new NextResponse(availabilityCheck.message, { status: 400 });
+    // 1. Doctor Working Hours validation (skip for walk-ins with EMERGENCY priority)
+    if (!walkIn || priority !== "EMERGENCY") {
+      const availabilityCheck = await validateDoctorAvailability(doctorId, requestedTime);
+      if (!availabilityCheck.valid) {
+        return new NextResponse(availabilityCheck.message, { status: 400 });
+      }
     }
 
     // 2. Server-side conflict check
@@ -124,11 +126,30 @@ export async function POST(req: Request) {
 
     const validTypes = ["NEW_VISIT", "FOLLOW_UP", "CONSULTATION", "EMERGENCY"];
     const validPriorities = ["NORMAL", "URGENT", "EMERGENCY"];
+    const validStatuses = ["SCHEDULED", "CHECKED_IN", "RESCHEDULED"];
 
     const finalAppointmentType = validTypes.includes(appointmentType) ? appointmentType : "NEW_VISIT";
     const finalPriority = validPriorities.includes(priority) ? priority : "NORMAL";
+    const finalStatus = validStatuses.includes(status) ? status : "SCHEDULED";
 
-    // 4. Create Appointment
+    // 4. Auto-assign queue number for walk-ins that are checked in
+    let queueNumber: number | undefined;
+    if (walkIn && finalStatus === "CHECKED_IN") {
+      const todayStart = new Date(requestedTime);
+      todayStart.setHours(0, 0, 0, 0);
+      const todayEnd = new Date(todayStart);
+      todayEnd.setDate(todayEnd.getDate() + 1);
+
+      const checkedInToday = await prisma.appointment.count({
+        where: {
+          dateTime: { gte: todayStart, lt: todayEnd },
+          status: "CHECKED_IN"
+        }
+      });
+      queueNumber = checkedInToday + 1;
+    }
+
+    // 5. Create Appointment
     const appointment = await prisma.appointment.create({
       data: {
         patientId: finalPatientId,
@@ -137,8 +158,13 @@ export async function POST(req: Request) {
         reason,
         appointmentType: finalAppointmentType,
         priority: finalPriority,
-        receptionistId: (session.user as any).role === "RECEPTIONIST" ? 
-          (await prisma.receptionist.findUnique({ where: { userId: session.user.id } }))?.id : 
+        status: finalStatus,
+        walkIn: walkIn === true,
+        chiefComplaint: chiefComplaint || null,
+        checkedInAt: finalStatus === "CHECKED_IN" ? new Date() : null,
+        queueNumber: queueNumber ?? null,
+        receptionistId: (session.user as any).role === "RECEPTIONIST" ?
+          (await prisma.receptionist.findUnique({ where: { userId: session.user.id } }))?.id :
           null,
       }
     });
