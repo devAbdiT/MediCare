@@ -22,6 +22,7 @@ import {
   X,
   Printer,
   Search,
+  MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -116,6 +117,8 @@ export default function ReceptionistSchedulePage() {
 
   // No-Show confirm
   const [noShowTarget, setNoShowTarget] = useState<any | null>(null);
+  // Cancel confirm
+  const [cancelTarget, setCancelTarget] = useState<any | null>(null);
 
   // Build query URL from current filters
   const buildQueryURL = useCallback(() => {
@@ -678,54 +681,81 @@ export default function ReceptionistSchedulePage() {
                             </div>
                           </td>
 
-                          {/* Actions */}
-                          <td className="px-6 py-5 text-right print:hidden">
-                            <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <PrintAppointmentButton appointment={app} variant="ghost" />
-                              {app.status === "SCHEDULED" && (
-                                <>
-                                  <button 
-                                    onClick={() => {
-                                      if ((app as any).paymentRequired && (app as any).paymentStatus !== "PAID") {
-                                        toast.error("Appointment payment must be completed before check-in.");
-                                        return;
-                                      }
-                                      updateStatus(app.id, "CHECKED_IN")
-                                    }} 
-                                    className={cn(
-                                      "p-2 rounded-xl transition-colors",
-                                      (app as any).paymentRequired && (app as any).paymentStatus !== "PAID"
-                                        ? "text-slate-300 dark:text-slate-600 cursor-not-allowed"
-                                        : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                    )}
-                                    title={((app as any).paymentRequired && (app as any).paymentStatus !== "PAID") ? "Payment required before check-in" : "Check In"}
-                                  >
-                                    <UserCheck size={17} />
-                                  </button>
-                                  <button onClick={() => setRescheduleData(app)} className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors" title="Reschedule">
-                                    <Calendar size={17} />
-                                  </button>
-                                  <button onClick={() => setNoShowTarget(app)} className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors" title="Mark No-Show">
-                                    <AlertTriangle size={17} />
-                                  </button>
-                                  <button onClick={() => updateStatus(app.id, "CANCELLED")} className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors" title="Cancel">
-                                    <XCircle size={17} />
-                                  </button>
-                                </>
-                              )}
-                              {app.status === "CHECKED_IN" && (
-                                <>
-                                  <button onClick={() => updateStatus(app.id, "COMPLETED")} className="p-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors" title="Mark Completed">
-                                    <CheckCircle2 size={17} />
-                                  </button>
-                                  <button onClick={() => setNoShowTarget(app)} className="p-2 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors" title="Mark No-Show">
-                                    <AlertTriangle size={17} />
-                                  </button>
-                                </>
-                              )}
-                              <button onClick={() => viewHistory(app)} className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors" title="View History">
-                                <History size={17} />
+                          {/* Actions Dropdown */}
+                          <td className="px-6 py-5 text-right print:hidden relative">
+                            <div className="group inline-block relative z-10">
+                              <button className="p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded-xl transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none">
+                                <MoreHorizontal size={20} />
                               </button>
+                              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl hidden group-hover:block hover:block z-50 overflow-hidden text-left py-1">
+                                <button
+                                  onClick={() => window.open(`/api/print/appointment/${app.id}`, '_blank')}
+                                  className="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
+                                >
+                                  <Printer size={15} /> Print Slip
+                                </button>
+                                
+                                {app.status === "SCHEDULED" && (
+                                  <>
+                                    <button 
+                                      onClick={() => {
+                                        if ((app as any).paymentRequired && (app as any).paymentStatus !== "PAID") {
+                                          toast.error("Payment must be completed before check-in.");
+                                          return;
+                                        }
+                                        updateStatus(app.id, "CHECKED_IN")
+                                      }} 
+                                      disabled={(app as any).paymentRequired && (app as any).paymentStatus !== "PAID"}
+                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                      <UserCheck size={15} /> Check In
+                                    </button>
+                                    <button 
+                                      onClick={() => setRescheduleData(app)} 
+                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2"
+                                    >
+                                      <Calendar size={15} /> Reschedule
+                                    </button>
+                                    <button 
+                                      onClick={() => setNoShowTarget(app)} 
+                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors flex items-center gap-2"
+                                    >
+                                      <AlertTriangle size={15} /> Mark No-Show
+                                    </button>
+                                    <button 
+                                      onClick={() => setCancelTarget(app)} 
+                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2"
+                                    >
+                                      <XCircle size={15} /> Cancel
+                                    </button>
+                                  </>
+                                )}
+                                
+                                {app.status === "CHECKED_IN" && (
+                                  <>
+                                    <button 
+                                      onClick={() => updateStatus(app.id, "COMPLETED")} 
+                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex items-center gap-2"
+                                    >
+                                      <CheckCircle2 size={15} /> Mark Completed
+                                    </button>
+                                    <button 
+                                      onClick={() => setNoShowTarget(app)} 
+                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors flex items-center gap-2"
+                                    >
+                                      <AlertTriangle size={15} /> Mark No-Show
+                                    </button>
+                                  </>
+                                )}
+                                
+                                <div className="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                                <button 
+                                  onClick={() => viewHistory(app)} 
+                                  className="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
+                                >
+                                  <History size={15} /> View History
+                                </button>
+                              </div>
                             </div>
                           </td>
                         </tr>
@@ -819,6 +849,43 @@ export default function ReceptionistSchedulePage() {
                 <button type="button" onClick={() => setNoShowTarget(null)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Cancel</button>
                 <button type="button" onClick={handleNoShow} className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black hover:bg-amber-600 transition-all">Confirm No-Show</button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ── Cancel Confirmation Dialog ── */}
+        <Dialog open={!!cancelTarget} onOpenChange={() => setCancelTarget(null)}>
+          <DialogContent className="sm:max-w-md rounded-[2.5rem] p-8 border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0F172A] shadow-2xl transition-colors duration-500">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
+                  <XCircle size={22} className="text-red-600 dark:text-red-400" />
+                </div>
+                Cancel Appointment
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Are you sure you want to cancel the appointment for <span className="font-bold text-slate-900 dark:text-slate-100">{cancelTarget?.patient?.user?.name}</span>? 
+                This action will mark the status as cancelled and free up the doctor's time slot.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setCancelTarget(null)}
+                className="flex-1 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 text-sm font-black text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => {
+                  updateStatus(cancelTarget.id, "CANCELLED");
+                  setCancelTarget(null);
+                }}
+                className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-700 hover:to-rose-600 text-white text-sm font-black transition-all shadow-lg shadow-red-500/20 flex items-center justify-center gap-2"
+              >
+                <XCircle size={16} /> Confirm Cancel
+              </button>
             </div>
           </DialogContent>
         </Dialog>
@@ -1013,7 +1080,7 @@ export default function ReceptionistSchedulePage() {
                         </button>
                         <button
                           onClick={() => {
-                            updateStatus(selectedApptDetails.id, "CANCELLED");
+                            setCancelTarget(selectedApptDetails);
                             setSelectedApptDetails(null);
                           }}
                           className="flex-1 min-w-[120px] py-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
