@@ -51,6 +51,39 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // ── Rate Limiting (all /api/* except /api/auth/*) ──────────────────────────
+  if (pathname.startsWith("/api/")) {
+    // Extract client IP from standard proxy headers, fall back to loopback
+    const forwarded = request.headers.get("x-forwarded-for");
+    const realIp    = request.headers.get("x-real-ip");
+    const ip        = (forwarded ? forwarded.split(",")[0].trim() : realIp) || "127.0.0.1";
+
+    // Dynamic import keeps this module out of the Edge bundle when not needed
+    const { checkRateLimit } = await import("@/lib/rateLimit");
+    const { allowed, remaining } = checkRateLimit(ip);
+
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": "60",
+            "X-RateLimit-Limit": "60",
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
+    // Allowed — attach rate-limit headers to the proxied response
+    const response = NextResponse.next();
+    response.headers.set("X-RateLimit-Limit", "60");
+    response.headers.set("X-RateLimit-Remaining", String(remaining));
+    return response;
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
   // Get session details
   const session = await getSession(request);
   const user = session?.user;
