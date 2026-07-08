@@ -9,6 +9,7 @@ import { format, differenceInYears } from "date-fns";
 import { ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
 import { PrintButton } from "@/components/admin/PrintButton";
+import { VerifyEmailButton } from "@/components/admin/VerifyEmailButton";
 
 export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -65,11 +66,14 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
               <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium">Digital clinical manifest for {user.name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 px-8 py-4 bg-[#1E4A8A] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0F3A6A] transition-all shadow-xl shadow-blue-500/10">
-            <PrintButton 
-              targetId="print-content"
-              label={user.role === "PATIENT" ? "Print Patient Report" : "Print User Report"}
-            />
+          <div className="flex items-center gap-3 no-print">
+            {!user.emailVerified && <VerifyEmailButton userId={user.id} />}
+            <div className="flex items-center gap-3 px-8 py-4 bg-[#1E4A8A] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#0F3A6A] transition-all shadow-xl shadow-blue-500/10">
+              <PrintButton 
+                targetId="print-content"
+                label={user.role === "PATIENT" ? "Print Patient Report" : "Print User Report"}
+              />
+            </div>
           </div>
         </div>
 
@@ -123,7 +127,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                 
                 <ReportField label="Gender" value={user.gender || "NOT SPECIFIED"} />
                 <ReportField label="Phone" value={user.phone || "-"} />
-                <ReportField label="Email" value={user.email} />
+                <ReportField label="Email" value={`${user.email} ${user.emailVerified ? '(Verified)' : '(Unverified)'}`} />
               </div>
             </div>
 

@@ -102,7 +102,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", nextUrl));
   }
 
-  // 3. Role-based Dashboard Protection
+  // 3. Email Verification Gate — block unverified users from /dashboard/*
+  if (pathname.startsWith("/dashboard") && user.emailVerified === false) {
+    const email = encodeURIComponent(user.email ?? "");
+    return NextResponse.redirect(
+      new URL(`/verify-email?email=${email}`, nextUrl)
+    );
+  }
+
+  // 4. Role-based Dashboard Protection
   if (pathname.startsWith("/dashboard")) {
     const userRole = (user.role as string).toUpperCase();
 
@@ -135,5 +143,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/api/:path*"],
+  matcher: ["/dashboard/:path*", "/login", "/verify-email", "/api/:path*"],
 };
