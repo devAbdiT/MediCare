@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createConsultationInvoice } from "@/lib/billing";
+import { createAuditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
@@ -52,6 +53,17 @@ export async function POST(req: Request) {
       }
 
       return record;
+    });
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    await createAuditLog({
+      userId: session.user.id,
+      userRole: (session.user as any).role,
+      action: "CREATE",
+      entity: "MedicalRecord",
+      entityId: result.id,
+      newValues: { patientId, doctorId, diagnosis, prescription, notes, appointmentId },
+      ipAddress,
     });
 
     return NextResponse.json(result);

@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { startOfHour, endOfHour } from "date-fns";
 import { validateDoctorAvailability } from "@/lib/availability";
+import { createAuditLog } from "@/lib/audit";
 
 // GET /api/appointments - List appointments based on role
 export async function GET(req: Request) {
@@ -167,6 +168,17 @@ export async function POST(req: Request) {
           (await prisma.receptionist.findUnique({ where: { userId: session.user.id } }))?.id :
           null,
       }
+    });
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    await createAuditLog({
+      userId: session.user.id,
+      userRole: (session.user as any).role,
+      action: "CREATE",
+      entity: "Appointment",
+      entityId: appointment.id,
+      newValues: { patientId: finalPatientId, doctorId, dateTime: requestedTime, reason, appointmentType: finalAppointmentType, priority: finalPriority, status: finalStatus, walkIn },
+      ipAddress,
     });
 
     return NextResponse.json(appointment);

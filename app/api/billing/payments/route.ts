@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { PaymentMethod } from "@prisma/client";
+import { createAuditLog } from "@/lib/audit";
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession({
@@ -77,6 +78,17 @@ export async function POST(req: Request) {
       });
 
       return { payment, updatedInvoice };
+    });
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    await createAuditLog({
+      userId: session.user.id,
+      userRole: role,
+      action: "CREATE",
+      entity: "Payment",
+      entityId: result.payment.id,
+      newValues: { invoiceId, amount, method, reference, notes },
+      ipAddress,
     });
 
     return NextResponse.json(result);

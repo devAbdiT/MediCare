@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { PatientStatus } from "@prisma/client";
+import { createAuditLog } from "@/lib/audit";
 
 // GET /api/patients/[id] - Retrieve patient details (Staff or the Patient themselves)
 export async function GET(
@@ -123,6 +124,27 @@ export async function PATCH(
       where: { id },
       data: updateData,
     });
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    
+    // Only log if something actually changed
+    if (Object.keys(updateData).length > 0) {
+      await createAuditLog({
+        userId: session.user.id,
+        userRole: (session.user as any).role,
+        action: "UPDATE",
+        entity: "Patient",
+        entityId: id,
+        oldValues: {
+          address: patient.address, city: patient.city, region: patient.region,
+          emergencyName: patient.emergencyName, emergencyPhone: patient.emergencyPhone, emergencyRelation: patient.emergencyRelation,
+          insuranceProvider: patient.insuranceProvider, insurancePolicyNo: patient.insurancePolicyNo, insuranceCoverage: patient.insuranceCoverage, insuranceExpiry: patient.insuranceExpiry,
+          patientStatus: patient.patientStatus
+        },
+        newValues: updateData,
+        ipAddress,
+      });
+    }
 
     return NextResponse.json(updatedPatient);
   } catch (error) {

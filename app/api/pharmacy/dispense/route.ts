@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { startOfDay, endOfDay } from "date-fns";
+import { createAuditLog } from "@/lib/audit";
 
 // ─── GET: Pending prescriptions + Today's dispensings ─────────────────────────
 export async function GET(req: Request) {
@@ -259,6 +260,17 @@ export async function POST(req: Request) {
         console.warn("Invoice update skipped:", invoiceErr);
       }
     }
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    await createAuditLog({
+      userId: session.user.id,
+      userRole: role,
+      action: "CREATE",
+      entity: "DrugDispensing",
+      entityId: dispensing.id,
+      newValues: { drugId, prescriptionId, patientId, quantity, notes },
+      ipAddress,
+    });
 
     return NextResponse.json({ success: true, dispensingId: dispensing.id });
   } catch (error) {

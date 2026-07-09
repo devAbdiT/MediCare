@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { createAuditLog } from "@/lib/audit";
 
 /**
  * POST /api/lab/results
@@ -96,6 +97,17 @@ export async function POST(req: Request) {
       }
 
       return newResult;
+    });
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    await createAuditLog({
+      userId: session.user.id,
+      userRole: role,
+      action: "CREATE",
+      entity: "LabResult",
+      entityId: result.id,
+      newValues: { labOrderId, resultValue, unit, referenceRange, isAbnormal, interpretation },
+      ipAddress,
     });
 
     return NextResponse.json(result, { status: 201 });

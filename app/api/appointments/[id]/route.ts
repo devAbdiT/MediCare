@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { startOfDay, endOfDay } from "date-fns";
 import { validateDoctorAvailability } from "@/lib/availability";
+import { createAuditLog } from "@/lib/audit";
 
 export async function PATCH(
   req: Request,
@@ -90,6 +91,18 @@ export async function PATCH(
         },
       });
 
+      const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+      await createAuditLog({
+        userId: session.user.id,
+        userRole: userRole,
+        action: "UPDATE",
+        entity: "Appointment",
+        entityId: id,
+        oldValues: { status: appointment.status, queueNumber: appointment.queueNumber },
+        newValues: { status: updated.status, queueNumber: updated.queueNumber },
+        ipAddress,
+      });
+
       return NextResponse.json(updated);
     }
 
@@ -110,6 +123,18 @@ export async function PATCH(
       const updated = await prisma.appointment.update({
         where: { id },
         data: { status: "NO_SHOW" },
+      });
+
+      const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+      await createAuditLog({
+        userId: session.user.id,
+        userRole: userRole,
+        action: "UPDATE",
+        entity: "Appointment",
+        entityId: id,
+        oldValues: { status: appointment.status },
+        newValues: { status: updated.status },
+        ipAddress,
       });
 
       return NextResponse.json(updated);
@@ -166,6 +191,18 @@ export async function PATCH(
         appointmentType: validTypes.includes(appointmentType) ? (appointmentType as any) : undefined,
         priority: validPriorities.includes(priority) ? (priority as any) : undefined,
       },
+    });
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    await createAuditLog({
+      userId: session.user.id,
+      userRole: userRole,
+      action: "UPDATE",
+      entity: "Appointment",
+      entityId: id,
+      oldValues: { status: appointment.status, dateTime: appointment.dateTime, appointmentType: appointment.appointmentType, priority: appointment.priority },
+      newValues: { status: updated.status, dateTime: updated.dateTime, appointmentType: updated.appointmentType, priority: updated.priority },
+      ipAddress,
     });
 
     return NextResponse.json(updated);

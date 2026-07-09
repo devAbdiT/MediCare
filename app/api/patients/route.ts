@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { hash } from "bcrypt-ts";
+import { createAuditLog } from "@/lib/audit";
 
 // GET /api/patients - Get all patients (Admin/Receptionist only)
 export async function GET() {
@@ -103,6 +104,17 @@ export async function POST(req: Request) {
       });
 
       return newUser;
+    });
+
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "127.0.0.1";
+    await createAuditLog({
+      userId: session.user.id,
+      userRole: (session.user as any).role,
+      action: "CREATE",
+      entity: "Patient",
+      entityId: result.patient?.id,
+      newValues: { name: result.name, cardNumber: result.patient?.cardNumber },
+      ipAddress,
     });
 
     return NextResponse.json({
