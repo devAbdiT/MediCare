@@ -4,9 +4,10 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import prisma from "@/lib/prisma";
-import { Users, Calendar, Activity, Zap, ArrowUpRight, BarChart2 } from "lucide-react";
-import { subDays, startOfDay, format } from "date-fns";
+import { Users, Calendar, Activity, Zap, ArrowUpRight, BarChart2, Wallet, Banknote, Landmark, Receipt } from "lucide-react";
+import { subDays, startOfDay, endOfDay, format } from "date-fns";
 import AnalyticsCharts from "./AnalyticsCharts";
+import RevenueChart from "./RevenueChart";
 import AdminQuickActions from "./AdminQuickActions";
 import AdminControls from "./AdminControls";
 import Link from "next/link";
@@ -66,6 +67,56 @@ export default async function AdminDashboard() {
       };
     }),
   );
+
+  // --- Revenue / Billing Data ---
+  const allInvoices = await prisma.invoice.aggregate({
+    _sum: { totalAmount: true, paidAmount: true },
+    where: { status: { notIn: ["CANCELLED", "WAIVED"] } }
+  });
+  const outstandingAmount = (Number(allInvoices._sum.totalAmount) || 0) - (Number(allInvoices._sum.paidAmount) || 0);
+
+  const billingStartDate = startOfDay(subDays(new Date(), 6));
+  const billingEndDate = endOfDay(new Date());
+
+  const [recentInvoices, recentPayments] = await Promise.all([
+    prisma.invoice.findMany({
+      where: {
+        createdAt: { gte: billingStartDate, lte: billingEndDate },
+        status: { notIn: ["CANCELLED", "WAIVED"] }
+      }
+    }),
+    prisma.payment.findMany({
+      where: { receivedAt: { gte: billingStartDate, lte: billingEndDate } }
+    })
+  ]);
+
+  const todayStart = startOfDay(new Date());
+  
+  const todayInvoices = recentInvoices.filter(inv => inv.createdAt >= todayStart);
+  const todayPayments = recentPayments.filter(p => p.receivedAt >= todayStart);
+
+  const todayInvoiced = todayInvoices.reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+  const todayCollected = todayPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+  const paidTodayCount = todayInvoices.filter(inv => inv.status === "PAID").length;
+
+  const revenueChartData = last7Days.map(day => {
+    const start = startOfDay(day);
+    const end = endOfDay(day);
+    
+    const dayInvoiced = recentInvoices
+      .filter(inv => inv.createdAt >= start && inv.createdAt <= end)
+      .reduce((sum, inv) => sum + Number(inv.totalAmount), 0);
+      
+    const dayCollected = recentPayments
+      .filter(p => p.receivedAt >= start && p.receivedAt <= end)
+      .reduce((sum, p) => sum + Number(p.amount), 0);
+
+    return {
+      date: format(day, "MMM dd"),
+      Invoiced: dayInvoiced,
+      Collected: dayCollected
+    };
+  });
 
   // Fetch recent system activity
   const [recentUsers, recentAppts] = await Promise.all([
@@ -154,8 +205,39 @@ export default async function AdminDashboard() {
           />
         </div>
 
+        {/* Revenue Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+          <AdminStat
+            icon={<Wallet />}
+            label="Today Invoiced"
+            value={`ETB ${todayInvoiced.toLocaleString()}`}
+            trend="Billing"
+          />
+          <AdminStat
+            icon={<Banknote />}
+            label="Today Collected"
+            value={`ETB ${todayCollected.toLocaleString()}`}
+            trend="Revenue"
+          />
+          <AdminStat
+            icon={<Landmark />}
+            label="Outstanding"
+            value={`ETB ${outstandingAmount.toLocaleString()}`}
+            trend="All Time"
+          />
+          <AdminStat
+            icon={<Receipt />}
+            label="Paid Today"
+            value={`${paidTodayCount} invoices`}
+            trend="Completed"
+          />
+        </div>
+
         {/* Analytics Charts Section */}
         <AnalyticsCharts data={analyticsData} />
+
+        {/* Revenue Chart */}
+        <RevenueChart data={revenueChartData} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Logs */}
@@ -185,27 +267,52 @@ export default async function AdminDashboard() {
 
           {/* Quick Access */}
           <div className="space-y-6">
-            {/* Reports Card */}
+            <Link
+              href="/dashboard/receptionist/billing"
+              className="block bg-[#1E4A8A] dark:bg-[#1A3A7A] p-6 rounded-[2rem] text-white shadow-xl hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                  <Receipt size={20} />
+                </div>
+                <ArrowUpRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+              </div>
+              <h3 className="text-xl font-black mb-1">View All Invoices</h3>
+              <p className="text-blue-200 text-xs font-medium">Manage pending and paid invoices.</p>
+            </Link>
+
             <Link
               href="/dashboard/admin/reports"
-              className="block bg-[#1E4A8A] dark:bg-[#1A3A7A] p-8 rounded-[2.5rem] text-white shadow-2xl shadow-[#1E4A8A]/20 hover:scale-[1.02] active:scale-[0.99] transition-all duration-300 group"
+              className="block bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] p-6 rounded-[2rem] shadow-sm hover:border-[#1E4A8A] dark:hover:border-[#4A8AC8] transition-all duration-300 group"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                  <BarChart2 size={24} />
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 bg-[#F0F4F8] dark:bg-[#0A122A] text-[#1E4A8A] dark:text-[#4A8AC8] rounded-xl flex items-center justify-center group-hover:bg-[#1E4A8A]/10 transition-colors">
+                  <BarChart2 size={20} />
                 </div>
-                <ArrowUpRight size={20} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+                <ArrowUpRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all text-[#1A2A4A] dark:text-white" />
               </div>
-              <h3 className="text-2xl font-black mb-1">Reports &amp; Analytics</h3>
-              <p className="text-blue-200 text-sm font-medium">
-                Revenue, appointments, and department insights with CSV export.
-              </p>
+              <h3 className="text-xl font-black mb-1 text-[#1A2A4A] dark:text-white">Full Reports</h3>
+              <p className="text-[#5A6E8A] dark:text-[#8A9CBA] text-xs font-medium">Revenue, appointments, and insights.</p>
+            </Link>
+            
+            <Link
+              href="/dashboard/admin/services"
+              className="block bg-white dark:bg-[#111C3A] border border-[#D0DCE8] dark:border-[#1A2A4A] p-6 rounded-[2rem] shadow-sm hover:border-[#1E4A8A] dark:hover:border-[#4A8AC8] transition-all duration-300 group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 bg-[#F0F4F8] dark:bg-[#0A122A] text-[#1E4A8A] dark:text-[#4A8AC8] rounded-xl flex items-center justify-center group-hover:bg-[#1E4A8A]/10 transition-colors">
+                  <Activity size={20} />
+                </div>
+                <ArrowUpRight size={18} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all text-[#1A2A4A] dark:text-white" />
+              </div>
+              <h3 className="text-xl font-black mb-1 text-[#1A2A4A] dark:text-white">Service Catalogue</h3>
+              <p className="text-[#5A6E8A] dark:text-[#8A9CBA] text-xs font-medium">Manage pricing and services.</p>
             </Link>
 
             {/* Version card */}
-            <div className="bg-white dark:bg-[#111C3A] p-8 rounded-[2.5rem] border border-[#D0DCE8] dark:border-[#1A2A4A] text-center transition-colors duration-500">
-              <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.2em] mb-2">Build Version</p>
-              <p className="text-[#1A2A4A] dark:text-[#E8EEF8] font-black">MediCare Enterprise v2.4.0</p>
+            <div className="bg-white dark:bg-[#111C3A] p-6 rounded-[2rem] border border-[#D0DCE8] dark:border-[#1A2A4A] text-center transition-colors duration-500">
+              <p className="text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-[0.2em] mb-1">Build Version</p>
+              <p className="text-[#1A2A4A] dark:text-[#E8EEF8] font-black text-sm">MediCare Enterprise v2.4.0</p>
             </div>
           </div>
         </div>
