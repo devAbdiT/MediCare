@@ -4,6 +4,7 @@
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { SessionTimeoutWarning } from "@/components/shared/SessionTimeoutWarning";
 import {
   LayoutDashboard,
   UserCircle,
@@ -392,6 +393,7 @@ export default function DashboardLayout({
           <div className="max-w-7xl mx-auto print:max-w-none">{children}</div>
         </main>
       </div>
+      <SessionTimeoutWarning />
     </div>
   );
 }
