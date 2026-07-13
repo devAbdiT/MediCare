@@ -9,6 +9,7 @@ import { headers } from "next/headers";
  *
  * DOCTOR  → only their own orders
  * LABTECH / ADMIN → all orders
+ * PATIENT → only their own orders
  *
  * Query params:
  *   ?status=ORDERED            filter by status
@@ -24,7 +25,7 @@ export async function GET(req: Request) {
     }
 
     const role = (session.user as any).role as string;
-    if (!["DOCTOR", "LABTECH", "ADMIN"].includes(role)) {
+    if (!["DOCTOR", "LABTECH", "ADMIN", "PATIENT"].includes(role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -47,9 +48,24 @@ export async function GET(req: Request) {
       doctorId = doctor.id;
     }
 
+    let patientIdFilter: string | undefined;
+    if (role === "PATIENT") {
+      const patient = await prisma.patient.findUnique({
+        where: { userId: (session.user as any).id },
+        select: { id: true },
+      });
+      if (!patient) {
+        return NextResponse.json({ error: "Patient profile not found" }, { status: 404 });
+      }
+      patientIdFilter = patient.id;
+    } else if (searchParams.get("patientId")) {
+      patientIdFilter = searchParams.get("patientId")!;
+    }
+
     const orders = await prisma.labOrder.findMany({
       where: {
         ...(doctorId ? { doctorId } : {}),
+        ...(patientIdFilter ? { patientId: patientIdFilter } : {}),
         ...(appointmentId ? { appointmentId } : {}),
         ...(statusFilter ? { status: statusFilter as any } : {}),
         ...(urgencyFilter ? { urgency: urgencyFilter as any } : {}),
