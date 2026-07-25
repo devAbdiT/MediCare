@@ -94,6 +94,7 @@ async function main() {
     data: {
       name: "Biruk Tadesse",
       email: "admin@medicare.com",
+      password: hashedPassword,
       phone: "+251911000001",
       role: "ADMIN",
       emailVerified: true,
@@ -129,6 +130,7 @@ async function main() {
       data: {
         name,
         email,
+        password: hashedPassword,
         phone: `+25191100000${phoneCounter}`,
         role: "RECEPTIONIST",
         emailVerified: true,
@@ -155,6 +157,7 @@ async function main() {
     data: {
       name: "Kedir Mohammed",
       email: "pharmacist@medicare.com",
+      password: hashedPassword,
       phone: "+251911000050",
       role: "PHARMACIST",
       emailVerified: true,
@@ -172,6 +175,7 @@ async function main() {
     data: {
       name: "Rahel Assefa",
       email: "labtech@medicare.com",
+      password: hashedPassword,
       phone: "+251911000051",
       role: "LABTECH",
       emailVerified: true,
@@ -219,6 +223,7 @@ async function main() {
       data: {
         name: doc.name,
         email,
+        password: hashedPassword,
         phone: `+2519110000${phoneCounter}`,
         role: "DOCTOR",
         emailVerified: true,
@@ -311,6 +316,7 @@ async function main() {
       data: {
         name: pt.name,
         email,
+        password: hashedPassword,
         phone: `+2519120000${formattedPhone}`,
         role: "PATIENT",
         gender: pt.gender,
@@ -703,3 +709,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
