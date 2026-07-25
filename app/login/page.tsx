@@ -200,16 +200,18 @@ export default function LoginPage() {
           {/* Demo Manifest - Floating Glass Box */}
           <div className="p-8 bg-blue-50/50 dark:bg-blue-900/10 rounded-[2.5rem] border border-[#D0DCE8] dark:border-[#1A2A4A]">
             <h4 className="text-[10px] font-black text-[#1E4A8A] dark:text-[#4A8AC8] uppercase tracking-[0.5em] mb-6 text-center">
-              Node Access Manifest
+              Node Access Manifest (Click to Auto-Fill)
             </h4>
-            <div className="grid grid-cols-2 gap-6 text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">
-              <DemoItem role="Admin" email="admin@medicare.com" />
-              <DemoItem role="Doctor" email="yonas.desta@medicare.com" />
-              <DemoItem role="Staff" email="mekdes.alemu@medicare.com" />
-              <DemoItem role="Patient" email="nahom.daniel@email.com" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-[10px] font-black text-[#5A6E8A] dark:text-[#8A9CBA] uppercase tracking-widest">
+              <DemoItem role="Admin" email="admin@medicare.com" onSelect={() => { setEmail("admin@medicare.com"); setPassword("password123@"); }} />
+              <DemoItem role="Doctor" email="yonas.desta@medicare.com" onSelect={() => { setEmail("yonas.desta@medicare.com"); setPassword("password123@"); }} />
+              <DemoItem role="Receptionist" email="mekdes.alemu@medicare.com" onSelect={() => { setEmail("mekdes.alemu@medicare.com"); setPassword("password123@"); }} />
+              <DemoItem role="Pharmacist" email="pharmacist@medicare.com" onSelect={() => { setEmail("pharmacist@medicare.com"); setPassword("password123@"); }} />
+              <DemoItem role="Lab Tech" email="labtech@medicare.com" onSelect={() => { setEmail("labtech@medicare.com"); setPassword("password123@"); }} />
+              <DemoItem role="Patient" email="nahom.daniel@email.com" onSelect={() => { setEmail("nahom.daniel@email.com"); setPassword("password123@"); }} />
             </div>
             <p className="text-[9px] text-[#1E4A8A]/50 dark:text-[#4A8AC8]/30 mt-6 text-center font-black uppercase tracking-[0.3em]">
-              Access Key for All Nodes: password123
+              Access Key for All Nodes: password123@
             </p>
           </div>
         </div>
@@ -226,13 +228,18 @@ export default function LoginPage() {
   );
 }
 
-function DemoItem({ role, email }: { role: string; email: string }) {
+function DemoItem({ role, email, onSelect }: { role: string; email: string; onSelect?: () => void }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div 
+      onClick={onSelect}
+      title="Click to fill credentials"
+      className="flex flex-col gap-1 p-2 rounded-xl hover:bg-[#1E4A8A]/10 dark:hover:bg-[#4A8AC8]/10 cursor-pointer transition-all border border-transparent hover:border-[#1E4A8A]/20 dark:hover:border-[#4A8AC8]/20"
+    >
       <span className="text-[#1A2A4A] dark:text-[#E8EEF8]">{role}</span>
-      <span className="opacity-60 lowercase font-medium tracking-tight text-[11px]">
+      <span className="opacity-60 lowercase font-medium tracking-tight text-[10px] break-all">
         {email}
       </span>
     </div>
   );
 }
+
