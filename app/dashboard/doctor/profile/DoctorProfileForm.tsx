@@ -5,8 +5,9 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import {
   User, Phone, Stethoscope, FileText, BadgeCheck,
-  DollarSign, Image as ImageIcon, Loader2, Save, Building2
+  DollarSign, Image as ImageIcon, Loader2, Save, Building2, Calendar, Clock
 } from "lucide-react";
+import DoctorAvailabilityForm from "./DoctorAvailabilityForm";
 
 interface DoctorData {
   id: string;
@@ -21,6 +22,7 @@ interface DoctorData {
 }
 
 export default function DoctorProfileForm({ doctor }: { doctor: DoctorData }) {
+  const [activeTab, setActiveTab] = useState<"profile" | "availability">("profile");
   const [form, setForm] = useState({
     specialization: doctor.specialization || "",
     bio: doctor.bio || "",
@@ -72,11 +74,11 @@ export default function DoctorProfileForm({ doctor }: { doctor: DoctorData }) {
           <div className="flex items-center gap-3 mb-1">
             <div className="w-1.5 h-8 bg-[#1E4A8A] dark:bg-[#4A8AC8] rounded-full" />
             <h1 className="text-4xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tight">
-              My Profile
+              My Profile & Schedule
             </h1>
           </div>
           <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium ml-5">
-            Manage your professional information and clinical details
+            Manage your professional details, working hours, and availability.
           </p>
         </div>
 
@@ -106,6 +108,39 @@ export default function DoctorProfileForm({ doctor }: { doctor: DoctorData }) {
           </div>
         </div>
       </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-3 border-b border-[#D0DCE8] dark:border-[#1A2A4A] pb-4">
+        <button
+          type="button"
+          onClick={() => setActiveTab("profile")}
+          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+            activeTab === "profile"
+              ? "bg-[#1E4A8A] dark:bg-[#4A8AC8] text-white shadow-lg shadow-[#1E4A8A]/20"
+              : "bg-white dark:bg-[#111C3A] text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1A2A4A] dark:hover:text-[#E8EEF8]"
+          }`}
+        >
+          <User size={16} />
+          Professional Information
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("availability")}
+          className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+            activeTab === "availability"
+              ? "bg-[#1E4A8A] dark:bg-[#4A8AC8] text-white shadow-lg shadow-[#1E4A8A]/20"
+              : "bg-white dark:bg-[#111C3A] text-[#5A6E8A] dark:text-[#8A9CBA] hover:text-[#1A2A4A] dark:hover:text-[#E8EEF8]"
+          }`}
+        >
+          <Clock size={16} />
+          Working Hours & Availability
+        </button>
+      </div>
+
+      {activeTab === "availability" ? (
+        <DoctorAvailabilityForm doctorId={doctor.id} />
+      ) : (
 
       <form onSubmit={handleSave} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -255,6 +290,7 @@ export default function DoctorProfileForm({ doctor }: { doctor: DoctorData }) {
           </div>
         </div>
       </form>
+      )}
     </div>
   );
 }

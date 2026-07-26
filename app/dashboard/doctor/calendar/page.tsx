@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import WeeklyCalendar from "@/components/WeeklyCalendar";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { format, startOfWeek, addDays, subDays } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { Loader2, Clock } from "lucide-react";
+import Link from "next/link";
 
 export default function DoctorCalendarPage() {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -41,11 +42,21 @@ export default function DoctorCalendarPage() {
   return (
     <DashboardLayout role="doctor">
       <div className="space-y-8 max-w-full">
-        <div>
-          <h1 className="text-3xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tight">My Calendar</h1>
-          <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium mt-1">
-            Weekly view of your scheduled appointments.
-          </p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-[#1A2A4A] dark:text-[#E8EEF8] tracking-tight">My Calendar</h1>
+            <p className="text-[#5A6E8A] dark:text-[#8A9CBA] font-medium mt-1">
+              Weekly view of your scheduled appointments and working hours.
+            </p>
+          </div>
+
+          <Link
+            href="/dashboard/doctor/profile"
+            className="px-6 py-3.5 bg-[#1E4A8A] dark:bg-[#4A8AC8] hover:bg-[#1A3F75] dark:hover:bg-[#3B72A8] text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-lg transition-all flex items-center gap-2.5"
+          >
+            <Clock size={16} />
+            Edit Working Hours
+          </Link>
         </div>
 
         {loading ? (

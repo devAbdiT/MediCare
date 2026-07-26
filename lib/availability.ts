@@ -49,3 +49,52 @@ export async function validateDoctorAvailability(doctorId: string, dateTime: Dat
 
   return { valid: true };
 }
+
+export async function updateDoctorAvailability(
+  doctorId: string,
+  schedule: Array<{
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    isActive: boolean;
+  }>
+) {
+  for (const item of schedule) {
+    if (item.isActive && item.startTime >= item.endTime) {
+      throw new Error(`End time (${item.endTime}) must be after start time (${item.startTime}).`);
+    }
+  }
+
+  const results = [];
+  for (const item of schedule) {
+    const existing = await prisma.doctorAvailability.findFirst({
+      where: { doctorId, dayOfWeek: item.dayOfWeek },
+    });
+
+    if (existing) {
+      const updated = await prisma.doctorAvailability.update({
+        where: { id: existing.id },
+        data: {
+          startTime: item.startTime,
+          endTime: item.endTime,
+          isActive: item.isActive,
+        },
+      });
+      results.push(updated);
+    } else {
+      const created = await prisma.doctorAvailability.create({
+        data: {
+          doctorId,
+          dayOfWeek: item.dayOfWeek,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          isActive: item.isActive,
+        },
+      });
+      results.push(created);
+    }
+  }
+
+  return results.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+}
+
